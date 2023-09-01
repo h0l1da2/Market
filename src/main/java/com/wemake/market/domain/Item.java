@@ -1,6 +1,7 @@
 package com.wemake.market.domain;
 
 import com.wemake.market.domain.dto.ItemDto;
+import com.wemake.market.domain.dto.ItemUpdateDto;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,6 +25,13 @@ public class Item {
     private Boolean isUpdate;
 
     public Item(ItemDto itemDto, boolean isUpdate) {
+        this.name = itemDto.getName();
+        this.price = itemDto.getPrice();
+        this.date = new Date();
+        this.isUpdate = isUpdate;
+    }
+
+    public Item(ItemUpdateDto itemDto, boolean isUpdate) {
         this.name = itemDto.getName();
         this.price = itemDto.getPrice();
         this.date = new Date();
