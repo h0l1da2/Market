@@ -1,6 +1,5 @@
 package com.wemake.market.controller;
 
-import com.google.gson.JsonObject;
 import com.wemake.market.domain.dto.ItemDto;
 import com.wemake.market.exception.ItemDuplException;
 import com.wemake.market.exception.NotAuthorityException;
@@ -23,6 +22,7 @@ public class ItemController {
 
     private final ItemService itemService;
     private final WebService webService;
+
     @PostMapping
     public ResponseEntity<String> create(@RequestBody @Valid ItemDto itemDto) {
 
