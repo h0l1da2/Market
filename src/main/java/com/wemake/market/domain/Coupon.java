@@ -11,9 +11,9 @@ public class Coupon {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Enumerated(value = EnumType.STRING)
-    private Enum How;
+    private How how;
     @Enumerated(value = EnumType.STRING)
-    private Enum Where;
+    private Where where;
     // 비율일 경우 -> 적용 비율
     private Integer rate;
     // 고정일 경우 -> 적용 금액
