@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -49,12 +51,15 @@ public class ItemServiceImpl implements ItemService {
     public ItemUpdateDto updateItem(ItemUpdateDto itemUpdateDto) throws NotAuthorityException, NotFoundException {
 
         if (itemUpdateDto.getRole().equals(Role.USER) ||
-                itemUpdateDto.getPassword().equalsIgnoreCase(password)) {
+                !itemUpdateDto.getPassword().equals(password)) {
             throw new NotAuthorityException("권한 없음 : 비밀번호 에러");
         }
 
-        itemRepository.findByNameAndIsUpdate(itemUpdateDto.getName(), false)
-                .orElseThrow(NotFoundException::new);
+        List<Item> byNameAndIsUpdate = itemRepository.findByNameAndIsUpdate(itemUpdateDto.getName(), false);
+
+        if (byNameAndIsUpdate.size() == 0) {
+            throw new NotFoundException("해당 아이템 찾을 수 없음");
+        }
 
         Item updateItem = itemRepository.save(new Item(itemUpdateDto, true));
 

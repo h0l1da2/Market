@@ -30,4 +30,11 @@ public class ItemUpdateDto {
         this.price = item.getPrice();
         this.date = item.getDate();
     }
+
+    public ItemUpdateDto(String name, Integer price, @NotNull Role role, String password) {
+        this.name = name;
+        this.price = price;
+        this.role = role;
+        this.password = password;
+    }
 }
