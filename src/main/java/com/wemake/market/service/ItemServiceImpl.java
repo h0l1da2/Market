@@ -33,7 +33,11 @@ public class ItemServiceImpl implements ItemService {
         }
 
         // 아이템 중복 검사
-        itemRepository.findByName(itemDto.getName()).orElseThrow(ItemDuplException::new);
+        Item findItem = itemRepository.findByName(itemDto.getName()).orElse(null);
+
+        if (findItem != null) {
+            throw new ItemDuplException("아이템 중복");
+        }
 
         // 아이템 넣기
         Item item = itemRepository.save(new Item(itemDto, false));
