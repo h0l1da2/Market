@@ -2,6 +2,7 @@ package com.wemake.market.service;
 
 import com.wemake.market.domain.Item;
 import com.wemake.market.domain.Role;
+import com.wemake.market.domain.dto.ItemDeleteDto;
 import com.wemake.market.domain.dto.ItemDto;
 import com.wemake.market.domain.dto.ItemUpdateDto;
 import com.wemake.market.exception.ItemDuplException;
@@ -35,9 +36,9 @@ public class ItemServiceImpl implements ItemService {
         }
 
         // 아이템 중복 검사
-        Item findItem = itemRepository.findByName(itemDto.getName()).orElse(null);
+        List<Item> findItem = itemRepository.findByName(itemDto.getName());
 
-        if (findItem != null) {
+        if (findItem.size() == 0) {
             throw new ItemDuplException("아이템 중복");
         }
 
@@ -50,10 +51,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemUpdateDto updateItem(ItemUpdateDto itemUpdateDto) throws NotAuthorityException, NotFoundException {
 
-        if (itemUpdateDto.getRole().equals(Role.USER) ||
-                !itemUpdateDto.getPassword().equals(password)) {
-            throw new NotAuthorityException("권한 없음 : 비밀번호 에러");
-        }
+        validRole(itemUpdateDto.getRole(), itemUpdateDto.getPassword());
 
         List<Item> byNameAndIsUpdate = itemRepository.findByNameAndIsUpdate(itemUpdateDto.getName(), false);
 
@@ -64,5 +62,26 @@ public class ItemServiceImpl implements ItemService {
         Item updateItem = itemRepository.save(new Item(itemUpdateDto, true));
 
         return new ItemUpdateDto(updateItem);
+    }
+
+    @Override
+    public void deleteItem(ItemDeleteDto itemDeleteDto) throws NotAuthorityException, NotFoundException {
+
+        validRole(itemDeleteDto.getRole(), itemDeleteDto.getPassword());
+
+        List<Item> itemList = itemRepository.findByName(itemDeleteDto.getName());
+        if (itemList.size() == 0) {
+            throw new NotFoundException();
+        }
+
+        itemRepository.deleteAllByName(itemDeleteDto.getName());
+
+    }
+
+    private void validRole(Role role, String pwd) throws NotAuthorityException {
+        if (role.equals(Role.USER) ||
+                !pwd.equals(password)) {
+            throw new NotAuthorityException("권한 없음 : 비밀번호 에러");
+        }
     }
 }

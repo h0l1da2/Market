@@ -2,6 +2,7 @@ package com.wemake.market.controller;
 
 import com.google.gson.JsonObject;
 import com.wemake.market.domain.Code;
+import com.wemake.market.domain.dto.ItemDeleteDto;
 import com.wemake.market.domain.dto.ItemDto;
 import com.wemake.market.domain.dto.ItemUpdateDto;
 import com.wemake.market.exception.ItemDuplException;
@@ -86,6 +87,34 @@ public class ItemController {
         jsonObject.addProperty("data", Code.OK.name());
         jsonObject.addProperty("item", itemJson);
 
+        return ResponseEntity.ok(jsonObject.toString());
+    }
+
+    @DeleteMapping
+    public ResponseEntity<String> deleteItem(@RequestBody @Valid ItemDeleteDto itemDeleteDto) {
+
+        JsonObject jsonObject = new JsonObject();
+        try {
+
+            itemService.deleteItem(itemDeleteDto);
+
+        } catch (NotAuthorityException e) {
+
+            log.error("마켓 권한 없음 : 비밀번호 = {}", itemDeleteDto.getPassword());
+            jsonObject.addProperty("data", Code.AUTH_ERR.name());
+            return ResponseEntity.badRequest()
+                    .body(jsonObject.toString());
+
+        } catch (NotFoundException e) {
+
+            log.error("삭제할 아이템이 존재하지 않음 = {}", itemDeleteDto.getName());
+            jsonObject.addProperty("data", Code.NOT_FOUND.name());
+            return ResponseEntity.badRequest()
+                    .body(jsonObject.toString());
+
+        }
+
+        jsonObject.addProperty("data", Code.OK.name());
         return ResponseEntity.ok(jsonObject.toString());
     }
 }
