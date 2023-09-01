@@ -1,6 +1,9 @@
 package com.wemake.market.controller;
 
+import com.google.gson.JsonObject;
 import com.wemake.market.domain.dto.ItemDto;
+import com.wemake.market.exception.ItemDuplException;
+import com.wemake.market.exception.NotAuthorityException;
 import com.wemake.market.service.ItemService;
 import com.wemake.market.service.WebService;
 import jakarta.validation.Valid;
@@ -23,8 +26,19 @@ public class ItemController {
     @PostMapping
     public ResponseEntity<String> create(@RequestBody @Valid ItemDto itemDto) {
 
-        ItemDto item = itemService.createItem(itemDto);
-        String itemJson = webService.objToJson(item);
+        try {
+
+            itemDto = itemService.createItem(itemDto);
+
+        } catch (ItemDuplException e) {
+            return ResponseEntity.badRequest()
+                    .body("ITEM_DUPL");
+        } catch (NotAuthorityException e) {
+            return ResponseEntity.badRequest()
+                    .body("NOT_AUTH");
+        }
+
+        String itemJson = webService.objToJson(itemDto);
 
         return ResponseEntity.ok(itemJson);
 

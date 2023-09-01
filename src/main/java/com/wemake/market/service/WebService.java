@@ -1,2 +1,5 @@
-package com.wemake.market.service;public interface WebService {
+package com.wemake.market.service;
+
+public interface WebService {
+    String objToJson(Object object);
 }
