@@ -1,6 +1,7 @@
 package com.wemake.market.controller;
 
 import com.google.gson.JsonObject;
+import com.wemake.market.domain.Code;
 import com.wemake.market.domain.dto.ItemDto;
 import com.wemake.market.domain.dto.ItemUpdateDto;
 import com.wemake.market.exception.ItemDuplException;
@@ -34,14 +35,14 @@ public class ItemController {
         } catch (NotAuthorityException e) {
 
             log.error("마켓 권한 없음");
-            jsonObject.addProperty("data", "NOT_AUTH");
+            jsonObject.addProperty("data", Code.AUTH_ERR.name());
             return ResponseEntity.badRequest()
 
                     .body(jsonObject.toString());
         } catch (ItemDuplException e) {
 
             log.error("같은 이름 아이템 존재 = {}", itemDto.getName());
-            jsonObject.addProperty("data", "ITEM_DUPL");
+            jsonObject.addProperty("data", Code.DUPL_ITEM.name());
             return ResponseEntity.badRequest()
                     .body(jsonObject.toString());
 
@@ -49,7 +50,7 @@ public class ItemController {
 
         String itemJson = webService.objToJson(itemDto);
 
-        jsonObject.addProperty("data", "OK");
+        jsonObject.addProperty("data", Code.OK.name());
         jsonObject.addProperty("item", itemJson);
 
         return ResponseEntity.ok(jsonObject.toString());
@@ -63,26 +64,26 @@ public class ItemController {
 
         try {
 
-            itemService.updateItem(itemUpdateDto);
+            itemUpdateDto = itemService.updateItem(itemUpdateDto);
 
         } catch (NotAuthorityException e) {
 
-            log.error("마켓 권한 없음 : 비밀번호 에러 = {}", itemUpdateDto.getPassword());
-            jsonObject.addProperty("data", "PWD_ERR");
+            log.error("마켓 권한 없음 : 비밀번호 = {}", itemUpdateDto.getPassword());
+            jsonObject.addProperty("data", Code.AUTH_ERR.name());
             return ResponseEntity.badRequest()
                     .body(jsonObject.toString());
 
         } catch (NotFoundException e) {
 
             log.error("수정할 아이템이 존재하지 않음 = {}", itemUpdateDto.getName());
-            jsonObject.addProperty("data", "NOT_FOUND");
+            jsonObject.addProperty("data", Code.NOT_FOUND.name());
             return ResponseEntity.badRequest()
                     .body(jsonObject.toString());
 
         }
 
-        String itemJson = webService.objToJson(itemUpdateDto);
-        jsonObject.addProperty("data", "OK");
+        String itemJson = webService.objToJson(new ItemDto(itemUpdateDto));
+        jsonObject.addProperty("data", Code.OK.name());
         jsonObject.addProperty("item", itemJson);
 
         return ResponseEntity.ok(jsonObject.toString());

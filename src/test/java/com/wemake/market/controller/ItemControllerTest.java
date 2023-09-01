@@ -1,6 +1,7 @@
 package com.wemake.market.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wemake.market.domain.Code;
 import com.wemake.market.domain.Item;
 import com.wemake.market.domain.Role;
 import com.wemake.market.domain.dto.ItemDto;
@@ -52,7 +53,7 @@ class ItemControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(itemDto))
                 ).andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("$.data").value("OK"))
+                .andExpect(jsonPath("$.data").value(Code.OK.name()))
                 .andExpect(jsonPath("$.item").hasJsonPath())
                 .andDo(print());
 
@@ -68,7 +69,7 @@ class ItemControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(itemDto))
                 ).andExpect(status().is4xxClientError())
-                .andExpect(jsonPath("$.data").value("NOT_AUTH"))
+                .andExpect(jsonPath("$.data").value(Code.AUTH_ERR.name()))
                 .andDo(print());
 
     }
@@ -84,7 +85,7 @@ class ItemControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(itemDto))
                 ).andExpect(status().is4xxClientError())
-                .andExpect(jsonPath("$.data").value("ITEM_DUPL"))
+                .andExpect(jsonPath("$.data").value(Code.DUPL_ITEM.name()))
                 .andDo(print());
 
     }
@@ -102,7 +103,7 @@ class ItemControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(itemUpdateDto))
                 ).andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("$.data").value("OK"))
+                .andExpect(jsonPath("$.data").value(Code.OK.name()))
                 .andExpect(jsonPath("$.item").hasJsonPath())
                 .andDo(print());
 
@@ -121,7 +122,7 @@ class ItemControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(itemUpdateDto))
                 ).andExpect(status().is4xxClientError())
-                .andExpect(jsonPath("$.data").value("AUTH_ERR"))
+                .andExpect(jsonPath("$.data").value(Code.AUTH_ERR.name()))
                 .andDo(print());
 
     }
@@ -138,7 +139,7 @@ class ItemControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(itemUpdateDto))
                 ).andExpect(status().is4xxClientError())
-                .andExpect(jsonPath("$.data").value("AUTH_ERR"))
+                .andExpect(jsonPath("$.data").value(Code.AUTH_ERR.name()))
                 .andDo(print());
 
     }
@@ -155,7 +156,7 @@ class ItemControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(itemUpdateDto))
                 ).andExpect(status().is4xxClientError())
-                .andExpect(jsonPath("$.data").value("AUTH_ERR"))
+                .andExpect(jsonPath("$.data").value(Code.AUTH_ERR.name()))
                 .andDo(print());
 
     }
@@ -171,7 +172,7 @@ class ItemControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(itemUpdateDto))
                 ).andExpect(status().is4xxClientError())
-                .andExpect(jsonPath("$.data").value("AUTH_ERR"))
+                .andExpect(jsonPath("$.data").value(Code.NOT_FOUND.name()))
                 .andDo(print());
 
     }
