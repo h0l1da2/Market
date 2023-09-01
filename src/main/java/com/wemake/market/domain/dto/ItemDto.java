@@ -2,9 +2,7 @@ package com.wemake.market.domain.dto;
 
 import com.wemake.market.domain.Item;
 import com.wemake.market.domain.Role;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.util.Date;
@@ -13,7 +11,7 @@ import java.util.Date;
 public class ItemDto {
     @NotBlank @Size(min = 1)
     private String name;
-    @Size(min = 100)
+    @Min(value = 100)
     private Integer price;
     @NotNull
     private Role role;
