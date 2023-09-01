@@ -17,7 +17,6 @@ public class ItemDto {
     private Integer price;
     @NotNull
     private Role role;
-
     private Date date;
 
     private ItemDto() {}
@@ -26,5 +25,11 @@ public class ItemDto {
         this.name = item.getName();
         this.price = item.getPrice();
         this.date = item.getDate();
+    }
+
+    public ItemDto(String name, Integer price, Role role) {
+        this.name = name;
+        this.price = price;
+        this.role = role;
     }
 }

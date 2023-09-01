@@ -5,6 +5,7 @@ import lombok.Getter;
 
 @Entity
 @Getter
+@Table(name = "orders")
 public class Order {
 
     @Id

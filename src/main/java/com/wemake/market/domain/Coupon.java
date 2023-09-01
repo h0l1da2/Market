@@ -13,7 +13,7 @@ public class Coupon {
     @Enumerated(value = EnumType.STRING)
     private How how;
     @Enumerated(value = EnumType.STRING)
-    private Where where;
+    private Where wheres;
     // 비율일 경우 -> 적용 비율
     private Integer rate;
     // 고정일 경우 -> 적용 금액
