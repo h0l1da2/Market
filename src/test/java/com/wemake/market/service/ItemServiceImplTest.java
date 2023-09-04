@@ -2,6 +2,7 @@ package com.wemake.market.service;
 
 import com.wemake.market.domain.Item;
 import com.wemake.market.domain.Role;
+import com.wemake.market.domain.dto.ItemDeleteDto;
 import com.wemake.market.domain.dto.ItemDto;
 import com.wemake.market.domain.dto.ItemUpdateDto;
 import com.wemake.market.exception.ItemDuplException;
@@ -129,6 +130,69 @@ class ItemServiceImplTest {
         // when then
         Assertions.assertThrows(NotFoundException.class,
                 () -> itemService.updateItem(itemUpdateDto));
+
+    }
+
+    @Test
+    @DisplayName("아이템 삭제 성공 : 한 개")
+    void deleteItem_성공_한개() throws NotAuthorityException, NotFoundException {
+        // given
+        ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
+        itemRepository.save(new Item(itemDto, false));
+
+        ItemDeleteDto itemDeleteDto = new ItemDeleteDto(itemDto.getName(), itemDto.getRole(), password);
+
+        // when
+        itemService.deleteItem(itemDeleteDto);
+
+        // then
+        List<Item> itemList = itemRepository.findByName(itemDeleteDto.getName());
+
+        assertThat(itemList.size()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("아이템 삭제 성공 : 여러 개")
+    void deleteItem_성공_여러개() throws NotAuthorityException, NotFoundException {
+        // given
+        ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
+        itemRepository.save(new Item(itemDto, false));
+        itemRepository.save(new Item(itemDto, true));
+        itemRepository.save(new Item(itemDto, true));
+
+        ItemDeleteDto itemDeleteDto = new ItemDeleteDto(itemDto.getName(), itemDto.getRole(), password);
+
+        // when
+        itemService.deleteItem(itemDeleteDto);
+
+        // then
+        List<Item> itemList = itemRepository.findByName(itemDeleteDto.getName());
+
+        assertThat(itemList.size()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("아이템 삭제 실패 : 삭제 아이템 존재 안 함")
+    void deleteItem_실패_존재없음() {
+        // given
+        ItemDeleteDto itemDeleteDto = new ItemDeleteDto("없는 아이템", Role.MARKET, password);
+
+        // when then
+        Assertions.assertThrows(NotFoundException.class, () -> itemService.deleteItem(itemDeleteDto));
+
+    }
+
+    @Test
+    @DisplayName("아이템 삭제 실패 : 권한 없음")
+    void deleteItem_실패_권한없음() {
+        // given
+        ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
+        itemRepository.save(new Item(itemDto, false));
+
+        ItemDeleteDto itemDeleteDto = new ItemDeleteDto(itemDto.getName(), Role.USER, password);
+
+        // when then
+        Assertions.assertThrows(NotAuthorityException.class, () -> itemService.deleteItem(itemDeleteDto));
 
     }
 
