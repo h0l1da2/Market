@@ -4,6 +4,7 @@ import com.wemake.market.domain.Item;
 import com.wemake.market.domain.Role;
 import com.wemake.market.domain.dto.ItemDeleteDto;
 import com.wemake.market.domain.dto.ItemDto;
+import com.wemake.market.domain.dto.ItemSearchTimeDto;
 import com.wemake.market.domain.dto.ItemUpdateDto;
 import com.wemake.market.exception.ItemDuplException;
 import com.wemake.market.exception.NotAuthorityException;
@@ -78,6 +79,15 @@ public class ItemServiceImpl implements ItemService {
 
         itemRepository.deleteAllByName(itemDeleteDto.getName());
 
+    }
+
+    @Override
+    public ItemDto searchItemByTime(ItemSearchTimeDto itemSearchTimeDto) throws NotFoundException {
+
+        Item item = itemRepository.findByNameAndDate(itemSearchTimeDto.getName(), itemSearchTimeDto.getDate())
+                .orElseThrow(NotFoundException::new);
+
+        return new ItemDto(item);
     }
 
     private void validRole(Role role, String pwd) throws NotAuthorityException {

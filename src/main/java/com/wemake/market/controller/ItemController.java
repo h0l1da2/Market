@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.wemake.market.domain.Code;
 import com.wemake.market.domain.dto.ItemDeleteDto;
 import com.wemake.market.domain.dto.ItemDto;
+import com.wemake.market.domain.dto.ItemSearchTimeDto;
 import com.wemake.market.domain.dto.ItemUpdateDto;
 import com.wemake.market.exception.ItemDuplException;
 import com.wemake.market.exception.NotAuthorityException;
@@ -24,6 +25,31 @@ public class ItemController {
 
     private final ItemService itemService;
     private final WebService webService;
+
+    @GetMapping
+    public ResponseEntity<String> searchTime(@RequestBody @Valid ItemSearchTimeDto itemSearchTimeDto) {
+
+        JsonObject jsonObject = new JsonObject();
+
+        try {
+
+            ItemDto itemDto = itemService.searchItemByTime(itemSearchTimeDto);
+            String itemJson = webService.objToJson(itemDto);
+            jsonObject.addProperty("item", itemJson);
+
+        } catch (NotFoundException e) {
+
+            log.error("아이템 찾을 수 없음 = {}", itemSearchTimeDto.getName());
+            jsonObject.addProperty("data", Code.NOT_FOUND.name());
+
+            return ResponseEntity.badRequest()
+                    .body(jsonObject.toString());
+        }
+
+        jsonObject.addProperty("data", Code.OK.name());
+
+        return ResponseEntity.ok(jsonObject.toString());
+    }
 
     @PostMapping
     public ResponseEntity<String> create(@RequestBody @Valid ItemDto itemDto) {
