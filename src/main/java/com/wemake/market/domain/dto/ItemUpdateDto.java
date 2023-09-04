@@ -2,13 +2,10 @@ package com.wemake.market.domain.dto;
 
 import com.wemake.market.domain.Item;
 import com.wemake.market.domain.Role;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
 public class ItemUpdateDto {
@@ -21,7 +18,7 @@ public class ItemUpdateDto {
     private Role role;
     @NotBlank
     private String password;
-    private Date date;
+    private LocalDateTime date;
 
     private ItemUpdateDto() {}
 

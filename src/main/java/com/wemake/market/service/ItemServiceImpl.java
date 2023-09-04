@@ -17,7 +17,9 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 
 @Slf4j
 @Service
@@ -84,7 +86,11 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto searchItemByTime(ItemSearchTimeDto itemSearchTimeDto) throws NotFoundException {
 
-        Item item = itemRepository.findByNameAndDate(itemSearchTimeDto.getName(), itemSearchTimeDto.getDate())
+        // 해당 시간으로 사이 시간 구하기 -- > 3:00:00 이면 3:00:00 과 3:59:00 사이 시간
+        LocalDateTime limitDate =
+                itemSearchTimeDto.getDate().plusMinutes(59);
+
+        Item item = itemRepository.findByNameAndDate(itemSearchTimeDto.getName(), itemSearchTimeDto.getDate(), limitDate)
                 .orElseThrow(NotFoundException::new);
 
         return new ItemDto(item);

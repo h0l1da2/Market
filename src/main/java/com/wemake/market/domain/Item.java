@@ -8,8 +8,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -21,20 +22,21 @@ public class Item {
     private Long id;
     private String name;
     private Integer price;
-    private Date date;
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime date;
     private Boolean isUpdate;
 
     public Item(ItemDto itemDto, boolean isUpdate) {
         this.name = itemDto.getName();
         this.price = itemDto.getPrice();
-        this.date = new Date();
+        this.date = LocalDateTime.now();
         this.isUpdate = isUpdate;
     }
 
     public Item(ItemUpdateDto itemDto, boolean isUpdate) {
         this.name = itemDto.getName();
         this.price = itemDto.getPrice();
-        this.date = new Date();
+        this.date = LocalDateTime.now();
         this.isUpdate = isUpdate;
     }
 }

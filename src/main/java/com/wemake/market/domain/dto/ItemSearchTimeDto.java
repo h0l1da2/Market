@@ -13,6 +13,6 @@ public class ItemSearchTimeDto {
     @NotBlank
     private String name;
     @PastOrPresent
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH")
     private LocalDateTime date;
 }
