@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wemake.market.domain.Code;
 import com.wemake.market.domain.Item;
 import com.wemake.market.domain.Role;
+import com.wemake.market.domain.dto.ItemDeleteDto;
 import com.wemake.market.domain.dto.ItemDto;
 import com.wemake.market.domain.dto.ItemUpdateDto;
 import com.wemake.market.repository.ItemRepository;
@@ -18,8 +19,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -175,6 +175,109 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$.data").value(Code.NOT_FOUND.name()))
                 .andDo(print());
 
+    }
+
+    @Test
+    @DisplayName("아이템 삭제 성공 : 한 개")
+    void 아이템삭제_성공_한개() throws Exception {
+        ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
+        itemRepository.save(new Item(itemDto, false));
+
+        ItemDeleteDto itemDeleteDto = new ItemDeleteDto(itemDto.getName(), itemDto.getRole(), password);
+
+        mockMvc.perform(
+                        delete("/item")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(mapper.writeValueAsString(itemDeleteDto))
+                ).andExpect(status().is2xxSuccessful())
+                .andExpect(jsonPath("$.data").value(Code.OK.name()))
+                .andDo(print());
+
+    }
+    @Test
+    @DisplayName("아이템 삭제 성공 : 여러 개")
+    void 아이템삭제_성공_여러개() throws Exception {
+        ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
+        itemRepository.save(new Item(itemDto, false));
+        itemRepository.save(new Item(itemDto, true));
+        itemRepository.save(new Item(itemDto, true));
+
+        ItemDeleteDto itemDeleteDto = new ItemDeleteDto(itemDto.getName(), itemDto.getRole(), password);
+
+        mockMvc.perform(
+                        delete("/item")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(mapper.writeValueAsString(itemDeleteDto))
+                ).andExpect(status().is2xxSuccessful())
+                .andExpect(jsonPath("$.data").value(Code.OK.name()))
+                .andDo(print());
+
+    }
+
+    @Test
+    @DisplayName("아이템 삭제 실패 : 유저권한")
+    void 아이템삭제_실패_권한없음_유저() throws Exception {
+        ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
+        itemRepository.save(new Item(itemDto, false));
+
+        ItemDeleteDto itemDeleteDto = new ItemDeleteDto(itemDto.getName(), Role.USER, password);
+
+        mockMvc.perform(
+                        delete("/item")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(mapper.writeValueAsString(itemDeleteDto))
+                ).andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.data").value(Code.AUTH_ERR.name()))
+                .andDo(print());
+    }
+    @Test
+    @DisplayName("아이템 삭제 실패 : 비밀번호틀림")
+    void 아이템삭제_실패_권한없음_비밀번호() throws Exception {
+        ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
+        itemRepository.save(new Item(itemDto, false));
+
+        ItemDeleteDto itemDeleteDto = new ItemDeleteDto(itemDto.getName(), Role.MARKET, "다른패스워드");
+
+        mockMvc.perform(
+                        delete("/item")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(mapper.writeValueAsString(itemDeleteDto))
+                ).andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.data").value(Code.AUTH_ERR.name()))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("아이템 삭제 실패 : 둘다틀림")
+    void 아이템삭제_실패_권한없음_둘다틀림() throws Exception {
+        ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
+        itemRepository.save(new Item(itemDto, false));
+
+        ItemDeleteDto itemDeleteDto = new ItemDeleteDto(itemDto.getName(), Role.USER, "다른패스워드");
+
+        mockMvc.perform(
+                        delete("/item")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(mapper.writeValueAsString(itemDeleteDto))
+                ).andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.data").value(Code.AUTH_ERR.name()))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("아이템 삭제 실패 : 없는 아이템")
+    void 아이템삭제_실패_권한없음_없는아이템() throws Exception {
+        ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
+
+        ItemDeleteDto itemDeleteDto = new ItemDeleteDto(itemDto.getName(), itemDto.getRole(), password);
+
+        mockMvc.perform(
+                        delete("/item")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(mapper.writeValueAsString(itemDeleteDto))
+                ).andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.data").value(Code.NOT_FOUND.name()))
+                .andDo(print());
     }
 
 }
