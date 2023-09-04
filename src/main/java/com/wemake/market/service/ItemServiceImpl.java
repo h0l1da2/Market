@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -38,7 +39,7 @@ public class ItemServiceImpl implements ItemService {
         // 아이템 중복 검사
         List<Item> findItem = itemRepository.findByName(itemDto.getName());
 
-        if (findItem.size() == 0) {
+        if (findItem.size() != 0) {
             throw new ItemDuplException("아이템 중복");
         }
 
@@ -64,6 +65,7 @@ public class ItemServiceImpl implements ItemService {
         return new ItemUpdateDto(updateItem);
     }
 
+    @Transactional
     @Override
     public void deleteItem(ItemDeleteDto itemDeleteDto) throws NotAuthorityException, NotFoundException {
 

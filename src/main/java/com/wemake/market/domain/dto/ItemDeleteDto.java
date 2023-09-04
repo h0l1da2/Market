@@ -14,4 +14,12 @@ public class ItemDeleteDto {
     private Role role;
     @NotBlank
     private String password;
+
+    private ItemDeleteDto() {}
+
+    public ItemDeleteDto(String name, @NotNull Role role, String password) {
+        this.name = name;
+        this.role = role;
+        this.password = password;
+    }
 }
