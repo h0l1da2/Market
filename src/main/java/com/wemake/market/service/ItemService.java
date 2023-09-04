@@ -8,9 +8,11 @@ import com.wemake.market.exception.ItemDuplException;
 import com.wemake.market.exception.NotAuthorityException;
 import com.wemake.market.exception.NotFoundException;
 
+import java.util.List;
+
 public interface ItemService {
     ItemDto createItem(ItemDto itemDto) throws NotAuthorityException, ItemDuplException;
     ItemUpdateDto updateItem(ItemUpdateDto itemUpdateDto) throws NotAuthorityException, NotFoundException;
     void deleteItem(ItemDeleteDto itemDeleteDto) throws NotAuthorityException, NotFoundException;
-    ItemDto searchItemByTime(ItemSearchTimeDto itemSearchTimeDto) throws NotFoundException;
+    List<ItemDto> searchItemByTime(ItemSearchTimeDto itemSearchTimeDto) throws NotFoundException;
 }

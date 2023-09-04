@@ -13,5 +13,5 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findByNameAndIsUpdate(String name, boolean isUpdate);
     void deleteAllByName(String name);
     @Query("select i from Item i where i.name = :name and i.date between :offset and :limit")
-    Optional<Item> findByNameAndDate(String name, LocalDateTime offset, LocalDateTime limit);
+    List<Item> findByNameAndDate(String name, LocalDateTime offset, LocalDateTime limit);
 }

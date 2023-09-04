@@ -17,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequestMapping("/item")
@@ -33,7 +35,7 @@ public class ItemController {
 
         try {
 
-            ItemDto itemDto = itemService.searchItemByTime(itemSearchTimeDto);
+            List<ItemDto> itemDto = itemService.searchItemByTime(itemSearchTimeDto);
             String itemJson = webService.objToJson(itemDto);
             jsonObject.addProperty("item", itemJson);
 

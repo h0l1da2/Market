@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -84,16 +85,29 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto searchItemByTime(ItemSearchTimeDto itemSearchTimeDto) throws NotFoundException {
+    public List<ItemDto> searchItemByTime(ItemSearchTimeDto itemSearchTimeDto) throws NotFoundException {
 
         // 해당 시간으로 사이 시간 구하기 -- > 3:00:00 이면 3:00:00 과 3:59:00 사이 시간
-        LocalDateTime limitDate =
-                itemSearchTimeDto.getDate().plusMinutes(59);
+        LocalDateTime searchTime = itemSearchTimeDto.getDate();
+        LocalDateTime offset =
+                LocalDateTime.of(
+                        searchTime.getYear(), searchTime.getMonth(), searchTime.getDayOfMonth(),
+                        searchTime.getHour(), 0);
 
-        Item item = itemRepository.findByNameAndDate(itemSearchTimeDto.getName(), itemSearchTimeDto.getDate(), limitDate)
-                .orElseThrow(NotFoundException::new);
+        LocalDateTime limitDate = offset.plusMinutes(59);
 
-        return new ItemDto(item);
+        List<Item> items = itemRepository.findByNameAndDate(itemSearchTimeDto.getName(), offset, limitDate);
+
+        if (items.size() == 0) {
+            throw new NotFoundException();
+        }
+
+        List<ItemDto> list = new ArrayList<>();
+        items.forEach(i -> {
+            list.add(new ItemDto(i));
+        });
+
+        return list;
     }
 
     private void validRole(Role role, String pwd) throws NotAuthorityException {

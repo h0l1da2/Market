@@ -13,6 +13,11 @@ public class ItemSearchTimeDto {
     @NotBlank
     private String name;
     @PastOrPresent
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime date;
+
+    public ItemSearchTimeDto(String name, LocalDateTime date) {
+        this.name = name;
+        this.date = date;
+    }
 }
