@@ -6,6 +6,7 @@ import com.wemake.market.domain.Item;
 import com.wemake.market.domain.Role;
 import com.wemake.market.domain.dto.ItemDeleteDto;
 import com.wemake.market.domain.dto.ItemDto;
+import com.wemake.market.domain.dto.ItemSearchTimeDto;
 import com.wemake.market.domain.dto.ItemUpdateDto;
 import com.wemake.market.repository.ItemRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,6 +20,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static java.time.LocalDateTime.now;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -275,6 +277,57 @@ class ItemControllerTest {
                         delete("/item")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(itemDeleteDto))
+                ).andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.data").value(Code.NOT_FOUND.name()))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("아이템 조회 성공 : 하나")
+    void 아이템조회_성공_한개() throws Exception {
+        ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
+        itemRepository.save(new Item(itemDto, false));
+
+        ItemSearchTimeDto itemSearchTimeDto = new ItemSearchTimeDto(itemDto.getName(), now());
+        mockMvc.perform(
+                        get("/item")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(mapper.writeValueAsString(itemSearchTimeDto))
+                ).andExpect(status().is2xxSuccessful())
+                .andExpect(jsonPath("$.data").value(Code.OK.name()))
+                .andExpect(jsonPath("$.item").hasJsonPath())
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("아이템 조회 성공 : 여러개")
+    void 아이템조회_성공_여러개() throws Exception {
+        ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
+        itemRepository.save(new Item(itemDto, false));
+        itemRepository.save(new Item(itemDto, false));
+        itemRepository.save(new Item(itemDto, false));
+
+        ItemSearchTimeDto itemSearchTimeDto = new ItemSearchTimeDto(itemDto.getName(), now());
+        mockMvc.perform(
+                        get("/item")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(mapper.writeValueAsString(itemSearchTimeDto))
+                ).andExpect(status().is2xxSuccessful())
+                .andExpect(jsonPath("$.data").value(Code.OK.name()))
+                .andExpect(jsonPath("$.item").hasJsonPath())
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("아이템 조회 실패 : 없는 아이템")
+    void 아이템조회_실패_없음() throws Exception {
+        ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
+
+        ItemSearchTimeDto itemSearchTimeDto = new ItemSearchTimeDto(itemDto.getName(), now());
+        mockMvc.perform(
+                        get("/item")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(mapper.writeValueAsString(itemSearchTimeDto))
                 ).andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("$.data").value(Code.NOT_FOUND.name()))
                 .andDo(print());
