@@ -99,7 +99,7 @@ class ItemServiceImplTest {
         assertThat(updateItem.getName()).isEqualTo(itemUpdateDto.getName());
         assertThat(updateItem.getPrice()).isEqualTo(itemUpdateDto.getPrice());
         assertThat(item.get(item.size()-1).getIsUpdate()).isTrue();
-        assertThat(item.get(item.size()-1).getDate().getTime()).isEqualTo(updateItem.getDate().getTime());
+        assertThat(item.get(item.size()-1).getDate()).isEqualTo(updateItem.getDate());
 
     }
 
