@@ -4,6 +4,7 @@ import com.wemake.market.domain.Item;
 import com.wemake.market.domain.Role;
 import com.wemake.market.domain.dto.ItemDeleteDto;
 import com.wemake.market.domain.dto.ItemDto;
+import com.wemake.market.domain.dto.ItemSearchTimeDto;
 import com.wemake.market.domain.dto.ItemUpdateDto;
 import com.wemake.market.exception.ItemDuplException;
 import com.wemake.market.exception.NotAuthorityException;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.PropertySource;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
@@ -193,6 +195,82 @@ class ItemServiceImplTest {
 
         // when then
         Assertions.assertThrows(NotAuthorityException.class, () -> itemService.deleteItem(itemDeleteDto));
+
+    }
+
+    @Test
+    @DisplayName("아이템 조회 성공 : 특정 시간")
+    void 아이템조회_성공() throws NotFoundException {
+        // given
+        ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
+        itemRepository.save(new Item(itemDto, false));
+
+        LocalDateTime localDateTime = LocalDateTime.of(
+                LocalDateTime.now().getYear(),
+                LocalDateTime.now().getMonth(),
+                LocalDateTime.now().getDayOfMonth(),
+                LocalDateTime.now().getHour(), 0);
+        ItemSearchTimeDto itemSearchTimeDto = new ItemSearchTimeDto(itemDto.getName(), localDateTime);
+
+        // when
+        List<ItemDto> items = itemService.searchItemByTime(itemSearchTimeDto);
+
+        // then
+        assertThat(items.size()).isNotEqualTo(0);
+
+        ItemDto item = items.get(items.size() - 1);
+
+        assertThat(item.getDate()).isAfterOrEqualTo(localDateTime);
+        assertThat(item.getName()).isEqualTo(itemDto.getName());
+        assertThat(item.getPrice()).isEqualTo(itemDto.getPrice());
+
+    }
+
+    @Test
+    @DisplayName("아이템 조회 성공 : 여러 개")
+    void 아이템조회_성공_여러개() throws NotFoundException {
+        // given
+        ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
+        itemRepository.save(new Item(itemDto, false));
+        itemRepository.save(new Item(itemDto, false));
+        itemRepository.save(new Item(itemDto, false));
+
+        LocalDateTime localDateTime = LocalDateTime.of(
+                LocalDateTime.now().getYear(),
+                LocalDateTime.now().getMonth(),
+                LocalDateTime.now().getDayOfMonth(),
+                LocalDateTime.now().getHour(), 0);
+        ItemSearchTimeDto itemSearchTimeDto = new ItemSearchTimeDto(itemDto.getName(), localDateTime);
+
+        // when
+        List<ItemDto> items = itemService.searchItemByTime(itemSearchTimeDto);
+
+        // then
+        assertThat(items.size()).isEqualTo(3);
+
+        ItemDto item = items.get(items.size() - 1);
+
+        assertThat(item.getDate()).isAfterOrEqualTo(localDateTime);
+        assertThat(item.getName()).isEqualTo(itemDto.getName());
+        assertThat(item.getPrice()).isEqualTo(itemDto.getPrice());
+
+    }
+
+    @Test
+    @DisplayName("아이템 조회 실패 : 없는 아이템")
+    void 아이템조회_실패_없는아이템() {
+        // given
+        ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
+
+        LocalDateTime localDateTime = LocalDateTime.of(
+                LocalDateTime.now().getYear(),
+                LocalDateTime.now().getMonth(),
+                LocalDateTime.now().getDayOfMonth(),
+                LocalDateTime.now().getHour(), 0);
+        ItemSearchTimeDto itemSearchTimeDto = new ItemSearchTimeDto(itemDto.getName(), localDateTime);
+
+        // when then
+        Assertions.assertThrows(NotFoundException.class, () -> itemService.searchItemByTime(itemSearchTimeDto));
 
     }
 
