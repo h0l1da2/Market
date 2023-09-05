@@ -1,0 +1,121 @@
+### 아이템 추가 성공 (다시 하면 DUPL_ITEM)
+POST http://localhost:8080/item
+Content-Type: application/json
+
+{
+  "name": "아이템",
+  "price": 3000,
+  "role": "MARKET"
+}
+### 아이템 추가 실패 _ 권한 없음
+POST http://localhost:8080/item
+Content-Type: application/json
+
+{
+  "name": "아이템3",
+  "price": 1000,
+  "role": "USER"
+}
+
+### 아이템 수정 성공
+PUT http://localhost:8080/item
+Content-Type: application/json
+
+{
+  "name": "아이템5",
+  "price": 3000,
+  "role": "MARKET",
+  "password": "lovemarket1004"
+}
+
+### 아이템 수정 실패 _ 유저
+PUT http://localhost:8080/item
+Content-Type: application/json
+
+{
+  "name": "아이템",
+  "price": 3000,
+  "role": "USER",
+  "password": "lovemarket1004"
+}
+
+### 아이템 수정 실패 _ 패스워드
+PUT http://localhost:8080/item
+Content-Type: application/json
+
+{
+  "name": "아이템",
+  "price": 3000,
+  "role": "MARKET",
+  "password": "1234"
+}
+
+### 아이템 수정 실패 _ 둘 다 이상
+PUT http://localhost:8080/item
+Content-Type: application/json
+
+{
+  "name": "아이템",
+  "price": 3000,
+  "role": "USER",
+  "password": "1234"
+}
+### 아이템 보기 성공 (시간 yyyy-MM-ddTHH:mm:ss)
+GET http://localhost:8080/item
+Content-Type: application/json
+
+{
+  "name": "아이템",
+  "date": "2023-09-05T17:00:00"
+}
+### 아이템 보기 실패 (없음)
+GET http://localhost:8080/item
+Content-Type: application/json
+
+{
+  "name": "아이템",
+  "date": "2023-09-05T13:00:00"
+}
+
+### 아이템 삭제 성공
+DELETE http://localhost:8080/item
+Content-Type: application/json
+
+{
+  "name": "아이템",
+  "role": "MARKET",
+  "password": "lovemarket1004"
+}
+### 아이템 삭제 실패 _ 유저
+DELETE http://localhost:8080/item
+Content-Type: application/json
+
+{
+  "name": "아이템",
+  "role": "USER",
+  "password": "lovemarket1004"
+}
+### 아이템 삭제 실패 _ 비밀번호
+DELETE http://localhost:8080/item
+Content-Type: application/json
+
+{
+  "name": "아이템",
+  "role": "MARKET",
+  "password": "1234"
+}
+### 아이템 삭제 실패 _ 둘다
+DELETE http://localhost:8080/item
+Content-Type: application/json
+
+{
+  "name": "아이템",
+  "role": "USER",
+  "password": "1234"
+}
+
+
+
+
+
+

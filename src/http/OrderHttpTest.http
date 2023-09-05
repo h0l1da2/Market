@@ -1,0 +1,258 @@
+### 주문 계산 성공 (한개)
+GET http://localhost:8080/order
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "name": "아이템1",
+      "count": 3
+    }
+  ],
+  "deliveryPrice": 3000
+}
+### 주문 계산 성공 (여러개)
+GET http://localhost:8080/order
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "name": "아이템1",
+      "count": 3
+    },
+    {
+      "name": "아이템2",
+      "count": 1
+    }
+  ],
+  "deliveryPrice": 3000
+}
+### 주문 계산 실패 (여러개 없는아이템)
+GET http://localhost:8080/order
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "name": "아이템ㅋ",
+      "count": 3
+    },
+    {
+      "name": "아이템2",
+      "count": 1
+    }
+  ],
+  "deliveryPrice": 3000
+}
+### 주문 계산 실패 (하나 없는아이템)
+GET http://localhost:8080/order
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "name": "아이템ㅋ",
+      "count": 3
+    }
+  ],
+  "deliveryPrice": 3000
+}
+
+### 결제 계산 성공 , 하나
+GET http://localhost:8080/order/pay
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "name": "아이템",
+      "count": 3
+    }
+  ],
+  "deliveryPrice": 3000,
+  "useCoupon": false
+}
+
+### 결제 계산 성공 , 여러개
+GET http://localhost:8080/order/pay
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "name": "아이템",
+      "count": 3
+    },
+    {
+      "name": "아이템2",
+      "count": 1
+    }
+  ],
+  "deliveryPrice": 3000,
+  "useCoupon": false
+}
+
+### 결제 계산 성공 , 한 개, 아이템 쿠폰(고정)
+GET http://localhost:8080/order/pay
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "name": "아이템",
+      "count": 3
+    }
+  ],
+  "deliveryPrice": 3000,
+  "useCoupon": true,
+  "coupon": {
+    "how": "FIXED",
+    "wheres": "ITEM",
+    "amount": 1000,
+    "name": "아이템"
+  }
+}
+
+### 결제 계산 성공 , 한 개, 아이템 쿠폰(비율)
+GET http://localhost:8080/order/pay
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "name": "아이템",
+      "count": 3
+    }
+  ],
+  "deliveryPrice": 3000,
+  "useCoupon": true,
+  "coupon": {
+    "how": "PERCENTAGE",
+    "wheres": "ITEM",
+    "rate": 5,
+    "name": "아이템"
+  }
+}
+
+### 결제 계산 성공 , 여러 개, 아이템 쿠폰(고정)
+GET http://localhost:8080/order/pay
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "name": "아이템",
+      "count": 3
+    },
+    {
+      "name": "아이템2",
+      "count": 1
+    }
+  ],
+  "deliveryPrice": 3000,
+  "useCoupon": true,
+  "coupon": {
+    "how": "FIXED",
+    "wheres": "ITEM",
+    "rate": 1000,
+    "name": "아이템"
+  }
+}
+
+### 결제 계산 성공 , 여러 개, 아이템 쿠폰(비율)
+GET http://localhost:8080/order/pay
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "name": "아이템",
+      "count": 3
+    },
+    {
+      "name": "아이템2",
+      "count": 1
+    }
+  ],
+  "deliveryPrice": 3000,
+  "useCoupon": true,
+  "coupon": {
+    "how": "PERCENTAGE",
+    "wheres": "ITEM",
+    "rate": 5,
+    "name": "아이템"
+  }
+}
+
+### 결제 계산 성공 , 여러 개, 주문 쿠폰(비율)
+GET http://localhost:8080/order/pay
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "name": "아이템",
+      "count": 3
+    },
+    {
+      "name": "아이템2",
+      "count": 1
+    }
+  ],
+  "deliveryPrice": 3000,
+  "useCoupon": true,
+  "coupon": {
+    "how": "PERCENTAGE",
+    "wheres": "ORDER",
+    "rate": 5
+  }
+}
+
+### 결제 계산 성공 , 여러 개, 주문 쿠폰(고정)
+GET http://localhost:8080/order/pay
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "name": "아이템",
+      "count": 3
+    },
+    {
+      "name": "아이템2",
+      "count": 1
+    }
+  ],
+  "deliveryPrice": 3000,
+  "useCoupon": true,
+  "coupon": {
+    "how": "FIXED",
+    "wheres": "ORDER",
+    "amount": 2000
+  }
+}
+
+### 결제 계산 실패 , 없는 아이템
+GET http://localhost:8080/order/pay
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "name": "아이템44",
+      "count": 3
+    },
+    {
+      "name": "아이템2",
+      "count": 1
+    }
+  ],
+  "deliveryPrice": 3000,
+  "useCoupon": true,
+  "coupon": {
+    "how": "FIXED",
+    "wheres": "ORDER",
+    "amount": 2000
+  }
+}
