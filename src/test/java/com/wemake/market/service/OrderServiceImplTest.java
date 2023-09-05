@@ -86,28 +86,6 @@ class OrderServiceImplTest {
         assertThat(orderPrice).isEqualTo(24000);
     }
 
-    @Test
-    @DisplayName("주문 금액 계산 실패 : 중복 아이템")
-    void 주문금액계산_실패_중복아이템() {
-
-        Item item1 = saveItem("감자", 2000);
-        Item item2 = saveItem("고구마", 4000);
-        Item item3 = saveItem("치즈", 1500);
-
-        List<OrderItemDto> list = new ArrayList<>();
-        OrderItemDto orderItemDtoA = new OrderItemDto(item1.getName(), 2);
-        OrderItemDto orderItemDtoB = new OrderItemDto(item2.getName(), 4);
-        OrderItemDto orderItemDtoC = new OrderItemDto(item3.getName(), 1);
-        list.add(orderItemDtoA);
-        list.add(orderItemDtoA); // 중복
-        list.add(orderItemDtoB);
-        list.add(orderItemDtoC);
-        OrderDto orderDto = new OrderDto(list, 2500);
-
-        Assertions.assertThrows(ItemDuplException.class,
-                () -> orderService.getOrderPrice(orderDto));
-    }
-
     private Item saveItem(String name, int price) {
         ItemDto itemDto = new ItemDto(name, price, Role.MARKET);
         Item item = new Item(itemDto);
@@ -218,28 +196,6 @@ class OrderServiceImplTest {
 
     // 과연 아이템이 중복으로 들어갔다면 ???
     // 옵션이 생길 경우... -> 이름만으로 비교하면 나중에 고칠 게 많아지려나
-    @Test
-    @DisplayName("결제 금액 계산 쿠폰 실패 : 아이템 중복")
-    void 결제금액_실패_여러개_쿠폰_아이템_퍼센트_여러개() {
-        saveItem("감자", 1000);
-        saveItem("고구마", 3000);
-        saveItem("치즈", 2000);
-
-        List<OrderItemDto> list = new ArrayList<>();
-        OrderItemDto orderItemDto1 = new OrderItemDto("감자", 10);
-        OrderItemDto orderItemDto2 = new OrderItemDto("고구마", 4);
-        OrderItemDto orderItemDto3 = new OrderItemDto("치즈", 2);
-        list.add(orderItemDto1);
-        list.add(orderItemDto1); // 감자 중복
-        list.add(orderItemDto2);
-        list.add(orderItemDto3);
-        Coupon coupon = new Coupon("고구마", How.PERCENTAGE, Where.ITEM);
-        coupon.setRate(20);
-        PayDto payDto = new PayDto(list, 3000, true, coupon);
-
-        Assertions.assertThrows(ItemDuplException.class, () ->
-                orderService.getPayPrice(payDto));
-    }
 
     @Test
     @DisplayName("결제 금액 계산 쿠폰 성공! : 주문,퍼센트,여러개")

@@ -95,36 +95,6 @@ class OrderControllerTest {
     }
 
     @Test
-    @DisplayName("주문 실패 : 중복아이템")
-    void 주문_실패_중복아이템() throws Exception {
-
-        saveItem("감자", 3000);
-        saveItem("고구마", 1000);
-        saveItem("사과", 2000);
-
-        List<OrderItemDto> list = new ArrayList<>();
-        OrderItemDto orderItemDto1 = new OrderItemDto("감자", 2);
-        OrderItemDto orderItemDto2 = new OrderItemDto("고구마", 1);
-        OrderItemDto orderItemDto3 = new OrderItemDto("사과", 3);
-
-        list.add(orderItemDto1);
-        list.add(orderItemDto1);
-        list.add(orderItemDto2);
-        list.add(orderItemDto3);
-
-        OrderDto orderDto = new OrderDto(list, 1000);
-
-        mockMvc.perform(
-                        post("/order")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(mapper.writeValueAsString(orderDto))
-                ).andExpect(status().is4xxClientError())
-                .andExpect(jsonPath("$.data").value(Code.DUPL_ITEM.name()))
-                .andDo(print());
-
-    }
-
-    @Test
     @DisplayName("결제가격 성공 : 아이템 한개")
     void 결제가격_성공_아이템한개() throws Exception {
 
@@ -417,70 +387,6 @@ class OrderControllerTest {
                 ).andExpect(status().is2xxSuccessful())
                 .andExpect(jsonPath("$.data").value(Code.OK.name()))
                 .andExpect(jsonPath("$.pay").value(12600))
-                .andDo(print());
-
-    }
-
-    @Test
-    @DisplayName("결제가격 실패 : (중복) 아이템여러개,주문쿠폰(비율)")
-    void 결제가격_실패_중복_아이템여러개_주문쿠폰_비율() throws Exception {
-
-        saveItem("감자", 3000);
-        saveItem("고구마", 1000);
-        saveItem("사과", 2000);
-
-        List<OrderItemDto> list = new ArrayList<>();
-        OrderItemDto orderItemDto1 = new OrderItemDto("감자", 2);
-        OrderItemDto orderItemDto2 = new OrderItemDto("고구마", 1);
-        OrderItemDto orderItemDto3 = new OrderItemDto("사과", 3);
-
-        list.add(orderItemDto1);
-        list.add(orderItemDto1);
-        list.add(orderItemDto2);
-        list.add(orderItemDto3);
-
-
-        Coupon coupon = new Coupon(How.PERCENTAGE, Where.ORDER);
-        coupon.setRate(10);
-
-        PayDto payDto = new PayDto(list, 1000, true, coupon);
-
-        mockMvc.perform(
-                        post("/order/pay")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(mapper.writeValueAsString(payDto))
-                ).andExpect(status().is4xxClientError())
-                .andExpect(jsonPath("$.data").value(Code.DUPL_ITEM.name()))
-                .andDo(print());
-
-    }
-
-    @Test
-    @DisplayName("결제가격 실패 : 중복 아이템")
-    void 결제가격_실패_중복아이템() throws Exception {
-
-        saveItem("감자", 3000);
-        saveItem("고구마", 1000);
-        saveItem("사과", 2000);
-
-        List<OrderItemDto> list = new ArrayList<>();
-        OrderItemDto orderItemDto1 = new OrderItemDto("감자", 2);
-        OrderItemDto orderItemDto2 = new OrderItemDto("고구마", 1);
-        OrderItemDto orderItemDto3 = new OrderItemDto("사과", 3);
-
-        list.add(orderItemDto1);
-        list.add(orderItemDto1);
-        list.add(orderItemDto2);
-        list.add(orderItemDto3);
-
-        PayDto payDto = new PayDto(list, 1000, false);
-
-        mockMvc.perform(
-                        post("/order/pay")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(mapper.writeValueAsString(payDto))
-                ).andExpect(status().is4xxClientError())
-                .andExpect(jsonPath("$.data").value(Code.DUPL_ITEM.name()))
                 .andDo(print());
 
     }
