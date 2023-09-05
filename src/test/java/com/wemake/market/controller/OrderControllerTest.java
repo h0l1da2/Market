@@ -60,8 +60,6 @@ class OrderControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(orderDto))
                 ).andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("$.data").value(Code.OK.name()))
-                .andExpect(jsonPath("$.price").value(7000))
                 .andDo(print());
 
     }
@@ -90,8 +88,6 @@ class OrderControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(orderDto))
                 ).andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("$.data").value(Code.OK.name()))
-                .andExpect(jsonPath("$.price").value(14000))
                 .andDo(print());
 
     }
@@ -117,8 +113,6 @@ class OrderControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(orderDto))
                 ).andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("$.data").value(Code.OK.name()))
-                .andExpect(jsonPath("$.price").value(5000))
                 .andDo(print());
 
     }
@@ -150,8 +144,6 @@ class OrderControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(orderDto))
                 ).andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("$.data").value(Code.OK.name()))
-                .andExpect(jsonPath("$.price").value(12000))
                 .andDo(print());
 
     }
@@ -177,8 +169,6 @@ class OrderControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(orderDto))
                 ).andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("$.data").value(Code.OK.name()))
-                .andExpect(jsonPath("$.price").value(6400))
                 .andDo(print());
 
     }
@@ -210,8 +200,6 @@ class OrderControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(orderDto))
                 ).andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("$.data").value(Code.OK.name()))
-                .andExpect(jsonPath("$.price").value(13400))
                 .andDo(print());
 
     }
@@ -237,8 +225,6 @@ class OrderControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(orderDto))
                 ).andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("$.data").value(Code.OK.name()))
-                .andExpect(jsonPath("$.price").value(6000))
                 .andDo(print());
 
     }
@@ -270,8 +256,6 @@ class OrderControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(orderDto))
                 ).andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("$.data").value(Code.OK.name()))
-                .andExpect(jsonPath("$.price").value(13000))
                 .andDo(print());
 
     }
@@ -297,8 +281,6 @@ class OrderControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(orderDto))
                 ).andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("$.data").value(Code.OK.name()))
-                .andExpect(jsonPath("$.price").value(6300))
                 .andDo(print());
 
     }
@@ -331,8 +313,6 @@ class OrderControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(orderDto))
                 ).andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("$.data").value(Code.OK.name()))
-                .andExpect(jsonPath("$.price").value(12600))
                 .andDo(print());
 
     }

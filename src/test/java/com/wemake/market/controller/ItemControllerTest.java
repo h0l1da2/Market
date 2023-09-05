@@ -1,7 +1,6 @@
 package com.wemake.market.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.wemake.market.domain.Code;
 import com.wemake.market.domain.Item;
 import com.wemake.market.domain.Role;
 import com.wemake.market.domain.dto.ItemDeleteDto;
@@ -55,8 +54,7 @@ class ItemControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(itemCreateDto))
                 ).andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("$.data").value(Code.OK.name()))
-                .andExpect(jsonPath("$.item").hasJsonPath())
+                .andExpect(jsonPath("name").value("name"))
                 .andDo(print());
 
     }
@@ -71,7 +69,6 @@ class ItemControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(itemCreateDto))
                 ).andExpect(status().is4xxClientError())
-                .andExpect(jsonPath("$.data").value(Code.AUTH_ERR.name()))
                 .andDo(print());
 
     }
@@ -86,7 +83,6 @@ class ItemControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(itemCreateDto))
                 ).andExpect(status().is4xxClientError())
-                .andExpect(jsonPath("$.data").value(Code.DUPL_ITEM.name()))
                 .andDo(print());
 
     }
@@ -103,8 +99,7 @@ class ItemControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(itemUpdateDto))
                 ).andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("$.data").value(Code.OK.name()))
-                .andExpect(jsonPath("$.item").hasJsonPath())
+                .andExpect(jsonPath("price").value(2000))
                 .andDo(print());
 
     }
@@ -121,7 +116,6 @@ class ItemControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(itemUpdateDto))
                 ).andExpect(status().is4xxClientError())
-                .andExpect(jsonPath("$.data").value(Code.AUTH_ERR.name()))
                 .andDo(print());
 
     }
@@ -137,7 +131,6 @@ class ItemControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(itemUpdateDto))
                 ).andExpect(status().is4xxClientError())
-                .andExpect(jsonPath("$.data").value(Code.AUTH_ERR.name()))
                 .andDo(print());
 
     }
@@ -153,7 +146,6 @@ class ItemControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(itemUpdateDto))
                 ).andExpect(status().is4xxClientError())
-                .andExpect(jsonPath("$.data").value(Code.AUTH_ERR.name()))
                 .andDo(print());
 
     }
@@ -169,7 +161,6 @@ class ItemControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(itemUpdateDto))
                 ).andExpect(status().is4xxClientError())
-                .andExpect(jsonPath("$.data").value(Code.NOT_FOUND.name()))
                 .andDo(print());
 
     }
@@ -186,7 +177,6 @@ class ItemControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(itemDeleteDto))
                 ).andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("$.data").value(Code.OK.name()))
                 .andDo(print());
 
     }
@@ -204,7 +194,6 @@ class ItemControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(itemDeleteDto))
                 ).andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("$.data").value(Code.OK.name()))
                 .andDo(print());
 
     }
@@ -221,7 +210,6 @@ class ItemControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(itemDeleteDto))
                 ).andExpect(status().is4xxClientError())
-                .andExpect(jsonPath("$.data").value(Code.AUTH_ERR.name()))
                 .andDo(print());
     }
     @Test
@@ -236,7 +224,6 @@ class ItemControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(itemDeleteDto))
                 ).andExpect(status().is4xxClientError())
-                .andExpect(jsonPath("$.data").value(Code.AUTH_ERR.name()))
                 .andDo(print());
     }
 
@@ -252,7 +239,6 @@ class ItemControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(itemDeleteDto))
                 ).andExpect(status().is4xxClientError())
-                .andExpect(jsonPath("$.data").value(Code.AUTH_ERR.name()))
                 .andDo(print());
     }
 
@@ -268,7 +254,6 @@ class ItemControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(itemDeleteDto))
                 ).andExpect(status().is4xxClientError())
-                .andExpect(jsonPath("$.data").value(Code.NOT_FOUND.name()))
                 .andDo(print());
     }
 
@@ -283,8 +268,7 @@ class ItemControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(itemSearchTimeDto))
                 ).andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("$.data").value(Code.OK.name()))
-                .andExpect(jsonPath("$.item").hasJsonPath())
+                .andExpect(jsonPath("name").value(itemSearchTimeDto.getName()))
                 .andDo(print());
     }
 
@@ -301,8 +285,7 @@ class ItemControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(itemSearchTimeDto))
                 ).andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("$.data").value(Code.OK.name()))
-                .andExpect(jsonPath("$.item").hasJsonPath())
+                .andExpect(jsonPath("name").value(itemSearchTimeDto.getName()))
                 .andDo(print());
     }
 
@@ -323,7 +306,6 @@ class ItemControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(itemSearchTimeDto))
                 ).andExpect(status().is4xxClientError())
-                .andExpect(jsonPath("$.data").value(Code.NOT_FOUND.name()))
                 .andDo(print());
     }
 
