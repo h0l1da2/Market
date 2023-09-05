@@ -8,6 +8,7 @@ import com.wemake.market.domain.dto.OrderDto;
 import com.wemake.market.domain.dto.OrderItemDto;
 import com.wemake.market.domain.dto.PayDto;
 import com.wemake.market.exception.ItemDuplException;
+import com.wemake.market.exception.NotFoundException;
 import com.wemake.market.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +27,7 @@ public class OrderServiceImpl implements OrderService {
     private final ItemRepository itemRepository;
 
     @Override
-    public int getOrderPrice(OrderDto orderDto) throws ItemDuplException {
+    public int getOrderPrice(OrderDto orderDto) throws ItemDuplException, NotFoundException {
 
         AtomicInteger price = new AtomicInteger();
 
@@ -38,7 +39,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public int getPayPrice(PayDto payDto) throws ItemDuplException {
+    public int getPayPrice(PayDto payDto) throws ItemDuplException, NotFoundException {
 
         AtomicInteger price = new AtomicInteger();
 
@@ -115,20 +116,25 @@ public class OrderServiceImpl implements OrderService {
         return price.get();
     }
 
-    private void calcItemPrice(List<OrderItemDto> payDto, AtomicInteger price) throws ItemDuplException {
+    private void calcItemPrice(List<OrderItemDto> payDto, AtomicInteger price) throws ItemDuplException, NotFoundException {
 
         ConcurrentHashMap<String, Item> map = new ConcurrentHashMap<>();
-        AtomicBoolean flag = new AtomicBoolean(false);
+        AtomicBoolean noFlag = new AtomicBoolean(false);
+        AtomicBoolean duplFlag = new AtomicBoolean(false);
 
 
         payDto.forEach(i -> {
             List<Item> itemList = itemRepository.findByName(i.getName());
+            if (itemList.size() == 0) {
+                noFlag.set(true);
+                return;
+            }
             Item item = itemList.get(itemList.size() - 1);
 
             // 중복 아이템 검사
             Item findItem = map.get(item.getName());
             if (findItem != null) {
-                flag.set(true);
+                duplFlag.set(true);
                 return;
             } else {
                 map.put(item.getName(), item);
@@ -137,8 +143,13 @@ public class OrderServiceImpl implements OrderService {
             price.set(price.get() + (item.getPrice() * i.getCount()));
         });
 
-        if (flag.get() == true) {
+        if (noFlag.get() == true) {
+            throw new NotFoundException();
+        }
+        if (duplFlag.get() == true) {
             throw new ItemDuplException();
         }
     }
+
+    // 실수면 0
 }

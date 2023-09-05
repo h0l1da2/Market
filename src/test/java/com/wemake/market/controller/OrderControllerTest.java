@@ -54,7 +54,7 @@ class OrderControllerTest {
         OrderDto orderDto = new OrderDto(list, 1000);
 
         mockMvc.perform(
-                        get("/order")
+                        post("/order")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(orderDto))
                 ).andExpect(status().is2xxSuccessful())
@@ -84,7 +84,7 @@ class OrderControllerTest {
         OrderDto orderDto = new OrderDto(list, 1000);
 
         mockMvc.perform(
-                        get("/order")
+                        post("/order")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(orderDto))
                 ).andExpect(status().is2xxSuccessful())
@@ -115,7 +115,7 @@ class OrderControllerTest {
         OrderDto orderDto = new OrderDto(list, 1000);
 
         mockMvc.perform(
-                        get("/order")
+                        post("/order")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(orderDto))
                 ).andExpect(status().is4xxClientError())
@@ -140,7 +140,7 @@ class OrderControllerTest {
         PayDto payDto = new PayDto(list, 1000, false);
 
         mockMvc.perform(
-                        get("/order/pay")
+                        post("/order/pay")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(payDto))
                 ).andExpect(status().is2xxSuccessful())
@@ -170,7 +170,7 @@ class OrderControllerTest {
         PayDto payDto = new PayDto(list, 1000, false);
 
         mockMvc.perform(
-                        get("/order/pay")
+                        post("/order/pay")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(payDto))
                 ).andExpect(status().is2xxSuccessful())
@@ -197,7 +197,7 @@ class OrderControllerTest {
         PayDto payDto = new PayDto(list, 1000, true, coupon);
 
         mockMvc.perform(
-                        get("/order/pay")
+                        post("/order/pay")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(payDto))
                 ).andExpect(status().is2xxSuccessful())
@@ -230,7 +230,7 @@ class OrderControllerTest {
         PayDto payDto = new PayDto(list, 1000, true, coupon);
 
         mockMvc.perform(
-                        get("/order/pay")
+                        post("/order/pay")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(payDto))
                 ).andExpect(status().is2xxSuccessful())
@@ -257,7 +257,7 @@ class OrderControllerTest {
         PayDto payDto = new PayDto(list, 1000, true, coupon);
 
         mockMvc.perform(
-                        get("/order/pay")
+                        post("/order/pay")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(payDto))
                 ).andExpect(status().is2xxSuccessful())
@@ -290,7 +290,7 @@ class OrderControllerTest {
         PayDto payDto = new PayDto(list, 1000, true, coupon);
 
         mockMvc.perform(
-                        get("/order/pay")
+                        post("/order/pay")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(payDto))
                 ).andExpect(status().is2xxSuccessful())
@@ -317,7 +317,7 @@ class OrderControllerTest {
         PayDto payDto = new PayDto(list, 1000, true, coupon);
 
         mockMvc.perform(
-                        get("/order/pay")
+                        post("/order/pay")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(payDto))
                 ).andExpect(status().is2xxSuccessful())
@@ -350,7 +350,7 @@ class OrderControllerTest {
         PayDto payDto = new PayDto(list, 1000, true, coupon);
 
         mockMvc.perform(
-                        get("/order/pay")
+                        post("/order/pay")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(payDto))
                 ).andExpect(status().is2xxSuccessful())
@@ -377,7 +377,7 @@ class OrderControllerTest {
         PayDto payDto = new PayDto(list, 1000, true, coupon);
 
         mockMvc.perform(
-                        get("/order/pay")
+                        post("/order/pay")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(payDto))
                 ).andExpect(status().is2xxSuccessful())
@@ -411,7 +411,7 @@ class OrderControllerTest {
         PayDto payDto = new PayDto(list, 1000, true, coupon);
 
         mockMvc.perform(
-                        get("/order/pay")
+                        post("/order/pay")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(payDto))
                 ).andExpect(status().is2xxSuccessful())
@@ -446,7 +446,7 @@ class OrderControllerTest {
         PayDto payDto = new PayDto(list, 1000, true, coupon);
 
         mockMvc.perform(
-                        get("/order/pay")
+                        post("/order/pay")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(payDto))
                 ).andExpect(status().is4xxClientError())
@@ -476,7 +476,7 @@ class OrderControllerTest {
         PayDto payDto = new PayDto(list, 1000, false);
 
         mockMvc.perform(
-                        get("/order/pay")
+                        post("/order/pay")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(payDto))
                 ).andExpect(status().is4xxClientError())
