@@ -6,7 +6,7 @@ import com.wemake.market.domain.dto.*;
 import com.wemake.market.exception.DuplicateItemException;
 import com.wemake.market.exception.NotAuthorityException;
 import com.wemake.market.exception.ItemNotFoundException;
-import com.wemake.market.exception.NotValidException;
+import com.wemake.market.exception.UnavailableDateTimeException;
 import com.wemake.market.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -88,7 +88,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto searchItemByTime(ItemSearchTimeDto itemSearchTimeDto) throws ItemNotFoundException, NotValidException {
+    public ItemDto searchItemByTime(ItemSearchTimeDto itemSearchTimeDto) throws ItemNotFoundException, UnavailableDateTimeException {
 
         /**
          * 13 로 구한다면 -> 13 ~ 현재 시간까지 데이터를 구해서
@@ -106,7 +106,7 @@ public class ItemServiceImpl implements ItemService {
         LocalDateTime offsetDateTime = itemSearchTimeDto.getDate();
 
         if (offsetDateTime.isAfter(now()) && offsetDateTime.isBefore(findItem.getDate())) {
-            throw new NotValidException();
+            throw new UnavailableDateTimeException();
         }
 
         // 궁금한 시간 ~ 지금까지해서 한 개 조회
