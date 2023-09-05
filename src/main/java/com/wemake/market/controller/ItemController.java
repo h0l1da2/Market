@@ -28,6 +28,9 @@ public class ItemController {
     private final ItemService itemService;
     private final WebService webService;
 
+    /**
+     * (상품 이름 + 특정 시간)으로 주문을 검색할 수 있음.
+     */
     @GetMapping
     public ResponseEntity<String> searchTime(@RequestBody @Valid ItemSearchTimeDto itemSearchTimeDto) {
 
@@ -53,6 +56,11 @@ public class ItemController {
         return ResponseEntity.ok(jsonObject.toString());
     }
 
+    /**
+     * 상품 추가
+     * 마켓 운영자만 상품을 추가할 수 있도록 Role 외에 password 를 추가.
+     * 상품 이름은 중복 불가
+     */
     @PostMapping
     public ResponseEntity<String> create(@RequestBody @Valid ItemDto itemDto) {
 
@@ -66,8 +74,8 @@ public class ItemController {
             log.error("마켓 권한 없음");
             jsonObject.addProperty("data", Code.AUTH_ERR.name());
             return ResponseEntity.badRequest()
-
                     .body(jsonObject.toString());
+
         } catch (ItemDuplException e) {
 
             log.error("같은 이름 아이템 존재 = {}", itemDto.getName());
@@ -86,6 +94,10 @@ public class ItemController {
 
     }
 
+    /**
+     * 상품 수정
+     * 가격 수정이 가능하며 권한, 패스워드가 있을 경우에만 수정 가능
+     */
     @PutMapping
     public ResponseEntity<String> update(@RequestBody @Valid ItemUpdateDto itemUpdateDto) {
 
@@ -118,6 +130,10 @@ public class ItemController {
         return ResponseEntity.ok(jsonObject.toString());
     }
 
+    /**
+     * 상품 삭제
+     * 권한이 있을 경우 해당 이름을 가진 상품 전부 삭제
+     */
     @DeleteMapping
     public ResponseEntity<String> deleteItem(@RequestBody @Valid ItemDeleteDto itemDeleteDto) {
 

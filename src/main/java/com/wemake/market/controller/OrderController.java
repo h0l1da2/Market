@@ -22,7 +22,7 @@ public class OrderController {
     /**
      * 주문 총 금액 계산
      * (각 주문 목록 상품 가격 * 개수) + 배달비
-     * 쿠폰이 있다면 쿠폰 할인 금액 반영해서 계산
+     * 쿠폰이 있다면(useCoupon) 쿠폰 할인 금액 반영해서 계산
      */
     @PostMapping
     public ResponseEntity<String> orderPrice(@RequestBody @Valid OrderDto orderDto) {
