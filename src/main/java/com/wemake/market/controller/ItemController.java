@@ -1,14 +1,11 @@
 package com.wemake.market.controller;
 
-import com.google.gson.JsonObject;
-import com.wemake.market.domain.Code;
 import com.wemake.market.domain.dto.*;
 import com.wemake.market.exception.DuplicateItemException;
 import com.wemake.market.exception.NotAuthorityException;
 import com.wemake.market.exception.ItemNotFoundException;
-import com.wemake.market.exception.NotValidException;
+import com.wemake.market.exception.UnavailableDateTimeException;
 import com.wemake.market.service.ItemService;
-import com.wemake.market.service.WebService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,42 +19,16 @@ import org.springframework.web.bind.annotation.*;
 public class ItemController {
 
     private final ItemService itemService;
-    private final WebService webService;
 
     /**
      * (상품 이름 + 특정 시간)으로 주문을 검색할 수 있음.
      */
     @GetMapping
-    public ResponseEntity<String> searchTime(@RequestBody @Valid ItemSearchTimeDto itemSearchTimeDto) {
+    public ResponseEntity<ItemDto> searchTime(@RequestBody @Valid ItemSearchTimeDto itemSearchTimeDto) throws ItemNotFoundException, UnavailableDateTimeException {
 
-        JsonObject jsonObject = new JsonObject();
+        ItemDto itemDto = itemService.searchItemByTime(itemSearchTimeDto);
 
-        try {
-
-            ItemDto itemDto = itemService.searchItemByTime(itemSearchTimeDto);
-            String itemJson = webService.objectToJson(itemDto);
-            jsonObject.addProperty("item", itemJson);
-
-        } catch (ItemNotFoundException e) {
-
-            log.error("아이템 찾을 수 없음 = {}", itemSearchTimeDto.getName());
-            jsonObject.addProperty("data", Code.NOT_FOUND.name());
-
-            return ResponseEntity.badRequest()
-                    .body(jsonObject.toString());
-        } catch (NotValidException e) {
-
-            log.error("시간을 다시 확인하세요 = {}", itemSearchTimeDto.getDate());
-            jsonObject.addProperty("data", Code.NOT_VALID.name());
-
-            return ResponseEntity.badRequest()
-                    .body(jsonObject.toString());
-
-        }
-
-        jsonObject.addProperty("data", Code.OK.name());
-
-        return ResponseEntity.ok(jsonObject.toString());
+        return ResponseEntity.ok(itemDto);
     }
 
     /**
@@ -66,35 +37,11 @@ public class ItemController {
      * 상품 이름은 중복 불가
      */
     @PostMapping
-    public ResponseEntity<String> create(@RequestBody @Valid ItemCreateDto itemCreateDto) {
+    public ResponseEntity<ItemCreateDto> create(@RequestBody @Valid ItemCreateDto itemCreateDto) throws DuplicateItemException, NotAuthorityException {
 
-        JsonObject jsonObject = new JsonObject();
-        try {
+        itemCreateDto = itemService.createItem(itemCreateDto);
 
-            itemCreateDto = itemService.createItem(itemCreateDto);
-
-        } catch (NotAuthorityException e) {
-
-            log.error("마켓 권한 없음");
-            jsonObject.addProperty("data", Code.AUTH_ERR.name());
-            return ResponseEntity.badRequest()
-                    .body(jsonObject.toString());
-
-        } catch (DuplicateItemException e) {
-
-            log.error("같은 이름 아이템 존재 = {}", itemCreateDto.getName());
-            jsonObject.addProperty("data", Code.DUPL_ITEM.name());
-            return ResponseEntity.badRequest()
-                    .body(jsonObject.toString());
-
-        }
-
-        String itemJson = webService.objectToJson(itemCreateDto);
-
-        jsonObject.addProperty("data", Code.OK.name());
-        jsonObject.addProperty("item", itemJson);
-
-        return ResponseEntity.ok(jsonObject.toString());
+        return ResponseEntity.ok(itemCreateDto);
 
     }
 
@@ -103,35 +50,11 @@ public class ItemController {
      * 가격 수정이 가능하며 권한, 패스워드가 있을 경우에만 수정 가능
      */
     @PutMapping
-    public ResponseEntity<String> update(@RequestBody @Valid ItemUpdateDto itemUpdateDto) {
+    public ResponseEntity<ItemUpdateDto> update(@RequestBody @Valid ItemUpdateDto itemUpdateDto) throws ItemNotFoundException, NotAuthorityException {
 
-        JsonObject jsonObject = new JsonObject();
+        itemUpdateDto = itemService.updateItem(itemUpdateDto);
 
-        try {
-
-            itemUpdateDto = itemService.updateItem(itemUpdateDto);
-
-        } catch (NotAuthorityException e) {
-
-            log.error("마켓 권한 없음 : 비밀번호 = {}", itemUpdateDto.getPassword());
-            jsonObject.addProperty("data", Code.AUTH_ERR.name());
-            return ResponseEntity.badRequest()
-                    .body(jsonObject.toString());
-
-        } catch (ItemNotFoundException e) {
-
-            log.error("수정할 아이템이 존재하지 않음 = {}", itemUpdateDto.getName());
-            jsonObject.addProperty("data", Code.NOT_FOUND.name());
-            return ResponseEntity.badRequest()
-                    .body(jsonObject.toString());
-
-        }
-
-        String itemJson = webService.objectToJson(new ItemCreateDto(itemUpdateDto));
-        jsonObject.addProperty("data", Code.OK.name());
-        jsonObject.addProperty("item", itemJson);
-
-        return ResponseEntity.ok(jsonObject.toString());
+        return ResponseEntity.ok(itemUpdateDto);
     }
 
     /**
@@ -139,30 +62,10 @@ public class ItemController {
      * 권한이 있을 경우 해당 이름을 가진 상품 전부 삭제
      */
     @DeleteMapping
-    public ResponseEntity<String> deleteItem(@RequestBody @Valid ItemDeleteDto itemDeleteDto) {
+    public ResponseEntity<String> deleteItem(@RequestBody @Valid ItemDeleteDto itemDeleteDto) throws ItemNotFoundException, NotAuthorityException {
 
-        JsonObject jsonObject = new JsonObject();
-        try {
+        itemService.deleteItem(itemDeleteDto);
 
-            itemService.deleteItem(itemDeleteDto);
-
-        } catch (NotAuthorityException e) {
-
-            log.error("마켓 권한 없음 : 비밀번호 = {}", itemDeleteDto.getPassword());
-            jsonObject.addProperty("data", Code.AUTH_ERR.name());
-            return ResponseEntity.badRequest()
-                    .body(jsonObject.toString());
-
-        } catch (ItemNotFoundException e) {
-
-            log.error("삭제할 아이템이 존재하지 않음 = {}", itemDeleteDto.getName());
-            jsonObject.addProperty("data", Code.NOT_FOUND.name());
-            return ResponseEntity.badRequest()
-                    .body(jsonObject.toString());
-
-        }
-
-        jsonObject.addProperty("data", Code.OK.name());
-        return ResponseEntity.ok(jsonObject.toString());
+        return ResponseEntity.ok("삭제 완료.");
     }
 }

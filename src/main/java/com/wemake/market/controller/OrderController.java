@@ -1,7 +1,5 @@
 package com.wemake.market.controller;
 
-import com.google.gson.JsonObject;
-import com.wemake.market.domain.Code;
 import com.wemake.market.domain.dto.OrderDto;
 import com.wemake.market.exception.ItemNotFoundException;
 import com.wemake.market.service.OrderService;
@@ -25,25 +23,11 @@ public class OrderController {
      * 쿠폰이 있다면(useCoupon) 쿠폰 할인 금액 반영해서 계산
      */
     @PostMapping
-    public ResponseEntity<String> orderPrice(@RequestBody @Valid OrderDto orderDto) {
+    public ResponseEntity<Integer> orderPrice(@RequestBody @Valid OrderDto orderDto) throws ItemNotFoundException {
 
-        JsonObject jsonObject = new JsonObject();
+        int orderPrice = orderService.getOrderPrice(orderDto);
 
-        try {
-
-            int orderPrice = orderService.getOrderPrice(orderDto);
-            jsonObject.addProperty("price", orderPrice);
-
-        } catch (ItemNotFoundException e) {
-            log.error("없는 아이템을 주문함");
-            jsonObject.addProperty("data", Code.NOT_FOUND.name());
-            return ResponseEntity.badRequest()
-                    .body(jsonObject.toString());
-        }
-
-        jsonObject.addProperty("data", Code.OK.name());
-
-        return ResponseEntity.ok(jsonObject.toString());
+        return ResponseEntity.ok(orderPrice);
     }
 
 
