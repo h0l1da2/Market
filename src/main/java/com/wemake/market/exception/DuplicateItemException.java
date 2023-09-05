@@ -16,4 +16,8 @@ public class DuplicateItemException extends Exception {
     public DuplicateItemException(Throwable cause) {
         super(cause);
     }
+
+    public String getErrorMessage() {
+        return "상품명이 중복입니다.";
+    }
 }
