@@ -4,9 +4,8 @@ import com.wemake.market.domain.Coupon;
 import com.wemake.market.domain.How;
 import com.wemake.market.domain.Item;
 import com.wemake.market.domain.Where;
-import com.wemake.market.domain.dto.OrderDto;
 import com.wemake.market.domain.dto.OrderItemDto;
-import com.wemake.market.domain.dto.PayDto;
+import com.wemake.market.domain.dto.OrderDto;
 import com.wemake.market.exception.NotFoundException;
 import com.wemake.market.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,21 +28,9 @@ public class OrderServiceImpl implements OrderService {
 
         AtomicInteger price = new AtomicInteger();
 
-        calcItemPrice(orderDto.getItems(), price);
-
-        price.set(price.get() + orderDto.getDeliveryPrice());
-
-        return price.get() <= 0 ? 0 : price.get();
-    }
-
-    @Override
-    public int getPayPrice(PayDto payDto) throws NotFoundException {
-
-        AtomicInteger price = new AtomicInteger();
-
         // 쿠폰이 존재한다면 ?
-        if (payDto.isUseCoupon()) {
-            Coupon coupon = payDto.getCoupon();
+        if (orderDto.isUseCoupon()) {
+            Coupon coupon = orderDto.getCoupon();
 
             Where wheres = coupon.getWheres();
             How how = coupon.getHow();
@@ -52,8 +39,9 @@ public class OrderServiceImpl implements OrderService {
 
             AtomicBoolean noFlag = new AtomicBoolean(false);
 
+            // 아이템 관련 쿠폰
             if (wheres.equals(Where.ITEM)) {
-                payDto.getItems().forEach(i -> {
+                orderDto.getItems().forEach(i -> {
                     List<Item> itemList = itemRepository.findByName(i.getName());
                     if (itemList.size() == 0) {
                         noFlag.set(true);
@@ -69,7 +57,7 @@ public class OrderServiceImpl implements OrderService {
                         }
                         if (how.equals(How.PERCENTAGE)) {
                             // 퍼센테이지를 계산 후 ...
-                            price.set((int) (price.get() + (((item.getPrice() * i.getCount())) * ((100 - rate) * 0.01))));
+                            price.set((int) (price.get() + ((item.getPrice() * i.getCount()) * ((100 - rate) * 0.01))));
                         }
                     } else {
                         price.set(price.get() + (item.getPrice() * i.getCount()));
@@ -81,29 +69,31 @@ public class OrderServiceImpl implements OrderService {
                     throw new NotFoundException();
                 }
 
-                price.set(price.get() + payDto.getDeliveryPrice());
+                price.set(price.get() + orderDto.getDeliveryPrice());
             }
 
+            // 주문 관련 쿠폰
             if (wheres.equals(Where.ORDER)) {
-                calcItemPrice(payDto.getItems(), price);
+                calcItemPrice(orderDto.getItems(), price);
 
                 if (how.equals(How.FIXED)) {
                     // 고정값을 전체 값에서 뺀 후 ...
-                    price.set(price.get() + payDto.getDeliveryPrice());
+                    price.set(price.get() + orderDto.getDeliveryPrice());
                     price.set(price.get() - amount);
                 }
                 if (how.equals(How.PERCENTAGE)) {
                     // 퍼센테이지를 계산 후 ...
-                    price.set((int) ((price.get() + payDto.getDeliveryPrice()) * ((100 - rate) * 0.01)));
+                    price.set((int) ((price.get() + orderDto.getDeliveryPrice()) * ((100 - rate) * 0.01)));
                 }
 
             }
 
         }
 
-        if (!payDto.isUseCoupon()) {
-            calcItemPrice(payDto.getItems(), price);
-            price.set(price.get() + payDto.getDeliveryPrice());
+        // 쿠폰이 없음
+        if (!orderDto.isUseCoupon()) {
+            calcItemPrice(orderDto.getItems(), price);
+            price.set(price.get() + orderDto.getDeliveryPrice());
         }
 
         return price.get() <= 0 ? 0 : price.get();
