@@ -7,7 +7,7 @@ import com.wemake.market.domain.dto.OrderItemDto;
 import com.wemake.market.domain.dto.PayDto;
 import com.wemake.market.exception.ItemDuplException;
 import com.wemake.market.repository.ItemRepository;
-import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class OrderServiceImplTest {
@@ -104,7 +103,7 @@ class OrderServiceImplTest {
         list.add(orderItemDtoC);
         OrderDto orderDto = new OrderDto(list, 2500);
 
-        org.junit.jupiter.api.Assertions.assertThrows(ItemDuplException.class,
+        Assertions.assertThrows(ItemDuplException.class,
                 () -> orderService.getOrderPrice(orderDto));
     }
 
@@ -205,7 +204,7 @@ class OrderServiceImplTest {
         coupon.setRate(20);
         PayDto payDto = new PayDto(list, 3000, true, coupon);
 
-        org.junit.jupiter.api.Assertions.assertThrows(ItemDuplException.class, () ->
+        Assertions.assertThrows(ItemDuplException.class, () ->
                 orderService.getPayPrice(payDto));
     }
 
