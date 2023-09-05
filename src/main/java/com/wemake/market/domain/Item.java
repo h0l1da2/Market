@@ -21,10 +21,10 @@ public class Item {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private Integer price;
+    private int price;
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime date;
-    private Boolean isUpdate;
+    private boolean isUpdate;
 
     public Item(ItemDto itemDto, boolean isUpdate) {
         this.name = itemDto.getName();

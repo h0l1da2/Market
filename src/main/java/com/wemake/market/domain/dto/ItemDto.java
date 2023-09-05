@@ -12,7 +12,7 @@ public class ItemDto {
     @NotBlank @Size(min = 1)
     private String name;
     @Min(value = 100)
-    private Integer price;
+    private int price;
     @NotNull
     private Role role;
     private LocalDateTime date;
