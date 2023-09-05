@@ -53,17 +53,23 @@ public class OrderServiceImpl implements OrderService {
             int amount = coupon.getAmount();
 
             ConcurrentHashMap<String, Item> map = new ConcurrentHashMap<>();
-            AtomicBoolean flag = new AtomicBoolean(false);
+            AtomicBoolean noFlag = new AtomicBoolean(false);
+            AtomicBoolean duplFalg = new AtomicBoolean(false);
 
             if (wheres.equals(Where.ITEM)) {
                 payDto.getItems().forEach(i -> {
                     List<Item> itemList = itemRepository.findByName(i.getName());
+                    if (itemList.size() == 0) {
+                        noFlag.set(true);
+                        return;
+
+                    }
                     Item item = itemList.get(itemList.size() - 1);
 
                     // 중복 아이템 검사
                     Item findItem = map.get(item.getName());
                     if (findItem != null) {
-                        flag.set(true);
+                        duplFalg.set(true);
                         return;
                     } else {
                         map.put(item.getName(), item);
@@ -84,7 +90,11 @@ public class OrderServiceImpl implements OrderService {
 
                 });
 
-                if (flag.get() == true) {
+                if (noFlag.get() == true) {
+                    throw new NotFoundException();
+                }
+
+                if (duplFalg.get() == true) {
                     throw new ItemDuplException();
                 }
 
