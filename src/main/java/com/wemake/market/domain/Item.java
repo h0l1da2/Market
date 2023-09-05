@@ -1,6 +1,6 @@
 package com.wemake.market.domain;
 
-import com.wemake.market.domain.dto.ItemDto;
+import com.wemake.market.domain.dto.ItemCreateDto;
 import com.wemake.market.domain.dto.ItemUpdateDto;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -25,9 +25,9 @@ public class Item {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime date;
 
-    public Item(ItemDto itemDto) {
-        this.name = itemDto.getName();
-        this.price = itemDto.getPrice();
+    public Item(ItemCreateDto itemCreateDto) {
+        this.name = itemCreateDto.getName();
+        this.price = itemCreateDto.getPrice();
         this.date = LocalDateTime.now();
     }
 

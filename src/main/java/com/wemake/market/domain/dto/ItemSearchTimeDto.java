@@ -16,6 +16,10 @@ public class ItemSearchTimeDto {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime date;
 
+    protected ItemSearchTimeDto() {
+
+    }
+
     public ItemSearchTimeDto(String name, LocalDateTime date) {
         this.name = name;
         this.date = date;

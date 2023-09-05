@@ -15,7 +15,7 @@ public class ItemDeleteDto {
     @NotBlank
     private String password;
 
-    private ItemDeleteDto() {}
+    protected ItemDeleteDto() {}
 
     public ItemDeleteDto(String name, @NotNull Role role, String password) {
         this.name = name;

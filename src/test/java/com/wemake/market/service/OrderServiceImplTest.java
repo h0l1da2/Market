@@ -1,10 +1,10 @@
 package com.wemake.market.service;
 
 import com.wemake.market.domain.*;
-import com.wemake.market.domain.dto.ItemDto;
+import com.wemake.market.domain.dto.ItemCreateDto;
 import com.wemake.market.domain.dto.OrderItemDto;
 import com.wemake.market.domain.dto.OrderDto;
-import com.wemake.market.exception.NotFoundException;
+import com.wemake.market.exception.ItemNotFoundException;
 import com.wemake.market.repository.ItemRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,8 +25,8 @@ class OrderServiceImplTest {
     private ItemRepository itemRepository;
 
     private Item saveItem(String name, int price) {
-        ItemDto itemDto = new ItemDto(name, price, Role.MARKET);
-        Item item = new Item(itemDto);
+        ItemCreateDto itemCreateDto = new ItemCreateDto(name, price, Role.MARKET);
+        Item item = new Item(itemCreateDto);
         itemRepository.save(item);
 
         return item;
@@ -34,7 +34,7 @@ class OrderServiceImplTest {
 
     @Test
     @DisplayName("결제 금액 계산 성공! : 아이템 하나, 쿠폰 사용 X")
-    void 결제금액_성공_하나() throws NotFoundException {
+    void 결제금액_성공_하나() throws ItemNotFoundException {
         saveItem("감자", 1000);
 
         List<OrderItemDto> list = new ArrayList<>();
@@ -48,7 +48,7 @@ class OrderServiceImplTest {
 
     @Test
     @DisplayName("결제 금액 계산 쿠폰 성공! : 아이템 하나,고정값")
-    void 결제금액_성공_하나_쿠폰_아이템_고정값() throws NotFoundException {
+    void 결제금액_성공_하나_쿠폰_아이템_고정값() throws ItemNotFoundException {
         saveItem("감자", 1000);
 
         List<OrderItemDto> list = new ArrayList<>();
@@ -64,7 +64,7 @@ class OrderServiceImplTest {
 
     @Test
     @DisplayName("결제 금액 계산 쿠폰 성공! : 아이템 하나,무료")
-    void 결제금액_성공_하나_쿠폰_아이템_고정값_무료() throws NotFoundException {
+    void 결제금액_성공_하나_쿠폰_아이템_고정값_무료() throws ItemNotFoundException {
         saveItem("감자", 1000);
 
         List<OrderItemDto> list = new ArrayList<>();
@@ -80,7 +80,7 @@ class OrderServiceImplTest {
 
     @Test
     @DisplayName("결제 금액 계산 쿠폰 성공! : 아이템 하나,퍼센트")
-    void 결제금액_성공_쿠폰_아이템_퍼센트_하나() throws NotFoundException {
+    void 결제금액_성공_쿠폰_아이템_퍼센트_하나() throws ItemNotFoundException {
         saveItem("감자", 1000);
 
         List<OrderItemDto> list = new ArrayList<>();
@@ -96,7 +96,7 @@ class OrderServiceImplTest {
 
     @Test
     @DisplayName("결제 금액 계산 쿠폰 성공! : 아이템 하나,백퍼센트")
-    void 결제금액_성공_쿠폰_아이템_퍼센트_하나_무료() throws NotFoundException {
+    void 결제금액_성공_쿠폰_아이템_퍼센트_하나_무료() throws ItemNotFoundException {
         saveItem("감자", 1000);
 
         List<OrderItemDto> list = new ArrayList<>();
@@ -112,7 +112,7 @@ class OrderServiceImplTest {
 
     @Test
     @DisplayName("결제 금액 계산 쿠폰 성공! : 아이템 여러개,퍼센트")
-    void 결제금액_성공_쿠폰_아이템_퍼센트_여러개() throws NotFoundException {
+    void 결제금액_성공_쿠폰_아이템_퍼센트_여러개() throws ItemNotFoundException {
         saveItem("감자", 1000);
         saveItem("고구마", 3000);
         saveItem("치즈", 2000);
@@ -137,7 +137,7 @@ class OrderServiceImplTest {
 
     @Test
     @DisplayName("결제 금액 계산 쿠폰 성공! : 주문,퍼센트,여러개")
-    void 결제금액_성공_하나_쿠폰_주문_퍼센트_여러개() throws NotFoundException {
+    void 결제금액_성공_하나_쿠폰_주문_퍼센트_여러개() throws ItemNotFoundException {
         saveItem("감자", 1000);
         saveItem("고구마", 3000);
         saveItem("치즈", 2000);
@@ -159,7 +159,7 @@ class OrderServiceImplTest {
 
     @Test
     @DisplayName("결제 금액 계산 쿠폰 성공! : 주문,퍼센트,여러개,100퍼")
-    void 결제금액_성공_하나_쿠폰_주문_퍼센트_여러개_백퍼() throws NotFoundException {
+    void 결제금액_성공_하나_쿠폰_주문_퍼센트_여러개_백퍼() throws ItemNotFoundException {
         saveItem("감자", 1000);
         saveItem("고구마", 3000);
         saveItem("치즈", 2000);
@@ -181,7 +181,7 @@ class OrderServiceImplTest {
 
     @Test
     @DisplayName("결제 금액 계산 쿠폰 성공! : 주문,고정값,여러개")
-    void 결제금액_성공_하나_쿠폰_주문_고정값_여러개() throws NotFoundException {
+    void 결제금액_성공_하나_쿠폰_주문_고정값_여러개() throws ItemNotFoundException {
         saveItem("감자", 1000);
         saveItem("고구마", 3000);
         saveItem("치즈", 2000);
@@ -203,7 +203,7 @@ class OrderServiceImplTest {
 
     @Test
     @DisplayName("결제 금액 계산 쿠폰 성공! : 주문,고정값,여러개, 무료")
-    void 결제금액_성공_하나_쿠폰_주문_고정값_여러개_무료() throws NotFoundException {
+    void 결제금액_성공_하나_쿠폰_주문_고정값_여러개_무료() throws ItemNotFoundException {
         saveItem("감자", 1000);
         saveItem("고구마", 3000);
         saveItem("치즈", 2000);

@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 public class WebServiceImpl implements WebService {
 
     @Override
-    public String objToJson(Object object) {
+    public String objectToJson(Object object) {
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter())
                 .create();

@@ -2,13 +2,10 @@ package com.wemake.market.controller;
 
 import com.google.gson.JsonObject;
 import com.wemake.market.domain.Code;
-import com.wemake.market.domain.dto.ItemDeleteDto;
-import com.wemake.market.domain.dto.ItemDto;
-import com.wemake.market.domain.dto.ItemSearchTimeDto;
-import com.wemake.market.domain.dto.ItemUpdateDto;
-import com.wemake.market.exception.ItemDuplException;
+import com.wemake.market.domain.dto.*;
+import com.wemake.market.exception.DuplicateItemException;
 import com.wemake.market.exception.NotAuthorityException;
-import com.wemake.market.exception.NotFoundException;
+import com.wemake.market.exception.ItemNotFoundException;
 import com.wemake.market.exception.NotValidException;
 import com.wemake.market.service.ItemService;
 import com.wemake.market.service.WebService;
@@ -38,10 +35,10 @@ public class ItemController {
         try {
 
             ItemDto itemDto = itemService.searchItemByTime(itemSearchTimeDto);
-            String itemJson = webService.objToJson(itemDto);
+            String itemJson = webService.objectToJson(itemDto);
             jsonObject.addProperty("item", itemJson);
 
-        } catch (NotFoundException e) {
+        } catch (ItemNotFoundException e) {
 
             log.error("아이템 찾을 수 없음 = {}", itemSearchTimeDto.getName());
             jsonObject.addProperty("data", Code.NOT_FOUND.name());
@@ -69,12 +66,12 @@ public class ItemController {
      * 상품 이름은 중복 불가
      */
     @PostMapping
-    public ResponseEntity<String> create(@RequestBody @Valid ItemDto itemDto) {
+    public ResponseEntity<String> create(@RequestBody @Valid ItemCreateDto itemCreateDto) {
 
         JsonObject jsonObject = new JsonObject();
         try {
 
-            itemDto = itemService.createItem(itemDto);
+            itemCreateDto = itemService.createItem(itemCreateDto);
 
         } catch (NotAuthorityException e) {
 
@@ -83,16 +80,16 @@ public class ItemController {
             return ResponseEntity.badRequest()
                     .body(jsonObject.toString());
 
-        } catch (ItemDuplException e) {
+        } catch (DuplicateItemException e) {
 
-            log.error("같은 이름 아이템 존재 = {}", itemDto.getName());
+            log.error("같은 이름 아이템 존재 = {}", itemCreateDto.getName());
             jsonObject.addProperty("data", Code.DUPL_ITEM.name());
             return ResponseEntity.badRequest()
                     .body(jsonObject.toString());
 
         }
 
-        String itemJson = webService.objToJson(itemDto);
+        String itemJson = webService.objectToJson(itemCreateDto);
 
         jsonObject.addProperty("data", Code.OK.name());
         jsonObject.addProperty("item", itemJson);
@@ -121,7 +118,7 @@ public class ItemController {
             return ResponseEntity.badRequest()
                     .body(jsonObject.toString());
 
-        } catch (NotFoundException e) {
+        } catch (ItemNotFoundException e) {
 
             log.error("수정할 아이템이 존재하지 않음 = {}", itemUpdateDto.getName());
             jsonObject.addProperty("data", Code.NOT_FOUND.name());
@@ -130,7 +127,7 @@ public class ItemController {
 
         }
 
-        String itemJson = webService.objToJson(new ItemDto(itemUpdateDto));
+        String itemJson = webService.objectToJson(new ItemCreateDto(itemUpdateDto));
         jsonObject.addProperty("data", Code.OK.name());
         jsonObject.addProperty("item", itemJson);
 
@@ -156,7 +153,7 @@ public class ItemController {
             return ResponseEntity.badRequest()
                     .body(jsonObject.toString());
 
-        } catch (NotFoundException e) {
+        } catch (ItemNotFoundException e) {
 
             log.error("삭제할 아이템이 존재하지 않음 = {}", itemDeleteDto.getName());
             jsonObject.addProperty("data", Code.NOT_FOUND.name());

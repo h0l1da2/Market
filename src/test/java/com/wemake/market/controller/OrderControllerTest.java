@@ -2,7 +2,7 @@ package com.wemake.market.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wemake.market.domain.*;
-import com.wemake.market.domain.dto.ItemDto;
+import com.wemake.market.domain.dto.ItemCreateDto;
 import com.wemake.market.domain.dto.OrderItemDto;
 import com.wemake.market.domain.dto.OrderDto;
 import com.wemake.market.repository.ItemRepository;
@@ -338,8 +338,8 @@ class OrderControllerTest {
     }
 
     private Item saveItem(String name, int price) {
-        ItemDto itemDto = new ItemDto(name, price, Role.MARKET);
-        Item item = new Item(itemDto);
+        ItemCreateDto itemCreateDto = new ItemCreateDto(name, price, Role.MARKET);
+        Item item = new Item(itemCreateDto);
         itemRepository.save(item);
 
         return item;

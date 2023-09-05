@@ -3,7 +3,7 @@ package com.wemake.market.controller;
 import com.google.gson.JsonObject;
 import com.wemake.market.domain.Code;
 import com.wemake.market.domain.dto.OrderDto;
-import com.wemake.market.exception.NotFoundException;
+import com.wemake.market.exception.ItemNotFoundException;
 import com.wemake.market.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ public class OrderController {
             int orderPrice = orderService.getOrderPrice(orderDto);
             jsonObject.addProperty("price", orderPrice);
 
-        } catch (NotFoundException e) {
+        } catch (ItemNotFoundException e) {
             log.error("없는 아이템을 주문함");
             jsonObject.addProperty("data", Code.NOT_FOUND.name());
             return ResponseEntity.badRequest()

@@ -2,13 +2,10 @@ package com.wemake.market.service;
 
 import com.wemake.market.domain.Item;
 import com.wemake.market.domain.Role;
-import com.wemake.market.domain.dto.ItemDeleteDto;
-import com.wemake.market.domain.dto.ItemDto;
-import com.wemake.market.domain.dto.ItemSearchTimeDto;
-import com.wemake.market.domain.dto.ItemUpdateDto;
-import com.wemake.market.exception.ItemDuplException;
+import com.wemake.market.domain.dto.*;
+import com.wemake.market.exception.DuplicateItemException;
 import com.wemake.market.exception.NotAuthorityException;
-import com.wemake.market.exception.NotFoundException;
+import com.wemake.market.exception.ItemNotFoundException;
 import com.wemake.market.exception.NotValidException;
 import com.wemake.market.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,35 +35,36 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
 
     @Override
-    public ItemDto createItem(ItemDto itemDto) throws NotAuthorityException, ItemDuplException {
+    public ItemCreateDto createItem(ItemCreateDto itemCreateDto) throws NotAuthorityException, DuplicateItemException {
 
         // 마켓 권한 검사
-        if (itemDto.getRole().equals(Role.USER)) {
+        if (itemCreateDto.getRole().equals(Role.USER)) {
             throw new NotAuthorityException("마켓 권한 없음");
         }
 
         // 아이템 중복 검사
-        List<Item> findItem = itemRepository.findByName(itemDto.getName());
+        List<Item> findItem = itemRepository.findByName(itemCreateDto.getName());
 
         if (findItem.size() != 0) {
-            throw new ItemDuplException("아이템 중복");
+            throw new DuplicateItemException("아이템 중복");
         }
 
         // 아이템 넣기
-        Item item = itemRepository.save(new Item(itemDto));
+        Item item = itemRepository.save(new Item(itemCreateDto));
 
-        return new ItemDto(item);
+        return new ItemCreateDto(item);
+
     }
 
     @Override
-    public ItemUpdateDto updateItem(ItemUpdateDto itemUpdateDto) throws NotAuthorityException, NotFoundException {
+    public ItemUpdateDto updateItem(ItemUpdateDto itemUpdateDto) throws NotAuthorityException, ItemNotFoundException {
 
-        validRole(itemUpdateDto.getRole(), itemUpdateDto.getPassword());
+        checkMarketRole(itemUpdateDto.getRole(), itemUpdateDto.getPassword());
 
-        List<Item> byName = itemRepository.findByName(itemUpdateDto.getName());
+        List<Item> findItem = itemRepository.findByName(itemUpdateDto.getName());
 
-        if (byName.size() == 0) {
-            throw new NotFoundException("해당 아이템 찾을 수 없음");
+        if (findItem.size() == 0) {
+            throw new ItemNotFoundException("해당 아이템 찾을 수 없음");
         }
 
         Item updateItem = itemRepository.save(new Item(itemUpdateDto));
@@ -76,13 +74,13 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional
     @Override
-    public void deleteItem(ItemDeleteDto itemDeleteDto) throws NotAuthorityException, NotFoundException {
+    public void deleteItem(ItemDeleteDto itemDeleteDto) throws NotAuthorityException, ItemNotFoundException {
 
-        validRole(itemDeleteDto.getRole(), itemDeleteDto.getPassword());
+        checkMarketRole(itemDeleteDto.getRole(), itemDeleteDto.getPassword());
 
-        List<Item> itemList = itemRepository.findByName(itemDeleteDto.getName());
-        if (itemList.size() == 0) {
-            throw new NotFoundException();
+        List<Item> deleteItemList = itemRepository.findByName(itemDeleteDto.getName());
+        if (deleteItemList.size() == 0) {
+            throw new ItemNotFoundException();
         }
 
         itemRepository.deleteAllByName(itemDeleteDto.getName());
@@ -90,7 +88,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto searchItemByTime(ItemSearchTimeDto itemSearchTimeDto) throws NotFoundException, NotValidException {
+    public ItemDto searchItemByTime(ItemSearchTimeDto itemSearchTimeDto) throws ItemNotFoundException, NotValidException {
 
         /**
          * 13 로 구한다면 -> 13 ~ 현재 시간까지 데이터를 구해서
@@ -98,42 +96,43 @@ public class ItemServiceImpl implements ItemService {
          * 이전 ~ 12:59 으로 구해서 마지막 데이터
          */
 
-        List<Item> items = itemRepository.findByName(itemSearchTimeDto.getName());
+        List<Item> findItems = itemRepository.findByName(itemSearchTimeDto.getName());
 
-        if (items.size() == 0) {
-            throw new NotFoundException();
+        if (findItems.size() == 0) {
+            throw new ItemNotFoundException();
         }
 
-        Item item = items.get(items.size() - 1);
-        LocalDateTime offset = itemSearchTimeDto.getDate();
+        Item findItem = findItems.get(findItems.size() - 1);
+        LocalDateTime offsetDateTime = itemSearchTimeDto.getDate();
 
-        if (offset.isAfter(now()) && offset.isBefore(item.getDate())) {
+        if (offsetDateTime.isAfter(now()) && offsetDateTime.isBefore(findItem.getDate())) {
             throw new NotValidException();
         }
 
         // 궁금한 시간 ~ 지금까지해서 한 개 조회
-        LocalDateTime limitDate = now();
+        LocalDateTime limitDateTime = now();
 
         PageRequest page = PageRequest.of(0, 1, Sort.by(ASC, "date"));
 
-        Page<Item> itemPage = itemRepository.findByNameAndDate(item.getName(), offset, limitDate, page);
-        items = itemPage.stream().toList();
+        Page<Item> resultItemPage = itemRepository.findByNameAndDate(findItem.getName(), offsetDateTime, limitDateTime, page);
+        List<Item> resultItemList = resultItemPage.stream().toList();
 
-        if (items.size() == 0) {
+        if (resultItemList.size() == 0) {
 
-            limitDate = offset;
+            limitDateTime = offsetDateTime;
             // 완전 과거
-            offset = item.getDate();
+            offsetDateTime = findItem.getDate();
 
             // 한 개
-            itemPage = itemRepository.findByNameAndDate(item.getName(), offset, limitDate, page);
-            items = itemPage.stream().toList();
+            resultItemPage = itemRepository.findByNameAndDate(findItem.getName(), offsetDateTime, limitDateTime, page);
+            resultItemList = resultItemPage.stream().toList();
         }
 
-        return new ItemDto(items.get(items.size() - 1));
+        Item resultItem = resultItemList.get(resultItemList.size() - 1);
+        return new ItemDto(resultItem);
     }
 
-    private void validRole(Role role, String pwd) throws NotAuthorityException {
+    private void checkMarketRole(Role role, String pwd) throws NotAuthorityException {
         if (role.equals(Role.USER) ||
                 !pwd.equals(password)) {
             throw new NotAuthorityException("권한 없음 : 비밀번호 에러");
