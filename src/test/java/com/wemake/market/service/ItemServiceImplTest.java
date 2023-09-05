@@ -6,7 +6,7 @@ import com.wemake.market.domain.dto.*;
 import com.wemake.market.exception.DuplicateItemException;
 import com.wemake.market.exception.NotAuthorityException;
 import com.wemake.market.exception.ItemNotFoundException;
-import com.wemake.market.exception.NotValidException;
+import com.wemake.market.exception.UnavailableDateTimeException;
 import com.wemake.market.repository.ItemRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -198,7 +198,7 @@ class ItemServiceImplTest {
 
     @Test
     @DisplayName("아이템 조회 성공 : 특정 시간")
-    void 아이템조회_성공() throws ItemNotFoundException, NotValidException {
+    void 아이템조회_성공() throws ItemNotFoundException, UnavailableDateTimeException {
         // given
         ItemCreateDto itemCreateDto = new ItemCreateDto("name", 1000, Role.MARKET);
         itemRepository.save(new Item(itemCreateDto));
@@ -224,7 +224,7 @@ class ItemServiceImplTest {
 
     @Test
     @DisplayName("아이템 조회 성공 : 여러 개")
-    void 아이템조회_성공_여러개() throws ItemNotFoundException, NotValidException {
+    void 아이템조회_성공_여러개() throws ItemNotFoundException, UnavailableDateTimeException {
         // given
         ItemCreateDto itemCreateDto = new ItemCreateDto("name", 1000, Role.MARKET);
         itemRepository.save(new Item(itemCreateDto));
