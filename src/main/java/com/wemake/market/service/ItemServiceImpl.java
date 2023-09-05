@@ -9,18 +9,23 @@ import com.wemake.market.domain.dto.ItemUpdateDto;
 import com.wemake.market.exception.ItemDuplException;
 import com.wemake.market.exception.NotAuthorityException;
 import com.wemake.market.exception.NotFoundException;
+import com.wemake.market.exception.NotValidException;
 import com.wemake.market.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
+
+import static java.time.LocalDateTime.*;
+import static org.springframework.data.domain.Sort.Direction.*;
 
 @Slf4j
 @Service
@@ -85,29 +90,47 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> searchItemByTime(ItemSearchTimeDto itemSearchTimeDto) throws NotFoundException {
+    public ItemDto searchItemByTime(ItemSearchTimeDto itemSearchTimeDto) throws NotFoundException, NotValidException {
 
-        // 해당 시간으로 사이 시간 구하기 -- > 3:00:00 이면 3:00:00 과 3:59:00 사이 시간
-        LocalDateTime searchTime = itemSearchTimeDto.getDate();
-        LocalDateTime offset =
-                LocalDateTime.of(
-                        searchTime.getYear(), searchTime.getMonth(), searchTime.getDayOfMonth(),
-                        searchTime.getHour(), 0);
+        /**
+         * 13 로 구한다면 -> 13 ~ 현재 시간까지 데이터를 구해서
+         * -> 근데 이게 데이터가 없다면
+         * 이전 ~ 12:59 으로 구해서 마지막 데이터
+         */
 
-        LocalDateTime limitDate = offset.plusMinutes(59).plusSeconds(59).plusNanos(59);
-
-        List<Item> items = itemRepository.findByNameAndDate(itemSearchTimeDto.getName(), offset, limitDate);
+        List<Item> items = itemRepository.findByName(itemSearchTimeDto.getName());
 
         if (items.size() == 0) {
             throw new NotFoundException();
         }
 
-        List<ItemDto> list = new ArrayList<>();
-        items.forEach(i -> {
-            list.add(new ItemDto(i));
-        });
+        Item item = items.get(items.size() - 1);
+        LocalDateTime offset = itemSearchTimeDto.getDate();
 
-        return list;
+        if (offset.isAfter(now()) && offset.isBefore(item.getDate())) {
+            throw new NotValidException();
+        }
+
+        // 궁금한 시간 ~ 지금까지해서 한 개 조회
+        LocalDateTime limitDate = now();
+
+        PageRequest page = PageRequest.of(0, 1, Sort.by(ASC, "date"));
+
+        Page<Item> itemPage = itemRepository.findByNameAndDate(item.getName(), offset, limitDate, page);
+        items = itemPage.stream().toList();
+
+        if (items.size() == 0) {
+
+            limitDate = offset;
+            // 완전 과거
+            offset = item.getDate();
+
+            // 한 개
+            itemPage = itemRepository.findByNameAndDate(item.getName(), offset, limitDate, page);
+            items = itemPage.stream().toList();
+        }
+
+        return new ItemDto(items.get(items.size() - 1));
     }
 
     private void validRole(Role role, String pwd) throws NotAuthorityException {

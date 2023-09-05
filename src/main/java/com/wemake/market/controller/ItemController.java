@@ -9,6 +9,7 @@ import com.wemake.market.domain.dto.ItemUpdateDto;
 import com.wemake.market.exception.ItemDuplException;
 import com.wemake.market.exception.NotAuthorityException;
 import com.wemake.market.exception.NotFoundException;
+import com.wemake.market.exception.NotValidException;
 import com.wemake.market.service.ItemService;
 import com.wemake.market.service.WebService;
 import jakarta.validation.Valid;
@@ -16,8 +17,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -38,7 +37,7 @@ public class ItemController {
 
         try {
 
-            List<ItemDto> itemDto = itemService.searchItemByTime(itemSearchTimeDto);
+            ItemDto itemDto = itemService.searchItemByTime(itemSearchTimeDto);
             String itemJson = webService.objToJson(itemDto);
             jsonObject.addProperty("item", itemJson);
 
@@ -49,6 +48,14 @@ public class ItemController {
 
             return ResponseEntity.badRequest()
                     .body(jsonObject.toString());
+        } catch (NotValidException e) {
+
+            log.error("시간을 다시 확인하세요 = {}", itemSearchTimeDto.getDate());
+            jsonObject.addProperty("data", Code.NOT_VALID.name());
+
+            return ResponseEntity.badRequest()
+                    .body(jsonObject.toString());
+
         }
 
         jsonObject.addProperty("data", Code.OK.name());
