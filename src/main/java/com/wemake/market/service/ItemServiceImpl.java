@@ -94,7 +94,7 @@ public class ItemServiceImpl implements ItemService {
                         searchTime.getYear(), searchTime.getMonth(), searchTime.getDayOfMonth(),
                         searchTime.getHour(), 0);
 
-        LocalDateTime limitDate = offset.plusMinutes(59);
+        LocalDateTime limitDate = offset.plusMinutes(59).plusSeconds(59).plusNanos(59);
 
         List<Item> items = itemRepository.findByNameAndDate(itemSearchTimeDto.getName(), offset, limitDate);
 
