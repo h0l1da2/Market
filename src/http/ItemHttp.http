@@ -68,6 +68,16 @@ Content-Type: application/json
   "name": "아이템",
   "date": "2023-09-05T17:00:00"
 }
+
+### 아이템 보기 실패 과거 시간 (시간 yyyy-MM-ddTHH:mm:ss)
+GET http://localhost:8080/item
+Content-Type: application/json
+
+{
+  "name": "아이템",
+  "date": "2023-09-04T17:00:00"
+}
+
 ### 아이템 보기 실패 (없음)
 GET http://localhost:8080/item
 Content-Type: application/json

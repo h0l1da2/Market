@@ -1,66 +1,5 @@
-### 주문 계산 성공 (한개)
-POST http://localhost:8080/order
-Content-Type: application/json
-
-{
-  "items": [
-    {
-      "name": "아이템1",
-      "count": 3
-    }
-  ],
-  "deliveryPrice": 3000
-}
-### 주문 계산 성공 (여러개)
-POST http://localhost:8080/order
-Content-Type: application/json
-
-{
-  "items": [
-    {
-      "name": "아이템1",
-      "count": 3
-    },
-    {
-      "name": "아이템2",
-      "count": 1
-    }
-  ],
-  "deliveryPrice": 3000
-}
-### 주문 계산 실패 (여러개 없는아이템)
-POST http://localhost:8080/order
-Content-Type: application/json
-
-{
-  "items": [
-    {
-      "name": "아이템ㅋ",
-      "count": 3
-    },
-    {
-      "name": "아이템2",
-      "count": 1
-    }
-  ],
-  "deliveryPrice": 3000
-}
-### 주문 계산 실패 (하나 없는아이템)
-POST http://localhost:8080/order
-Content-Type: application/json
-
-{
-  "items": [
-    {
-      "name": "아이템ㅋ",
-      "count": 3
-    }
-  ],
-  "deliveryPrice": 3000
-}
-
 ### 결제 계산 성공 , 하나
-POST http://localhost:8080/order/pay
+POST http://localhost:8080/order
 Content-Type: application/json
 
 {
@@ -75,7 +14,7 @@ Content-Type: application/json
 }
 
 ### 결제 계산 성공 , 여러개
-POST http://localhost:8080/order/pay
+POST http://localhost:8080/order
 Content-Type: application/json
 
 {
@@ -94,7 +33,7 @@ Content-Type: application/json
 }
 
 ### 결제 계산 성공 , 한 개, 아이템 쿠폰(고정)
-POST http://localhost:8080/order/pay
+POST http://localhost:8080/order
 Content-Type: application/json
 
 {
@@ -115,7 +54,7 @@ Content-Type: application/json
 }
 
 ### 결제 계산 성공 , 한 개, 아이템 쿠폰(비율)
-POST http://localhost:8080/order/pay
+POST http://localhost:8080/order
 Content-Type: application/json
 
 {
@@ -136,7 +75,7 @@ Content-Type: application/json
 }
 
 ### 결제 계산 성공 , 여러 개, 아이템 쿠폰(고정)
-POST http://localhost:8080/order/pay
+POST http://localhost:8080/order
 Content-Type: application/json
 
 {
@@ -161,7 +100,7 @@ Content-Type: application/json
 }
 
 ### 결제 계산 성공 , 여러 개, 아이템 쿠폰(비율)
-POST http://localhost:8080/order/pay
+POST http://localhost:8080/order
 Content-Type: application/json
 
 {
@@ -186,7 +125,7 @@ Content-Type: application/json
 }
 
 ### 결제 계산 성공 , 여러 개, 주문 쿠폰(비율)
-POST http://localhost:8080/order/pay
+POST http://localhost:8080/order
 Content-Type: application/json
 
 {
@@ -210,7 +149,7 @@ Content-Type: application/json
 }
 
 ### 결제 계산 성공 , 여러 개, 주문 쿠폰(고정)
-POST http://localhost:8080/order/pay
+POST http://localhost:8080/order
 Content-Type: application/json
 
 {
@@ -234,7 +173,7 @@ Content-Type: application/json
 }
 
 ### 결제 계산 실패 , 없는 아이템
-POST http://localhost:8080/order/pay
+POST http://localhost:8080/order
 Content-Type: application/json
 
 {
