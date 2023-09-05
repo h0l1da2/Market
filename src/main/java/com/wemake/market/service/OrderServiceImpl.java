@@ -7,12 +7,15 @@ import com.wemake.market.domain.Where;
 import com.wemake.market.domain.dto.OrderDto;
 import com.wemake.market.domain.dto.OrderItemDto;
 import com.wemake.market.domain.dto.PayDto;
+import com.wemake.market.exception.ItemDuplException;
 import com.wemake.market.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
@@ -23,7 +26,7 @@ public class OrderServiceImpl implements OrderService {
     private final ItemRepository itemRepository;
 
     @Override
-    public int getOrderPrice(OrderDto orderDto) {
+    public int getOrderPrice(OrderDto orderDto) throws ItemDuplException {
 
         AtomicInteger price = new AtomicInteger();
 
@@ -35,7 +38,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public int getPayPrice(PayDto payDto) {
+    public int getPayPrice(PayDto payDto) throws ItemDuplException {
 
         AtomicInteger price = new AtomicInteger();
 
@@ -48,27 +51,43 @@ public class OrderServiceImpl implements OrderService {
             int rate = coupon.getRate();
             int amount = coupon.getAmount();
 
+            ConcurrentHashMap<String, Item> map = new ConcurrentHashMap<>();
+            AtomicBoolean flag = new AtomicBoolean(false);
+
             if (wheres.equals(Where.ITEM)) {
                 payDto.getItems().forEach(i -> {
                     List<Item> itemList = itemRepository.findByName(i.getName());
                     Item item = itemList.get(itemList.size() - 1);
 
+                    // 중복 아이템 검사
+                    Item findItem = map.get(item.getName());
+                    if (findItem != null) {
+                        flag.set(true);
+                        return;
+                    } else {
+                        map.put(item.getName(), item);
+                    }
+
                     if (coupon.getName().equals(item.getName())) {
                         if (how.equals(How.FIXED)) {
                             // 고정값을 아이템 값에서 뺀 후 ...
-                            price.set(price.get() + ((item.getPrice() - amount) * i.getCount()));
+                            price.set(price.get() + (item.getPrice() * i.getCount()) - amount);
                         }
                         if (how.equals(How.PERCENTAGE)) {
                             // 퍼센테이지를 계산 후 ...
-                            int value = 100 - rate;
-                            value = (int) (value * 0.01);
-                            price.set(price.get() + ((item.getPrice() * value) * i.getCount()));
+                            price.set((int) (price.get() + (((item.getPrice() * i.getCount())) * ((100 - rate) * 0.01))));
                         }
                     } else {
                         price.set(price.get() + (item.getPrice() * i.getCount()));
                     }
 
                 });
+
+                if (flag.get() == true) {
+                    throw new ItemDuplException();
+                }
+
+                price.set(price.get() + payDto.getDeliveryPrice());
             }
 
             if (wheres.equals(Where.ORDER)) {
@@ -76,16 +95,14 @@ public class OrderServiceImpl implements OrderService {
 
                 if (how.equals(How.FIXED)) {
                     // 고정값을 전체 값에서 뺀 후 ...
+                    price.set(price.get() + payDto.getDeliveryPrice());
                     price.set(price.get() - amount);
                 }
                 if (how.equals(How.PERCENTAGE)) {
                     // 퍼센테이지를 계산 후 ...
-                    int value = 100 - rate;
-                    value = (int) (value * 0.01);
-                    price.set(price.get() * value);
+                    price.set((int) ((price.get() + payDto.getDeliveryPrice()) * ((100 - rate) * 0.01)));
                 }
 
-                price.set(price.get() + payDto.getDeliveryPrice());
             }
 
         }
@@ -98,12 +115,30 @@ public class OrderServiceImpl implements OrderService {
         return price.get();
     }
 
-    private void calcItemPrice(List<OrderItemDto> payDto, AtomicInteger price) {
+    private void calcItemPrice(List<OrderItemDto> payDto, AtomicInteger price) throws ItemDuplException {
+
+        ConcurrentHashMap<String, Item> map = new ConcurrentHashMap<>();
+        AtomicBoolean flag = new AtomicBoolean(false);
+
+
         payDto.forEach(i -> {
             List<Item> itemList = itemRepository.findByName(i.getName());
             Item item = itemList.get(itemList.size() - 1);
 
+            // 중복 아이템 검사
+            Item findItem = map.get(item.getName());
+            if (findItem != null) {
+                flag.set(true);
+                return;
+            } else {
+                map.put(item.getName(), item);
+            }
+
             price.set(price.get() + (item.getPrice() * i.getCount()));
         });
+
+        if (flag.get() == true) {
+            throw new ItemDuplException();
+        }
     }
 }

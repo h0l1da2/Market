@@ -15,4 +15,19 @@ public class PayDto {
     private int deliveryPrice;
     private boolean useCoupon;
     private Coupon coupon;
+
+    protected PayDto() {}
+
+    public PayDto(List<OrderItemDto> items, int deliveryPrice, boolean useCoupon, Coupon coupon) {
+        this.items = items;
+        this.deliveryPrice = deliveryPrice;
+        this.useCoupon = useCoupon;
+        this.coupon = coupon;
+    }
+
+    public PayDto(List<OrderItemDto> items, int deliveryPrice, boolean useCoupon) {
+        this.items = items;
+        this.deliveryPrice = deliveryPrice;
+        this.useCoupon = useCoupon;
+    }
 }

@@ -12,4 +12,10 @@ public class OrderItemDto {
     @Min(value = 1)
     private int count;
 
+    protected OrderItemDto() {}
+
+    public OrderItemDto(String name, int count) {
+        this.name = name;
+        this.count = count;
+    }
 }

@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.wemake.market.domain.Code;
 import com.wemake.market.domain.dto.PayDto;
 import com.wemake.market.domain.dto.OrderDto;
+import com.wemake.market.exception.ItemDuplException;
 import com.wemake.market.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,9 +32,20 @@ public class OrderController {
 
         JsonObject jsonObject = new JsonObject();
 
-        int orderPrice = orderService.getOrderPrice(orderDto);
+        try {
 
-        jsonObject.addProperty("price", orderPrice);
+            int orderPrice = orderService.getOrderPrice(orderDto);
+            jsonObject.addProperty("price", orderPrice);
+
+        } catch (ItemDuplException e) {
+
+            log.error("아이템이 중복으로 장바구니에 들어감.");
+            jsonObject.addProperty("data", Code.DUPL_ITEM.name());
+
+            return ResponseEntity.badRequest()
+                    .body(jsonObject.toString());
+        }
+
         jsonObject.addProperty("data", Code.OK.name());
 
         return ResponseEntity.ok(jsonObject.toString());
@@ -48,10 +60,20 @@ public class OrderController {
 
         JsonObject jsonObject = new JsonObject();
 
-        int payPrice = orderService.getPayPrice(payDto);
+        try {
+            int payPrice = orderService.getPayPrice(payDto);
+            jsonObject.addProperty("pay", payPrice);
+
+        } catch (ItemDuplException e) {
+
+            log.error("아이템이 중복으로 장바구니에 들어감.");
+            jsonObject.addProperty("data", Code.DUPL_ITEM.name());
+
+            return ResponseEntity.badRequest()
+                    .body(jsonObject.toString());
+        }
 
         jsonObject.addProperty("data", Code.OK.name());
-        jsonObject.addProperty("pay", payPrice);
 
         return ResponseEntity.ok(jsonObject.toString());
     }

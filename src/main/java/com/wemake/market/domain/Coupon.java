@@ -12,4 +12,19 @@ public class Coupon {
     private int rate;
     // 고정일 경우 -> 적용 금액
     private int amount;
+
+    protected Coupon() {
+
+    }
+
+    public Coupon(String name, How how, Where wheres) {
+        this.name = name;
+        this.how = how;
+        this.wheres = wheres;
+    }
+
+    public Coupon(How how, Where wheres) {
+        this.how = how;
+        this.wheres = wheres;
+    }
 }

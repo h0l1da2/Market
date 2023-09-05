@@ -14,4 +14,8 @@ public class OrderDto {
     @Min(value = 0)
     private int deliveryPrice;
 
+    public OrderDto(List<OrderItemDto> items, int deliveryPrice) {
+        this.items = items;
+        this.deliveryPrice = deliveryPrice;
+    }
 }
