@@ -35,7 +35,7 @@ public class OrderServiceImpl implements OrderService {
 
         price.set(price.get() + orderDto.getDeliveryPrice());
 
-        return price.get();
+        return price.get() <= 0 ? 0 : price.get();
     }
 
     @Override
@@ -113,7 +113,7 @@ public class OrderServiceImpl implements OrderService {
             price.set(price.get() + payDto.getDeliveryPrice());
         }
 
-        return price.get();
+        return price.get() <= 0 ? 0 : price.get();
     }
 
     private void calcItemPrice(List<OrderItemDto> payDto, AtomicInteger price) throws ItemDuplException, NotFoundException {
@@ -151,5 +151,4 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-    // 실수면 0
 }
