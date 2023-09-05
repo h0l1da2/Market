@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import com.wemake.market.domain.Code;
 import com.wemake.market.domain.dto.PayDto;
 import com.wemake.market.domain.dto.OrderDto;
-import com.wemake.market.exception.ItemDuplException;
 import com.wemake.market.exception.NotFoundException;
 import com.wemake.market.service.OrderService;
 import jakarta.validation.Valid;
@@ -35,13 +34,6 @@ public class OrderController {
             int orderPrice = orderService.getOrderPrice(orderDto);
             jsonObject.addProperty("price", orderPrice);
 
-        } catch (ItemDuplException e) {
-
-            log.error("아이템이 중복으로 장바구니에 들어감.");
-            jsonObject.addProperty("data", Code.DUPL_ITEM.name());
-
-            return ResponseEntity.badRequest()
-                    .body(jsonObject.toString());
         } catch (NotFoundException e) {
             log.error("없는 아이템을 주문함");
             jsonObject.addProperty("data", Code.NOT_FOUND.name());
@@ -67,13 +59,6 @@ public class OrderController {
             int payPrice = orderService.getPayPrice(payDto);
             jsonObject.addProperty("pay", payPrice);
 
-        } catch (ItemDuplException e) {
-
-            log.error("아이템이 중복으로 장바구니에 들어감.");
-            jsonObject.addProperty("data", Code.DUPL_ITEM.name());
-
-            return ResponseEntity.badRequest()
-                    .body(jsonObject.toString());
         } catch (NotFoundException e) {
             log.error("없는 아이템을 주문함");
             jsonObject.addProperty("data", Code.NOT_FOUND.name());

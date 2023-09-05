@@ -7,7 +7,6 @@ import com.wemake.market.domain.Where;
 import com.wemake.market.domain.dto.OrderDto;
 import com.wemake.market.domain.dto.OrderItemDto;
 import com.wemake.market.domain.dto.PayDto;
-import com.wemake.market.exception.ItemDuplException;
 import com.wemake.market.exception.NotFoundException;
 import com.wemake.market.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -27,7 +25,7 @@ public class OrderServiceImpl implements OrderService {
     private final ItemRepository itemRepository;
 
     @Override
-    public int getOrderPrice(OrderDto orderDto) throws ItemDuplException, NotFoundException {
+    public int getOrderPrice(OrderDto orderDto) throws NotFoundException {
 
         AtomicInteger price = new AtomicInteger();
 
@@ -39,7 +37,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public int getPayPrice(PayDto payDto) throws ItemDuplException, NotFoundException {
+    public int getPayPrice(PayDto payDto) throws NotFoundException {
 
         AtomicInteger price = new AtomicInteger();
 
@@ -52,9 +50,7 @@ public class OrderServiceImpl implements OrderService {
             int rate = coupon.getRate();
             int amount = coupon.getAmount();
 
-            ConcurrentHashMap<String, Item> map = new ConcurrentHashMap<>();
             AtomicBoolean noFlag = new AtomicBoolean(false);
-            AtomicBoolean duplFalg = new AtomicBoolean(false);
 
             if (wheres.equals(Where.ITEM)) {
                 payDto.getItems().forEach(i -> {
@@ -65,15 +61,6 @@ public class OrderServiceImpl implements OrderService {
 
                     }
                     Item item = itemList.get(itemList.size() - 1);
-
-                    // 중복 아이템 검사
-                    Item findItem = map.get(item.getName());
-                    if (findItem != null) {
-                        duplFalg.set(true);
-                        return;
-                    } else {
-                        map.put(item.getName(), item);
-                    }
 
                     if (coupon.getName().equals(item.getName())) {
                         if (how.equals(How.FIXED)) {
@@ -92,10 +79,6 @@ public class OrderServiceImpl implements OrderService {
 
                 if (noFlag.get() == true) {
                     throw new NotFoundException();
-                }
-
-                if (duplFalg.get() == true) {
-                    throw new ItemDuplException();
                 }
 
                 price.set(price.get() + payDto.getDeliveryPrice());
@@ -126,11 +109,9 @@ public class OrderServiceImpl implements OrderService {
         return price.get() <= 0 ? 0 : price.get();
     }
 
-    private void calcItemPrice(List<OrderItemDto> payDto, AtomicInteger price) throws ItemDuplException, NotFoundException {
+    private void calcItemPrice(List<OrderItemDto> payDto, AtomicInteger price) throws NotFoundException {
 
-        ConcurrentHashMap<String, Item> map = new ConcurrentHashMap<>();
         AtomicBoolean noFlag = new AtomicBoolean(false);
-        AtomicBoolean duplFlag = new AtomicBoolean(false);
 
 
         payDto.forEach(i -> {
@@ -141,24 +122,13 @@ public class OrderServiceImpl implements OrderService {
             }
             Item item = itemList.get(itemList.size() - 1);
 
-            // 중복 아이템 검사
-            Item findItem = map.get(item.getName());
-            if (findItem != null) {
-                duplFlag.set(true);
-                return;
-            } else {
-                map.put(item.getName(), item);
-            }
-
             price.set(price.get() + (item.getPrice() * i.getCount()));
         });
 
         if (noFlag.get() == true) {
             throw new NotFoundException();
         }
-        if (duplFlag.get() == true) {
-            throw new ItemDuplException();
-        }
+
     }
 
 }
