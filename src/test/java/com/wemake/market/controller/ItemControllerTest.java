@@ -79,8 +79,7 @@ class ItemControllerTest {
     @Test
     @DisplayName("아이템 추가 : 실패 -> 중복 아이템")
     void create_실패_중복_아이템() throws Exception {
-        ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemDto, false));
+        ItemDto itemDto = saveItem();
 
         mockMvc.perform(
                         post("/item")
@@ -95,8 +94,7 @@ class ItemControllerTest {
     @Test
     @DisplayName("아이템 수정 : 성공 !")
     void 아이템수정_성공() throws Exception {
-        ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemDto, false));
+        saveItem();
 
         ItemUpdateDto itemUpdateDto = new ItemUpdateDto("name", 2000, Role.MARKET, password);
 
@@ -114,8 +112,7 @@ class ItemControllerTest {
     @Test
     @DisplayName("아이템 수정 실패 : 유저 요청")
     void 아이템수정_실패_권한없음_유저요청() throws Exception {
-        ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemDto, false));
+        saveItem();
 
         ItemUpdateDto itemUpdateDto = new ItemUpdateDto("name", 2000, Role.USER, password);
 
@@ -131,8 +128,7 @@ class ItemControllerTest {
     @Test
     @DisplayName("아이템 수정 실패 : 비밀번호 틀림")
     void 아이템수정_실패_권한없음_비밀번호틀림() throws Exception {
-        ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemDto, false));
+        saveItem();
 
         ItemUpdateDto itemUpdateDto = new ItemUpdateDto("name", 2000, Role.MARKET, "패스워둥");
 
@@ -148,8 +144,7 @@ class ItemControllerTest {
     @Test
     @DisplayName("아이템 수정 실패 : 둘 다 문제")
     void 아이템수정_실패_권한없음_둘다이상함() throws Exception {
-        ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemDto, false));
+        saveItem();
 
         ItemUpdateDto itemUpdateDto = new ItemUpdateDto("name", 2000, Role.USER, "패스워둥");
 
@@ -182,8 +177,7 @@ class ItemControllerTest {
     @Test
     @DisplayName("아이템 삭제 성공 : 한 개")
     void 아이템삭제_성공_한개() throws Exception {
-        ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemDto, false));
+        ItemDto itemDto = saveItem();
 
         ItemDeleteDto itemDeleteDto = new ItemDeleteDto(itemDto.getName(), itemDto.getRole(), password);
 
@@ -199,10 +193,9 @@ class ItemControllerTest {
     @Test
     @DisplayName("아이템 삭제 성공 : 여러 개")
     void 아이템삭제_성공_여러개() throws Exception {
-        ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemDto, false));
-        itemRepository.save(new Item(itemDto, true));
-        itemRepository.save(new Item(itemDto, true));
+        ItemDto itemDto = saveItem();
+        itemRepository.save(new Item(itemDto));
+        itemRepository.save(new Item(itemDto));
 
         ItemDeleteDto itemDeleteDto = new ItemDeleteDto(itemDto.getName(), itemDto.getRole(), password);
 
@@ -219,8 +212,7 @@ class ItemControllerTest {
     @Test
     @DisplayName("아이템 삭제 실패 : 유저권한")
     void 아이템삭제_실패_권한없음_유저() throws Exception {
-        ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemDto, false));
+        ItemDto itemDto = saveItem();
 
         ItemDeleteDto itemDeleteDto = new ItemDeleteDto(itemDto.getName(), Role.USER, password);
 
@@ -235,8 +227,7 @@ class ItemControllerTest {
     @Test
     @DisplayName("아이템 삭제 실패 : 비밀번호틀림")
     void 아이템삭제_실패_권한없음_비밀번호() throws Exception {
-        ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemDto, false));
+        ItemDto itemDto = saveItem();
 
         ItemDeleteDto itemDeleteDto = new ItemDeleteDto(itemDto.getName(), Role.MARKET, "다른패스워드");
 
@@ -252,8 +243,7 @@ class ItemControllerTest {
     @Test
     @DisplayName("아이템 삭제 실패 : 둘다틀림")
     void 아이템삭제_실패_권한없음_둘다틀림() throws Exception {
-        ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemDto, false));
+        ItemDto itemDto = saveItem();
 
         ItemDeleteDto itemDeleteDto = new ItemDeleteDto(itemDto.getName(), Role.USER, "다른패스워드");
 
@@ -285,8 +275,7 @@ class ItemControllerTest {
     @Test
     @DisplayName("아이템 조회 성공 : 하나")
     void 아이템조회_성공_한개() throws Exception {
-        ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemDto, false));
+        ItemDto itemDto = saveItem();
 
         ItemSearchTimeDto itemSearchTimeDto = new ItemSearchTimeDto(itemDto.getName(), now());
         mockMvc.perform(
@@ -302,10 +291,9 @@ class ItemControllerTest {
     @Test
     @DisplayName("아이템 조회 성공 : 여러개")
     void 아이템조회_성공_여러개() throws Exception {
-        ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemDto, false));
-        itemRepository.save(new Item(itemDto, false));
-        itemRepository.save(new Item(itemDto, false));
+        ItemDto itemDto = saveItem();
+        itemRepository.save(new Item(itemDto));
+        itemRepository.save(new Item(itemDto));
 
         ItemSearchTimeDto itemSearchTimeDto = new ItemSearchTimeDto(itemDto.getName(), now());
         mockMvc.perform(
@@ -316,6 +304,12 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$.data").value(Code.OK.name()))
                 .andExpect(jsonPath("$.item").hasJsonPath())
                 .andDo(print());
+    }
+
+    private ItemDto saveItem() {
+        ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
+        itemRepository.save(new Item(itemDto));
+        return itemDto;
     }
 
     @Test

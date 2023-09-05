@@ -24,19 +24,16 @@ public class Item {
     private int price;
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime date;
-    private boolean isUpdate;
 
-    public Item(ItemDto itemDto, boolean isUpdate) {
+    public Item(ItemDto itemDto) {
         this.name = itemDto.getName();
         this.price = itemDto.getPrice();
         this.date = LocalDateTime.now();
-        this.isUpdate = isUpdate;
     }
 
-    public Item(ItemUpdateDto itemDto, boolean isUpdate) {
+    public Item(ItemUpdateDto itemDto) {
         this.name = itemDto.getName();
         this.price = itemDto.getPrice();
         this.date = LocalDateTime.now();
-        this.isUpdate = isUpdate;
     }
 }

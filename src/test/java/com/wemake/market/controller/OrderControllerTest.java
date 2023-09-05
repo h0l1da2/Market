@@ -487,7 +487,7 @@ class OrderControllerTest {
 
     private Item saveItem(String name, int price) {
         ItemDto itemDto = new ItemDto(name, price, Role.MARKET);
-        Item item = new Item(itemDto, false);
+        Item item = new Item(itemDto);
         itemRepository.save(item);
 
         return item;

@@ -48,7 +48,7 @@ public class ItemServiceImpl implements ItemService {
         }
 
         // 아이템 넣기
-        Item item = itemRepository.save(new Item(itemDto, false));
+        Item item = itemRepository.save(new Item(itemDto));
 
         return new ItemDto(item);
     }
@@ -58,13 +58,13 @@ public class ItemServiceImpl implements ItemService {
 
         validRole(itemUpdateDto.getRole(), itemUpdateDto.getPassword());
 
-        List<Item> byNameAndIsUpdate = itemRepository.findByNameAndIsUpdate(itemUpdateDto.getName(), false);
+        List<Item> byName = itemRepository.findByName(itemUpdateDto.getName());
 
-        if (byNameAndIsUpdate.size() == 0) {
+        if (byName.size() == 0) {
             throw new NotFoundException("해당 아이템 찾을 수 없음");
         }
 
-        Item updateItem = itemRepository.save(new Item(itemUpdateDto, true));
+        Item updateItem = itemRepository.save(new Item(itemUpdateDto));
 
         return new ItemUpdateDto(updateItem);
     }

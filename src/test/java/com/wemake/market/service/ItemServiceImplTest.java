@@ -73,7 +73,7 @@ class ItemServiceImplTest {
     void 아이템추가_실패_중복아이템() {
         // given
         ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemDto, false));
+        itemRepository.save(new Item(itemDto));
 
         // when then
         Assertions.assertThrows(ItemDuplException.class,
@@ -86,21 +86,20 @@ class ItemServiceImplTest {
     void updateItem() throws NotAuthorityException, NotFoundException {
         // given
         ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemDto, false));
+        itemRepository.save(new Item(itemDto));
 
         ItemUpdateDto itemUpdateDto = new ItemUpdateDto(itemDto.getName(), 2000, Role.MARKET, password);
 
         // when
         ItemUpdateDto updateItem = itemService.updateItem(itemUpdateDto);
 
-        List<Item> item = itemRepository.findByNameAndIsUpdate(itemUpdateDto.getName(), true);
+        List<Item> item = itemRepository.findByName(itemUpdateDto.getName());
 
         // then
         assertThat(updateItem).isNotNull();
         assertThat(updateItem.getDate()).isNotNull();
         assertThat(updateItem.getName()).isEqualTo(itemUpdateDto.getName());
         assertThat(updateItem.getPrice()).isEqualTo(itemUpdateDto.getPrice());
-        assertThat(item.get(item.size()-1).isUpdate()).isTrue();
         assertThat(item.get(item.size()-1).getDate()).isEqualTo(updateItem.getDate());
 
     }
@@ -110,7 +109,7 @@ class ItemServiceImplTest {
     void updateItem_실패_권한없음() {
         // given
         ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemDto, false));
+        itemRepository.save(new Item(itemDto));
 
         ItemUpdateDto itemUpdateDto = new ItemUpdateDto(itemDto.getName(), 2000, Role.USER, password);
 
@@ -125,7 +124,7 @@ class ItemServiceImplTest {
     void updateItem_실패_없는아이템() {
         // given
         ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemDto, false));
+        itemRepository.save(new Item(itemDto));
 
         ItemUpdateDto itemUpdateDto = new ItemUpdateDto("ㅋㅋ", 2000, Role.MARKET, password);
 
@@ -140,7 +139,7 @@ class ItemServiceImplTest {
     void deleteItem_성공_한개() throws NotAuthorityException, NotFoundException {
         // given
         ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemDto, false));
+        itemRepository.save(new Item(itemDto));
 
         ItemDeleteDto itemDeleteDto = new ItemDeleteDto(itemDto.getName(), itemDto.getRole(), password);
 
@@ -158,9 +157,9 @@ class ItemServiceImplTest {
     void deleteItem_성공_여러개() throws NotAuthorityException, NotFoundException {
         // given
         ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemDto, false));
-        itemRepository.save(new Item(itemDto, true));
-        itemRepository.save(new Item(itemDto, true));
+        itemRepository.save(new Item(itemDto));
+        itemRepository.save(new Item(itemDto));
+        itemRepository.save(new Item(itemDto));
 
         ItemDeleteDto itemDeleteDto = new ItemDeleteDto(itemDto.getName(), itemDto.getRole(), password);
 
@@ -189,7 +188,7 @@ class ItemServiceImplTest {
     void deleteItem_실패_권한없음() {
         // given
         ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemDto, false));
+        itemRepository.save(new Item(itemDto));
 
         ItemDeleteDto itemDeleteDto = new ItemDeleteDto(itemDto.getName(), Role.USER, password);
 
@@ -203,7 +202,7 @@ class ItemServiceImplTest {
     void 아이템조회_성공() throws NotFoundException {
         // given
         ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemDto, false));
+        itemRepository.save(new Item(itemDto));
 
         LocalDateTime localDateTime = LocalDateTime.of(
                 LocalDateTime.now().getYear(),
@@ -231,9 +230,9 @@ class ItemServiceImplTest {
     void 아이템조회_성공_여러개() throws NotFoundException {
         // given
         ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemDto, false));
-        itemRepository.save(new Item(itemDto, false));
-        itemRepository.save(new Item(itemDto, false));
+        itemRepository.save(new Item(itemDto));
+        itemRepository.save(new Item(itemDto));
+        itemRepository.save(new Item(itemDto));
 
         LocalDateTime localDateTime = LocalDateTime.of(
                 LocalDateTime.now().getYear(),
