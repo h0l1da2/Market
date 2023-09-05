@@ -9,6 +9,7 @@ import com.wemake.market.domain.dto.ItemUpdateDto;
 import com.wemake.market.exception.ItemDuplException;
 import com.wemake.market.exception.NotAuthorityException;
 import com.wemake.market.exception.NotFoundException;
+import com.wemake.market.exception.NotValidException;
 import com.wemake.market.repository.ItemRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +23,7 @@ import org.springframework.context.annotation.PropertySource;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static java.time.LocalDateTime.*;
 import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
@@ -199,25 +201,23 @@ class ItemServiceImplTest {
 
     @Test
     @DisplayName("아이템 조회 성공 : 특정 시간")
-    void 아이템조회_성공() throws NotFoundException {
+    void 아이템조회_성공() throws NotFoundException, NotValidException {
         // given
         ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
         itemRepository.save(new Item(itemDto));
 
-        LocalDateTime localDateTime = LocalDateTime.of(
-                LocalDateTime.now().getYear(),
-                LocalDateTime.now().getMonth(),
-                LocalDateTime.now().getDayOfMonth(),
-                LocalDateTime.now().getHour(), 0);
+        LocalDateTime localDateTime = of(
+                now().getYear(),
+                now().getMonth(),
+                now().getDayOfMonth(),
+                now().getHour(), 0);
         ItemSearchTimeDto itemSearchTimeDto = new ItemSearchTimeDto(itemDto.getName(), localDateTime);
 
         // when
-        List<ItemDto> items = itemService.searchItemByTime(itemSearchTimeDto);
+        ItemDto item = itemService.searchItemByTime(itemSearchTimeDto);
 
         // then
-        assertThat(items.size()).isNotEqualTo(0);
-
-        ItemDto item = items.get(items.size() - 1);
+        assertThat(item).isNotNull();
 
         assertThat(item.getDate()).isAfterOrEqualTo(localDateTime);
         assertThat(item.getName()).isEqualTo(itemDto.getName());
@@ -227,27 +227,25 @@ class ItemServiceImplTest {
 
     @Test
     @DisplayName("아이템 조회 성공 : 여러 개")
-    void 아이템조회_성공_여러개() throws NotFoundException {
+    void 아이템조회_성공_여러개() throws NotFoundException, NotValidException {
         // given
         ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
         itemRepository.save(new Item(itemDto));
         itemRepository.save(new Item(itemDto));
         itemRepository.save(new Item(itemDto));
 
-        LocalDateTime localDateTime = LocalDateTime.of(
-                LocalDateTime.now().getYear(),
-                LocalDateTime.now().getMonth(),
-                LocalDateTime.now().getDayOfMonth(),
-                LocalDateTime.now().getHour(), 0);
+        LocalDateTime localDateTime = of(
+                now().getYear(),
+                now().getMonth(),
+                now().getDayOfMonth(),
+                now().getHour(), 0);
         ItemSearchTimeDto itemSearchTimeDto = new ItemSearchTimeDto(itemDto.getName(), localDateTime);
 
         // when
-        List<ItemDto> items = itemService.searchItemByTime(itemSearchTimeDto);
+        ItemDto item = itemService.searchItemByTime(itemSearchTimeDto);
 
         // then
-        assertThat(items.size()).isEqualTo(3);
-
-        ItemDto item = items.get(items.size() - 1);
+        assertThat(item).isNotNull();
 
         assertThat(item.getDate()).isAfterOrEqualTo(localDateTime);
         assertThat(item.getName()).isEqualTo(itemDto.getName());
@@ -261,11 +259,11 @@ class ItemServiceImplTest {
         // given
         ItemDto itemDto = new ItemDto("name", 1000, Role.MARKET);
 
-        LocalDateTime localDateTime = LocalDateTime.of(
-                LocalDateTime.now().getYear(),
-                LocalDateTime.now().getMonth(),
-                LocalDateTime.now().getDayOfMonth(),
-                LocalDateTime.now().getHour(), 0);
+        LocalDateTime localDateTime = of(
+                now().getYear(),
+                now().getMonth(),
+                now().getDayOfMonth(),
+                now().getHour(), 0);
         ItemSearchTimeDto itemSearchTimeDto = new ItemSearchTimeDto(itemDto.getName(), localDateTime);
 
         // when then
