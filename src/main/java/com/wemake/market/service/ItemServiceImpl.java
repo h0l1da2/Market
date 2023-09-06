@@ -117,7 +117,7 @@ public class ItemServiceImpl implements ItemService {
                 findItem.getDate().getDayOfMonth(),
                 findItem.getDate().getHour(),
                 findItem.getDate().getMinute(),
-                findItem.getDate().getSecond() - 1
+                findItem.getDate().getSecond()
         );
         LocalDateTime limitDateTime = userWantPriceDate;
 

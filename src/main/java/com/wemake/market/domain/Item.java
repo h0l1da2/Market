@@ -36,4 +36,10 @@ public class Item {
         this.price = itemDto.getPrice();
         this.date = LocalDateTime.now();
     }
+
+    public Item(String name, int price, LocalDateTime date) {
+        this.name = name;
+        this.price = price;
+        this.date = date;
+    }
 }
