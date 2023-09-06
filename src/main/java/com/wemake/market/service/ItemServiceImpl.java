@@ -102,17 +102,26 @@ public class ItemServiceImpl implements ItemService {
             throw new ItemNotFoundException();
         }
 
-        Item findItem = findItems.get(findItems.size() - 1);
-        LocalDateTime offsetDateTime = itemSearchTimeDto.getDate();
+        Item findItem = findItems.get(0);
 
-        if (offsetDateTime.isBefore(findItem.getDate())) {
+        LocalDateTime userWantPriceDate = itemSearchTimeDto.getDate();
+
+        if (userWantPriceDate.isBefore(findItem.getDate())) {
             throw new UnavailableDateTimeException();
         }
 
         // 궁금한 시간 ~ 지금까지해서 한 개 조회
-        LocalDateTime limitDateTime = now();
+        LocalDateTime offsetDateTime = LocalDateTime.of(
+                findItem.getDate().getYear(),
+                findItem.getDate().getMonth(),
+                findItem.getDate().getDayOfMonth(),
+                findItem.getDate().getHour(),
+                findItem.getDate().getMinute(),
+                findItem.getDate().getSecond() - 1
+        );
+        LocalDateTime limitDateTime = userWantPriceDate;
 
-        PageRequest page = PageRequest.of(0, 1, Sort.by(ASC, "date"));
+        PageRequest page = PageRequest.of(0, 1, Sort.by(DESC, "date"));
 
         Page<Item> resultItemPage = itemRepository.findByNameAndDate(findItem.getName(), offsetDateTime, limitDateTime, page);
         List<Item> resultItemList = resultItemPage.stream().toList();
