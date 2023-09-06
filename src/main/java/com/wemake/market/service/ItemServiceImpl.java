@@ -105,7 +105,7 @@ public class ItemServiceImpl implements ItemService {
         Item findItem = findItems.get(findItems.size() - 1);
         LocalDateTime offsetDateTime = itemSearchTimeDto.getDate();
 
-        if (offsetDateTime.isAfter(now()) && offsetDateTime.isBefore(findItem.getDate())) {
+        if (offsetDateTime.isBefore(findItem.getDate())) {
             throw new UnavailableDateTimeException();
         }
 
