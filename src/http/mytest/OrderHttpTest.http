@@ -1,11 +1,13 @@
 ### 결제 계산 성공 , 하나
+### 1 = 3000 | 2 = 2000
+### 예상값 = 12000
 POST http://localhost:8080/order
 Content-Type: application/json
 
 {
   "items": [
     {
-      "name": "아이템",
+      "id": 1,
       "count": 3
     }
   ],
@@ -14,17 +16,19 @@ Content-Type: application/json
 }
 
 ### 결제 계산 성공 , 여러개
+### 1 = 3000 | 2 = 2000
+### 예상값 = 14000
 POST http://localhost:8080/order
 Content-Type: application/json
 
 {
   "items": [
     {
-      "name": "아이템",
+      "id": 1,
       "count": 3
     },
     {
-      "name": "아이템2",
+      "id": 2,
       "count": 1
     }
   ],
@@ -33,13 +37,15 @@ Content-Type: application/json
 }
 
 ### 결제 계산 성공 , 한 개, 아이템 쿠폰(고정)
+### 1 = 3000 | 2 = 2000
+### 예상값 = 11000
 POST http://localhost:8080/order
 Content-Type: application/json
 
 {
   "items": [
     {
-      "name": "아이템",
+      "id": 1,
       "count": 3
     }
   ],
@@ -49,18 +55,20 @@ Content-Type: application/json
     "how": "FIXED",
     "wheres": "ITEM",
     "amount": 1000,
-    "name": "아이템"
+    "id": 1
   }
 }
 
 ### 결제 계산 성공 , 한 개, 아이템 쿠폰(비율)
+### 1 = 3000 | 2 = 2000
+### 예상값 = 7500
 POST http://localhost:8080/order
 Content-Type: application/json
 
 {
   "items": [
     {
-      "name": "아이템",
+      "id": 1,
       "count": 3
     }
   ],
@@ -69,23 +77,25 @@ Content-Type: application/json
   "coupon": {
     "how": "PERCENTAGE",
     "wheres": "ITEM",
-    "rate": 5,
-    "name": "아이템"
+    "rate": 50,
+    "id": 1
   }
 }
 
 ### 결제 계산 성공 , 여러 개, 아이템 쿠폰(고정)
+### 1 = 3000 | 2 = 2000
+### 예상값 = 14000
 POST http://localhost:8080/order
 Content-Type: application/json
 
 {
   "items": [
     {
-      "name": "아이템",
+      "id": 1,
       "count": 3
     },
     {
-      "name": "아이템2",
+      "id": 2,
       "count": 1
     }
   ],
@@ -95,22 +105,24 @@ Content-Type: application/json
     "how": "FIXED",
     "wheres": "ITEM",
     "rate": 1000,
-    "name": "아이템"
+    "id": 1
   }
 }
 
 ### 결제 계산 성공 , 여러 개, 아이템 쿠폰(비율)
+### 1 = 3000 | 2 = 2000
+### 예상값 = 13000
 POST http://localhost:8080/order
 Content-Type: application/json
 
 {
   "items": [
     {
-      "name": "아이템",
+      "id": 1,
       "count": 3
     },
     {
-      "name": "아이템2",
+      "id": 2,
       "count": 1
     }
   ],
@@ -119,23 +131,25 @@ Content-Type: application/json
   "coupon": {
     "how": "PERCENTAGE",
     "wheres": "ITEM",
-    "rate": 5,
-    "name": "아이템"
+    "rate": 50,
+    "id": 2
   }
 }
 
 ### 결제 계산 성공 , 여러 개, 주문 쿠폰(비율)
+### 1 = 3000 | 2 = 2000
+### 예상값 = 12600
 POST http://localhost:8080/order
 Content-Type: application/json
 
 {
   "items": [
     {
-      "name": "아이템",
+      "id": 1,
       "count": 3
     },
     {
-      "name": "아이템2",
+      "id": 2,
       "count": 1
     }
   ],
@@ -144,22 +158,25 @@ Content-Type: application/json
   "coupon": {
     "how": "PERCENTAGE",
     "wheres": "ORDER",
-    "rate": 5
+    "rate": 10,
+    "id": 1
   }
 }
 
 ### 결제 계산 성공 , 여러 개, 주문 쿠폰(고정)
+### 1 = 3000 | 2 = 2000
+### 예상값 = 12000
 POST http://localhost:8080/order
 Content-Type: application/json
 
 {
   "items": [
     {
-      "name": "아이템",
+      "id": 1,
       "count": 3
     },
     {
-      "name": "아이템2",
+      "id": 2,
       "count": 1
     }
   ],
@@ -168,30 +185,8 @@ Content-Type: application/json
   "coupon": {
     "how": "FIXED",
     "wheres": "ORDER",
-    "amount": 2000
+    "amount": 2000,
+    "id": 1
   }
-}
 
-### 결제 계산 실패 , 없는 아이템
-POST http://localhost:8080/order
-Content-Type: application/json
-
-{
-  "items": [
-    {
-      "name": "아이템44",
-      "count": 3
-    },
-    {
-      "name": "아이템2",
-      "count": 1
-    }
-  ],
-  "deliveryPrice": 3000,
-  "useCoupon": true,
-  "coupon": {
-    "how": "FIXED",
-    "wheres": "ORDER",
-    "amount": 2000
-  }
 }

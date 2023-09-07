@@ -1,0 +1,49 @@
+### 아이템 추가 1
+POST http://localhost:8080/item
+Content-Type: application/json
+
+{
+  "name": "감자",
+  "price": 3000,
+  "role": "MARKET",
+  "date": "2023-01-01T12:00:00"
+}
+### 아이템 추가 2
+POST http://localhost:8080/item
+Content-Type: application/json
+
+{
+  "name": "고구마",
+  "price": 2000,
+  "role": "MARKET",
+  "date": "2023-03-01T12:00:00"
+
+}
+
+### 특정 시간 아이템 확인하기
+GET http://localhost:8080/item?id=1&date=2023-02-03T10:12:00
+
+### 아이템 수정 (3000원 -> 50000 원으로 가격 수정)
+PUT http://localhost:8080/item
+Content-Type: application/json
+
+{
+  "id": 1,
+  "price": 120000,
+  "role": "MARKET",
+  "password": "lovemarket1004",
+  "date": "2023-05-03T10:00:00"
+}
+
+### 특정 시간 아이템 확인하기
+GET http://localhost:8080/item?id=1&date=2023-09-03T10:12:00
+
+### 아이템 삭제 성공
+DELETE http://localhost:8080/item
+Content-Type: application/json
+
+{
+  "id": 1,
+  "role": "MARKET",
+  "password": "lovemarket1004"
+}

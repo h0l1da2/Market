@@ -1,0 +1,173 @@
+### 결제 한 개, 쿠폰 없음
+POST http://localhost:8080/order
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "id": 1,
+      "count": 3
+    }
+  ],
+  "deliveryPrice": 3000,
+  "useCoupon": false
+}
+
+### 결제 여러 개, 쿠폰 없음
+POST http://localhost:8080/order
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "id": 1,
+      "count": 3
+    },
+    {
+      "id": 2,
+      "count": 1
+    }
+  ],
+  "deliveryPrice": 3000,
+  "useCoupon": false
+}
+
+### 결제 한 개, 고정 쿠폰
+POST http://localhost:8080/order
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "id": 1,
+      "count": 3
+    }
+  ],
+  "deliveryPrice": 3000,
+  "useCoupon": true,
+  "coupon": {
+    "how": "FIXED",
+    "wheres": "ITEM",
+    "amount": 1000,
+    "id": 1
+  }
+}
+
+### 결제 한 개, 비율 쿠폰
+POST http://localhost:8080/order
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "id": 1,
+      "count": 3
+    }
+  ],
+  "deliveryPrice": 3000,
+  "useCoupon": true,
+  "coupon": {
+    "how": "PERCENTAGE",
+    "wheres": "ITEM",
+    "rate": 5,
+    "id": 1
+  }
+}
+
+### 결제 여러 개, 고정 쿠폰
+POST http://localhost:8080/order
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "id": 1,
+      "count": 3
+    },
+    {
+      "id": 2,
+      "count": 1
+    }
+  ],
+  "deliveryPrice": 3000,
+  "useCoupon": true,
+  "coupon": {
+    "how": "FIXED",
+    "wheres": "ITEM",
+    "rate": 1000,
+    "id": 2
+  }
+}
+
+### 결제 여러 개, 비율 쿠폰
+POST http://localhost:8080/order
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "id": 1,
+      "count": 3
+    },
+    {
+      "id": 2,
+      "count": 1
+    }
+  ],
+  "deliveryPrice": 3000,
+  "useCoupon": true,
+  "coupon": {
+    "how": "PERCENTAGE",
+    "wheres": "ITEM",
+    "rate": 5,
+    "name": "아이템"
+  }
+}
+
+### 결제 여러 개, 비율 쿠폰
+POST http://localhost:8080/order
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "id": 1,
+      "count": 3
+    },
+    {
+      "id": 2,
+      "count": 1
+    }
+  ],
+  "deliveryPrice": 3000,
+  "useCoupon": true,
+  "coupon": {
+    "how": "PERCENTAGE",
+    "wheres": "ORDER",
+    "rate": 5
+  }
+}
+
+### 결제 여러 개, 고정 쿠폰
+POST http://localhost:8080/order
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "id": 1,
+      "count": 3
+    },
+    {
+      "id": 2,
+      "count": 1
+    }
+  ],
+  "deliveryPrice": 3000,
+  "useCoupon": true,
+  "coupon": {
+    "how": "FIXED",
+    "wheres": "ORDER",
+    "amount": 2000
+  }
+}
