@@ -56,28 +56,30 @@ public class OrderServiceImpl implements OrderService {
 
                     ItemPriceHistory finalItemStatus = getFinalItemStatusByItem(itemNotFoundFlag, findItem);
                     if (finalItemStatus == null) return;
-                    int itemPrice = finalItemStatus.getPrice() - amount;
-                    int resultItemPrice = 0;
+
+                    int itemPrice = finalItemStatus.getPrice();
                     int itemCount = item.getCount();
+                    double resultItemPrice = 0;
 
                     if (coupon.getItem().getId().equals(findItem.getId())) {
 
                         if (how.equals(How.FIXED)) {
                             // 고정값을 아이템 값에서 뺀 후 ...
-                            resultItemPrice = itemPrice * itemCount;
-                            price.set(price.get() + resultItemPrice);
+                            resultItemPrice = (itemPrice - amount) * itemCount;
+                            price.set((int) (price.get() + resultItemPrice));
                         }
 
                         if (how.equals(How.PERCENTAGE)) {
                             // 퍼센테이지를 계산 후 ...
                             double percent = (100 - rate) * 0.01;
-                            double resultPrice = itemPrice * percent;
+                            resultItemPrice = itemPrice * percent;
+                            double resultPrice = resultItemPrice * itemCount;
                             price.set((int) (price.get() + resultPrice));
                         }
 
                     } else {
 
-                        price.set(price.get() + itemPrice);
+                        price.set(price.get() + (itemPrice * itemCount));
 
                     }
 
