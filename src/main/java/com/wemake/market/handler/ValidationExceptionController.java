@@ -1,4 +1,4 @@
-package com.wemake.market.controller;
+package com.wemake.market.handler;
 
 import com.google.gson.JsonObject;
 import org.springframework.http.HttpStatus;

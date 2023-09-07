@@ -1,4 +1,4 @@
-package com.wemake.market.controller;
+package com.wemake.market.handler;
 
 import com.wemake.market.exception.NotAuthorityException;
 import org.springframework.http.HttpStatus;
