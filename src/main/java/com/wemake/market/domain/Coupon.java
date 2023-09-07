@@ -1,10 +1,18 @@
 package com.wemake.market.domain;
 
-import lombok.Data;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.Getter;
 
-@Data
+@Getter
+@Entity
 public class Coupon {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private String name;
     private How how;
     private Where wheres;
@@ -26,5 +34,13 @@ public class Coupon {
     public Coupon(How how, Where wheres) {
         this.how = how;
         this.wheres = wheres;
+    }
+
+    public void isPercentagePrice(int rate) {
+        this.rate = rate;
+    }
+
+    public void isFixedPrice(int amount) {
+        this.amount = amount;
     }
 }
