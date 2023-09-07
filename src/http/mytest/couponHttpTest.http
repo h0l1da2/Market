@@ -1,0 +1,41 @@
+### 쿠폰 추가 (아이템/고정)
+POST http://localhost:8080/coupon
+Content-Type: application/json
+
+{
+  "itemId": 1,
+  "how": "FIXED",
+  "wheres": "ITEM",
+  "amount": 1000
+}
+
+### 쿠폰 추가 (아이템/비율)
+POST http://localhost:8080/coupon
+Content-Type: application/json
+
+{
+  "itemId": 1,
+  "how": "PERCENTAGE",
+  "wheres": "ITEM",
+  "rate": 10
+}
+
+### 쿠폰 추가 (주문/고정)
+POST http://localhost:8080/coupon
+Content-Type: application/json
+
+{
+  "how": "FIXED",
+  "wheres": "ORDER",
+  "amount": 1000
+}
+
+### 쿠폰 추가 (주문/비율)
+POST http://localhost:8080/coupon
+Content-Type: application/json
+
+{
+  "how": "PERCENTAGE",
+  "wheres": "ORDER",
+  "rate": 10
+}
