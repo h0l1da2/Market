@@ -5,6 +5,7 @@ import com.wemake.market.domain.*;
 import com.wemake.market.domain.dto.ItemCreateDto;
 import com.wemake.market.domain.dto.OrderItemDto;
 import com.wemake.market.domain.dto.OrderDto;
+import com.wemake.market.repository.ItemPriceHistoryRepository;
 import com.wemake.market.repository.ItemRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -33,9 +34,12 @@ class OrderControllerTest {
     private MockMvc mockMvc;
     @Autowired
     private ItemRepository itemRepository;
+    @Autowired
+    private ItemPriceHistoryRepository itemPriceHistoryRepository;
 
     @BeforeEach
     void clean() {
+        itemPriceHistoryRepository.deleteAll();
         itemRepository.deleteAll();
     }
 
@@ -55,12 +59,12 @@ class OrderControllerTest {
     }
 
     private List<OrderItemDto> itemSaveAndAddList() {
-        saveItem("감자", 3000);
+        Item item = saveItem("감자", 3000);
 
         List<OrderItemDto> list = new ArrayList<>();
 
         OrderItemDto orderItemDto = OrderItemDto.builder()
-                .name("감자")
+                .id(item.getId())
                 .count(2)
                 .build();
 
@@ -252,8 +256,17 @@ class OrderControllerTest {
                 .role(Role.MARKET)
                 .build();
 
-        Item item = new Item(itemCreateDto);
-        itemRepository.save(item);
+        Item item = Item.builder()
+                .name(itemCreateDto.getName())
+                .build();
+        Item saveItem = itemRepository.save(item);
+
+        ItemPriceHistory itemPriceHistory = ItemPriceHistory.builder()
+                .item(saveItem)
+                .date(itemCreateDto.getDate())
+                .price(itemCreateDto.getPrice())
+                .build();
+        itemPriceHistoryRepository.save(itemPriceHistory);
 
         return item;
     }
@@ -281,17 +294,17 @@ class OrderControllerTest {
         List<OrderItemDto> list = new ArrayList<>();
 
         OrderItemDto orderItemDto1 = OrderItemDto.builder()
-                .name(item1.getName())
+                .id(item1.getId())
                 .count(2)
                 .build();
 
         OrderItemDto orderItemDto2 = OrderItemDto.builder()
-                .name(item2.getName())
+                .id(item2.getId())
                 .count(2)
                 .build();
 
         OrderItemDto orderItemDto3 = OrderItemDto.builder()
-                .name(item3.getName())
+                .id(item3.getId())
                 .count(2)
                 .build();
 

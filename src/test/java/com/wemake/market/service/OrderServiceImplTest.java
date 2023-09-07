@@ -5,7 +5,9 @@ import com.wemake.market.domain.dto.ItemCreateDto;
 import com.wemake.market.domain.dto.OrderItemDto;
 import com.wemake.market.domain.dto.OrderDto;
 import com.wemake.market.exception.ItemNotFoundException;
+import com.wemake.market.repository.ItemPriceHistoryRepository;
 import com.wemake.market.repository.ItemRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,17 +25,20 @@ class OrderServiceImplTest {
     private OrderService orderService;
     @Autowired
     private ItemRepository itemRepository;
+    @Autowired
+    private ItemPriceHistoryRepository itemPriceHistoryRepository;
+
+    @BeforeEach
+    void clean() {
+        itemPriceHistoryRepository.deleteAll();
+        itemRepository.deleteAll();
+    }
 
     @Test
     @DisplayName("결제 금액 계산 성공! : 아이템 하나, 쿠폰 사용 X")
     void 결제금액_성공_하나() throws ItemNotFoundException {
         // given
-        saveItem("감자", 1000);
-
-        OrderItemDto orderItemDto = OrderItemDto.builder()
-                .name("감자")
-                .count(10)
-                .build();
+        OrderItemDto orderItemDto = saveItemAndgetOrderItemDto("감자", 1000, 10);
 
         // 총 10000
         List<OrderItemDto> list = new ArrayList<>();
@@ -57,12 +62,7 @@ class OrderServiceImplTest {
     @DisplayName("결제 금액 계산 쿠폰 성공! : 아이템 하나,고정값")
     void 결제금액_성공_하나_쿠폰_아이템_고정값() throws ItemNotFoundException {
         // given
-        saveItem("감자", 1000);
-
-        OrderItemDto orderItemDto = OrderItemDto.builder()
-                .name("감자")
-                .count(10)
-                .build();
+        OrderItemDto orderItemDto = saveItemAndgetOrderItemDto("감자", 1000, 10);
 
         // 총 10000
         List<OrderItemDto> list = new ArrayList<>();
@@ -80,16 +80,23 @@ class OrderServiceImplTest {
         assertThat(payPrice).isEqualTo(9000);
     }
 
+    private OrderItemDto saveItemAndgetOrderItemDto(String name, int price, int count) {
+
+        Item item = saveItem(name, price);
+
+        OrderItemDto orderItemDto = OrderItemDto.builder()
+                .id(item.getId())
+                .count(count)
+                .build();
+
+        return orderItemDto;
+    }
+
     @Test
     @DisplayName("결제 금액 계산 쿠폰 성공! : 아이템 하나,무료")
     void 결제금액_성공_하나_쿠폰_아이템_고정값_무료() throws ItemNotFoundException {
         // given
-        saveItem("감자", 1000);
-
-        OrderItemDto orderItemDto = OrderItemDto.builder()
-                .name("감자")
-                .count(10)
-                .build();
+        OrderItemDto orderItemDto = saveItemAndgetOrderItemDto("감자", 1000, 10);
 
         // 총 10000
         List<OrderItemDto> list = new ArrayList<>();
@@ -111,12 +118,7 @@ class OrderServiceImplTest {
     @DisplayName("결제 금액 계산 쿠폰 성공! : 아이템 하나,퍼센트")
     void 결제금액_성공_쿠폰_아이템_퍼센트_하나() throws ItemNotFoundException {
         // given
-        saveItem("감자", 1000);
-
-        OrderItemDto orderItemDto = OrderItemDto.builder()
-                .name("감자")
-                .count(10)
-                .build();
+        OrderItemDto orderItemDto = saveItemAndgetOrderItemDto("감자", 1000, 10);
 
         // 총 10000
         List<OrderItemDto> list = new ArrayList<>();
@@ -138,18 +140,13 @@ class OrderServiceImplTest {
     @DisplayName("결제 금액 계산 쿠폰 성공! : 아이템 하나,백퍼센트")
     void 결제금액_성공_쿠폰_아이템_퍼센트_하나_무료() throws ItemNotFoundException {
         // given
-        Item item = saveItem("감자", 1000);
-
-        OrderItemDto orderItemDto = OrderItemDto.builder()
-                .name(item.getName())
-                .count(10)
-                .build();
+        OrderItemDto orderItemDto = saveItemAndgetOrderItemDto("감자", 1000, 10);
 
         // 총 10000
         List<OrderItemDto> list = new ArrayList<>();
         list.add(orderItemDto);
 
-        Coupon coupon = new Coupon(item.getName(), How.PERCENTAGE, Where.ITEM);
+        Coupon coupon = new Coupon("감자", How.PERCENTAGE, Where.ITEM);
         coupon.isPercentagePrice(100);
 
         OrderDto orderDto = getOrderDtoUserCoupon(list, 1000, coupon);
@@ -165,25 +162,14 @@ class OrderServiceImplTest {
     @DisplayName("결제 금액 계산 쿠폰 성공! : 아이템 여러개,퍼센트")
     void 결제금액_성공_쿠폰_아이템_퍼센트_여러개() throws ItemNotFoundException {
         // given
-        Item item1 = saveItem("감자", 1000);
-        Item item2 = saveItem("고구마", 3000);
-        Item item3 = saveItem("치즈", 2000);
-
         // 10000
-        OrderItemDto orderItemDto1 = OrderItemDto.builder()
-                .name(item1.getName())
-                .count(10)
-                .build();
+        OrderItemDto orderItemDto1 = saveItemAndgetOrderItemDto("감자", 1000, 10);
+
         // 12000
-        OrderItemDto orderItemDto2 = OrderItemDto.builder()
-                .name(item2.getName())
-                .count(4)
-                .build();
+        OrderItemDto orderItemDto2 = saveItemAndgetOrderItemDto("고구마", 3000, 4);
+
         // 4000
-        OrderItemDto orderItemDto3 = OrderItemDto.builder()
-                .name(item3.getName())
-                .count(2)
-                .build();
+        OrderItemDto orderItemDto3 = saveItemAndgetOrderItemDto("치즈", 2000, 2);
 
         // 총 26000
         List<OrderItemDto> list = new ArrayList<>();
@@ -191,7 +177,7 @@ class OrderServiceImplTest {
         list.add(orderItemDto2);
         list.add(orderItemDto3);
 
-        Coupon coupon = new Coupon(item2.getName(), How.PERCENTAGE, Where.ITEM);
+        Coupon coupon = new Coupon("고구마", How.PERCENTAGE, Where.ITEM);
         coupon.isPercentagePrice(40);
 
         OrderDto orderDto = getOrderDtoUserCoupon(list, 1000, coupon);
@@ -210,25 +196,14 @@ class OrderServiceImplTest {
     @DisplayName("결제 금액 계산 쿠폰 성공! : 주문,퍼센트,여러개")
     void 결제금액_성공_하나_쿠폰_주문_퍼센트_여러개() throws ItemNotFoundException {
         // given
-        Item item1 = saveItem("감자", 1000);
-        Item item2 = saveItem("고구마", 3000);
-        Item item3 = saveItem("치즈", 2000);
-
         // 10000
-        OrderItemDto orderItemDto1 = OrderItemDto.builder()
-                .name(item1.getName())
-                .count(10)
-                .build();
+        OrderItemDto orderItemDto1 = saveItemAndgetOrderItemDto("감자", 1000, 10);
+
         // 12000
-        OrderItemDto orderItemDto2 = OrderItemDto.builder()
-                .name(item2.getName())
-                .count(4)
-                .build();
+        OrderItemDto orderItemDto2 = saveItemAndgetOrderItemDto("고구마", 3000, 4);
+
         // 4000
-        OrderItemDto orderItemDto3 = OrderItemDto.builder()
-                .name(item3.getName())
-                .count(2)
-                .build();
+        OrderItemDto orderItemDto3 = saveItemAndgetOrderItemDto("치즈", 2000, 2);
 
         // 총 26000
         List<OrderItemDto> list = new ArrayList<>();
@@ -252,25 +227,14 @@ class OrderServiceImplTest {
     @DisplayName("결제 금액 계산 쿠폰 성공! : 주문,퍼센트,여러개,100퍼")
     void 결제금액_성공_하나_쿠폰_주문_퍼센트_여러개_백퍼() throws ItemNotFoundException {
         // given
-        Item item1 = saveItem("감자", 1000);
-        Item item2 = saveItem("고구마", 3000);
-        Item item3 = saveItem("치즈", 2000);
-
         // 10000
-        OrderItemDto orderItemDto1 = OrderItemDto.builder()
-                .name(item1.getName())
-                .count(10)
-                .build();
+        OrderItemDto orderItemDto1 = saveItemAndgetOrderItemDto("감자", 1000, 10);
+
         // 12000
-        OrderItemDto orderItemDto2 = OrderItemDto.builder()
-                .name(item2.getName())
-                .count(4)
-                .build();
+        OrderItemDto orderItemDto2 = saveItemAndgetOrderItemDto("고구마", 3000, 4);
+
         // 4000
-        OrderItemDto orderItemDto3 = OrderItemDto.builder()
-                .name(item3.getName())
-                .count(2)
-                .build();
+        OrderItemDto orderItemDto3 = saveItemAndgetOrderItemDto("치즈", 2000, 2);
 
         // 총 26000
         List<OrderItemDto> list = new ArrayList<>();
@@ -294,26 +258,14 @@ class OrderServiceImplTest {
     @DisplayName("결제 금액 계산 쿠폰 성공! : 주문,고정값,여러개")
     void 결제금액_성공_하나_쿠폰_주문_고정값_여러개() throws ItemNotFoundException {
         // given
-        // given
-        Item item1 = saveItem("감자", 1000);
-        Item item2 = saveItem("고구마", 3000);
-        Item item3 = saveItem("치즈", 2000);
-
         // 10000
-        OrderItemDto orderItemDto1 = OrderItemDto.builder()
-                .name(item1.getName())
-                .count(10)
-                .build();
+        OrderItemDto orderItemDto1 = saveItemAndgetOrderItemDto("감자", 1000, 10);
+
         // 12000
-        OrderItemDto orderItemDto2 = OrderItemDto.builder()
-                .name(item2.getName())
-                .count(4)
-                .build();
+        OrderItemDto orderItemDto2 = saveItemAndgetOrderItemDto("고구마", 3000, 4);
+
         // 4000
-        OrderItemDto orderItemDto3 = OrderItemDto.builder()
-                .name(item3.getName())
-                .count(2)
-                .build();
+        OrderItemDto orderItemDto3 = saveItemAndgetOrderItemDto("치즈", 2000, 2);
 
         // 총 26000
         List<OrderItemDto> list = new ArrayList<>();
@@ -337,25 +289,14 @@ class OrderServiceImplTest {
     @DisplayName("결제 금액 계산 쿠폰 성공! : 주문,고정값,여러개, 무료")
     void 결제금액_성공_하나_쿠폰_주문_고정값_여러개_무료() throws ItemNotFoundException {
         // given
-        Item item1 = saveItem("감자", 1000);
-        Item item2 = saveItem("고구마", 3000);
-        Item item3 = saveItem("치즈", 2000);
-
         // 10000
-        OrderItemDto orderItemDto1 = OrderItemDto.builder()
-                .name(item1.getName())
-                .count(10)
-                .build();
+        OrderItemDto orderItemDto1 = saveItemAndgetOrderItemDto("감자", 1000, 10);
+
         // 12000
-        OrderItemDto orderItemDto2 = OrderItemDto.builder()
-                .name(item2.getName())
-                .count(4)
-                .build();
+        OrderItemDto orderItemDto2 = saveItemAndgetOrderItemDto("고구마", 3000, 4);
+
         // 4000
-        OrderItemDto orderItemDto3 = OrderItemDto.builder()
-                .name(item3.getName())
-                .count(2)
-                .build();
+        OrderItemDto orderItemDto3 = saveItemAndgetOrderItemDto("치즈", 2000, 2);
 
         // 총 26000
 
@@ -384,20 +325,38 @@ class OrderServiceImplTest {
                 .role(Role.MARKET)
                 .build();
 
-        Item item = new Item(itemCreateDto);
-        itemRepository.save(item);
+        Item item = itemSave(itemCreateDto);
 
         return item;
     }
 
     private OrderDto getOrderDtoUserCoupon(List<OrderItemDto> list, int deliveryPrice, Coupon coupon) {
+
         OrderDto orderDto = OrderDto.builder()
                 .items(list)
                 .deliveryPrice(deliveryPrice)
                 .useCoupon(true)
                 .coupon(coupon)
                 .build();
+
         return orderDto;
+    }
+
+    private Item itemSave(ItemCreateDto itemCreateDto) {
+        Item item = Item.builder()
+                .name(itemCreateDto.getName())
+                .build();
+        Item saveItem = itemRepository.save(item);
+
+        ItemPriceHistory itemPriceHistory = ItemPriceHistory.builder()
+                .item(saveItem)
+                .date(itemCreateDto.getDate())
+                .price(itemCreateDto.getPrice())
+                .build();
+        itemPriceHistoryRepository.save(itemPriceHistory);
+
+        return saveItem;
+
     }
 
 }

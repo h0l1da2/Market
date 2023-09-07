@@ -1,12 +1,14 @@
 package com.wemake.market.service;
 
 import com.wemake.market.domain.Item;
+import com.wemake.market.domain.ItemPriceHistory;
 import com.wemake.market.domain.Role;
 import com.wemake.market.domain.dto.*;
 import com.wemake.market.exception.DuplicateItemException;
 import com.wemake.market.exception.NotAuthorityException;
 import com.wemake.market.exception.ItemNotFoundException;
 import com.wemake.market.exception.UnavailableDateTimeException;
+import com.wemake.market.repository.ItemPriceHistoryRepository;
 import com.wemake.market.repository.ItemRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.data.crossstore.ChangeSetPersister;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -29,6 +32,8 @@ import static org.assertj.core.api.Assertions.*;
 class ItemServiceImplTest {
 
     @Autowired
+    private ItemPriceHistoryRepository itemPriceHistoryRepository;
+    @Autowired
     private ItemRepository itemRepository;
     @Autowired
     private ItemService itemService;
@@ -37,6 +42,7 @@ class ItemServiceImplTest {
 
     @BeforeEach
     void clean() {
+        itemPriceHistoryRepository.deleteAll();
         itemRepository.deleteAll();
     }
 
@@ -48,6 +54,7 @@ class ItemServiceImplTest {
                 .name("감자")
                 .price(20000)
                 .role(Role.MARKET)
+                .date(now())
                 .build();
 
         // when
@@ -90,24 +97,31 @@ class ItemServiceImplTest {
         // given
         ItemCreateDto itemCreateDto = saveAndGetItemCreateDto("도넛", 30000, Role.MARKET);
 
-        ItemUpdateDto itemUpdateDto = ItemUpdateDto.builder()
-                .name(itemCreateDto.getName())
+        ItemUpdateDto dtoForItemUpdate = ItemUpdateDto.builder()
+                .id(itemCreateDto.getId())
                 .price(2000)
                 .role(Role.MARKET)
                 .password(password)
+                .date(now())
                 .build();
 
         // when
-        ItemUpdateDto updateItem = itemService.updateItem(itemUpdateDto);
+        ItemUpdateDto finishSaveItemUpdateDto = itemService.updateItem(dtoForItemUpdate);
 
-        List<Item> item = itemRepository.findByName(itemUpdateDto.getName());
+        Item item = itemRepository.findById(finishSaveItemUpdateDto.getId()).orElseThrow(ItemNotFoundException::new);
 
         // then
-        assertThat(updateItem).isNotNull();
-        assertThat(updateItem.getDate()).isNotNull();
-        assertThat(updateItem.getName()).isEqualTo(itemUpdateDto.getName());
-        assertThat(updateItem.getPrice()).isEqualTo(itemUpdateDto.getPrice());
-        assertThat(item.get(item.size()-1).getDate()).isEqualTo(updateItem.getDate());
+        assertThat(finishSaveItemUpdateDto).isNotNull();
+        assertThat(finishSaveItemUpdateDto.getDate()).isNotNull();
+        assertThat(item.getName()).isEqualTo(itemCreateDto.getName());
+        assertThat(finishSaveItemUpdateDto.getPrice()).isEqualTo(dtoForItemUpdate.getPrice());
+
+        assertThat(item.getDate().getDayOfYear()).isEqualTo(finishSaveItemUpdateDto.getDate().getDayOfYear());
+        assertThat(item.getDate().getMonth()).isEqualTo(finishSaveItemUpdateDto.getDate().getMonth());
+        assertThat(item.getDate().getDayOfMonth()).isEqualTo(finishSaveItemUpdateDto.getDate().getDayOfMonth());
+        assertThat(item.getDate().getHour()).isEqualTo(finishSaveItemUpdateDto.getDate().getHour());
+        assertThat(item.getDate().getMinute()).isEqualTo(finishSaveItemUpdateDto.getDate().getMinute());
+        assertThat(item.getDate().getSecond()).isEqualTo(finishSaveItemUpdateDto.getDate().getSecond());
 
     }
 
@@ -118,7 +132,7 @@ class ItemServiceImplTest {
         ItemCreateDto itemCreateDto = saveAndGetItemCreateDto("어묵", 1000, Role.MARKET);
 
         ItemUpdateDto itemUpdateDto = ItemUpdateDto.builder()
-                .name(itemCreateDto.getName())
+                .id(itemCreateDto.getId())
                 .price(2000)
                 .role(Role.USER)
                 .password(password)
@@ -135,7 +149,7 @@ class ItemServiceImplTest {
     void updateItem_실패_없는아이템() {
         // given
         ItemUpdateDto itemUpdateDto = ItemUpdateDto.builder()
-                .name("힝")
+                .id(1L)
                 .price(2000)
                 .role(Role.MARKET)
                 .password(password)
@@ -154,7 +168,7 @@ class ItemServiceImplTest {
         ItemCreateDto itemCreateDto = saveAndGetItemCreateDto("당근", 3000, Role.MARKET);
 
         ItemDeleteDto itemDeleteDto = ItemDeleteDto.builder()
-                .name(itemCreateDto.getName())
+                .id(itemCreateDto.getId())
                 .role(itemCreateDto.getRole())
                 .password(password)
                 .build();
@@ -162,10 +176,10 @@ class ItemServiceImplTest {
         // when
         itemService.deleteItem(itemDeleteDto);
 
-        List<Item> itemList = itemRepository.findByName(itemDeleteDto.getName());
+        Item deleteItem = itemRepository.findById(itemCreateDto.getId()).orElse(null);
 
         // then
-        assertThat(itemList.size()).isEqualTo(0);
+        assertThat(deleteItem).isNull();
     }
 
     @Test
@@ -173,20 +187,35 @@ class ItemServiceImplTest {
     void deleteItem_성공_여러개() throws NotAuthorityException, ItemNotFoundException {
         // given
         ItemCreateDto itemCreateDto = saveAndGetItemCreateDto("포테토칩", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemCreateDto));
-        itemRepository.save(new Item(itemCreateDto));
+        Item saveItem = itemRepository.findById(itemCreateDto.getId()).orElse(null);
+
+        ItemPriceHistory itemPriceHistory1 = ItemPriceHistory.builder()
+                .item(saveItem)
+                .date(saveItem.getDate())
+                .price(itemCreateDto.getPrice())
+                .build();
+
+        ItemPriceHistory itemPriceHistory2 = ItemPriceHistory.builder()
+                .item(saveItem)
+                .date(saveItem.getDate())
+                .price(itemCreateDto.getPrice())
+                .build();
+        itemPriceHistoryRepository.save(itemPriceHistory1);
+        itemPriceHistoryRepository.save(itemPriceHistory2);
 
         ItemDeleteDto itemDeleteDto = ItemDeleteDto.builder()
-                .name(itemCreateDto.getName())
+                .id(itemCreateDto.getId())
                 .role(itemCreateDto.getRole())
                 .password(password)
                 .build();
         // when
         itemService.deleteItem(itemDeleteDto);
 
-        List<Item> itemList = itemRepository.findByName(itemDeleteDto.getName());
+        Item item = itemRepository.findById(itemDeleteDto.getId()).orElse(null);
+        List<ItemPriceHistory> findPriceHistory = itemPriceHistoryRepository.findByItem(item);
         // then
-        assertThat(itemList.size()).isEqualTo(0);
+        assertThat(item).isNull();
+        assertThat(findPriceHistory.size()).isEqualTo(0);
     }
 
     @Test
@@ -194,7 +223,7 @@ class ItemServiceImplTest {
     void deleteItem_실패_존재없음() {
         // given
         ItemDeleteDto itemDeleteDto = ItemDeleteDto.builder()
-                .name("치약")
+                .id(1L)
                 .role(Role.MARKET)
                 .password(password)
                 .build();
@@ -212,7 +241,7 @@ class ItemServiceImplTest {
         ItemCreateDto itemCreateDto = saveAndGetItemCreateDto("칫솔", 1000, Role.MARKET);
 
         ItemDeleteDto itemDeleteDto = ItemDeleteDto.builder()
-                .name(itemCreateDto.getName())
+                .id(itemCreateDto.getId())
                 .role(Role.USER)
                 .password(password)
                 .build();
@@ -227,18 +256,70 @@ class ItemServiceImplTest {
     @DisplayName("아이템 조회 성공 : 특정 시간1")
     void 아이템조회_성공1() throws ItemNotFoundException, UnavailableDateTimeException {
         // given
-        List<Item> itemList =
-                saveAndGetItemList("짱구", 30000, 2000, 15000, 2, 3);
+        LocalDateTime createDate = LocalDateTime.of(
+                2023, 1, 1, 12, 0, 0
+        );
 
-        Item item1 = itemList.get(0);
-        Item item3 = itemList.get(2);
+        String itemName = "짱구";
+
+        ItemCreateDto itemCreateDto1 = ItemCreateDto.builder()
+                .name(itemName)
+                .price(3000)
+                .date(createDate)
+                .build();
+
+        Item item1 = new Item(itemCreateDto1);
+        item1 = itemRepository.save(item1);
+
+        ItemPriceHistory itemPriceHistory1 = ItemPriceHistory.builder()
+                .price(itemCreateDto1.getPrice())
+                .item(item1)
+                .date(createDate)
+                .build();
+        ItemPriceHistory priceHistory1 = itemPriceHistoryRepository.save(itemPriceHistory1);
+
+        // 2023-04-01 12:00:00
+        LocalDateTime item2CreateDate = createDate.plusMonths(3);
+        ItemCreateDto itemCreateDto2 = ItemCreateDto.builder()
+                .name(itemName)
+                .price(3000)
+                .date(item2CreateDate)
+                .build();
+
+        Item item2 = new Item(itemCreateDto2);
+        item2 = itemRepository.save(item2);
+
+        ItemPriceHistory itemPriceHistory2 = ItemPriceHistory.builder()
+                .price(itemCreateDto2.getPrice())
+                .item(item2)
+                .date(item2CreateDate)
+                .build();
+        ItemPriceHistory priceHistory2 = itemPriceHistoryRepository.save(itemPriceHistory2);
+
+        // 2023-09-01 12:00:00
+        LocalDateTime item3CreateDate = item2CreateDate.plusMonths(5);
+        ItemCreateDto itemCreateDto3 = ItemCreateDto.builder()
+                .name(itemName)
+                .price(3000)
+                .date(item3CreateDate)
+                .build();
+
+        Item item3 = new Item(itemCreateDto3);
+        item3 = itemRepository.save(item3);
+
+        ItemPriceHistory itemPriceHistory3 = ItemPriceHistory.builder()
+                .price(itemCreateDto3.getPrice())
+                .item(item3)
+                .date(item3CreateDate)
+                .build();
+        ItemPriceHistory priceHistory3 = itemPriceHistoryRepository.save(itemPriceHistory3);
 
         // when
-        ItemDto itemDto = itemService.searchItemByTime(item1.getName(), "2023-09-06T12:00:00");
+        ItemDto itemDto = itemService.searchItemByTime(item1.getId(), "2023-09-06T12:00:00");
 
         // then
         assertThat(itemDto).isNotNull();
-        assertThat(itemDto.getPrice()).isEqualTo(item3.getPrice());
+        assertThat(itemDto.getPrice()).isEqualTo(itemPriceHistory3.getPrice());
 
     }
 
@@ -247,61 +328,226 @@ class ItemServiceImplTest {
     void 아이템조회_성공2() throws ItemNotFoundException, UnavailableDateTimeException {
 
         // given
-        List<Item> itemList =
-                saveAndGetItemList("포카칩", 3000, 4000, 1000, 2, 3);
+        // given
+        LocalDateTime createDate = LocalDateTime.of(
+                2023, 1, 1, 12, 0, 0
+        );
 
-        Item item1 = itemList.get(0);
-        Item item2 = itemList.get(1);
+        String itemName = "짱구";
+
+        ItemCreateDto itemCreateDto1 = ItemCreateDto.builder()
+                .name(itemName)
+                .price(3000)
+                .date(createDate)
+                .build();
+
+        Item item1 = new Item(itemCreateDto1);
+        item1 = itemRepository.save(item1);
+
+        ItemPriceHistory itemPriceHistory1 = ItemPriceHistory.builder()
+                .price(itemCreateDto1.getPrice())
+                .item(item1)
+                .date(createDate)
+                .build();
+        ItemPriceHistory priceHistory1 = itemPriceHistoryRepository.save(itemPriceHistory1);
+
+        // 2023-04-01 12:00:00
+        LocalDateTime item2CreateDate = createDate.plusMonths(3);
+        ItemCreateDto itemCreateDto2 = ItemCreateDto.builder()
+                .name(itemName)
+                .price(3000)
+                .date(item2CreateDate)
+                .build();
+
+        Item item2 = new Item(itemCreateDto2);
+        item2 = itemRepository.save(item2);
+
+        ItemPriceHistory itemPriceHistory2 = ItemPriceHistory.builder()
+                .price(itemCreateDto2.getPrice())
+                .item(item2)
+                .date(item2CreateDate)
+                .build();
+        ItemPriceHistory priceHistory2 = itemPriceHistoryRepository.save(itemPriceHistory2);
+
+        // 2023-09-01 12:00:00
+        LocalDateTime item3CreateDate = item2CreateDate.plusMonths(5);
+        ItemCreateDto itemCreateDto3 = ItemCreateDto.builder()
+                .name(itemName)
+                .price(3000)
+                .date(item3CreateDate)
+                .build();
+
+        Item item3 = new Item(itemCreateDto3);
+        item3 = itemRepository.save(item3);
+
+        ItemPriceHistory itemPriceHistory3 = ItemPriceHistory.builder()
+                .price(itemCreateDto3.getPrice())
+                .item(item3)
+                .date(item3CreateDate)
+                .build();
+        ItemPriceHistory priceHistory3 = itemPriceHistoryRepository.save(itemPriceHistory3);
+
 
         // when
-        ItemDto itemDto = itemService.searchItemByTime(item1.getName(), "2023-04-06T12:00:00");
+        ItemDto itemDto = itemService.searchItemByTime(item1.getId(), "2023-04-06T12:00:00");
 
         // then
         assertThat(itemDto).isNotNull();
-        assertThat(itemDto.getPrice()).isEqualTo(item2.getPrice());
+        assertThat(itemDto.getPrice()).isEqualTo(itemCreateDto2.getPrice());
 
     }
     @Test
     @DisplayName("아이템 조회 성공 : 특정 시간")
     void 아이템조회_성공() throws ItemNotFoundException, UnavailableDateTimeException {
         // given
-        List<Item> itemList =
-                saveAndGetItemList("감자튀김", 1000, 2000, 3000, 2, 3);
+        LocalDateTime createDate = LocalDateTime.of(
+                2023, 1, 1, 12, 0, 0
+        );
 
-        LocalDateTime searchDate = of(
-                2023,
-                9,
-                5,
-                12, 52, 0);
+        String itemName = "짱구";
 
-        Item item1 = itemList.get(0);
-        Item item4 = itemList.get(2);
+        ItemCreateDto itemCreateDto1 = ItemCreateDto.builder()
+                .name(itemName)
+                .price(3000)
+                .date(createDate)
+                .build();
+
+        Item item1 = new Item(itemCreateDto1);
+        item1 = itemRepository.save(item1);
+
+        ItemPriceHistory itemPriceHistory1 = ItemPriceHistory.builder()
+                .price(itemCreateDto1.getPrice())
+                .item(item1)
+                .date(createDate)
+                .build();
+        ItemPriceHistory priceHistory1 = itemPriceHistoryRepository.save(itemPriceHistory1);
+
+        // 2023-04-01 12:00:00
+        LocalDateTime item2CreateDate = createDate.plusMonths(3);
+        ItemCreateDto itemCreateDto2 = ItemCreateDto.builder()
+                .name(itemName)
+                .price(3000)
+                .date(item2CreateDate)
+                .build();
+
+        Item item2 = new Item(itemCreateDto2);
+        item2 = itemRepository.save(item2);
+
+        ItemPriceHistory itemPriceHistory2 = ItemPriceHistory.builder()
+                .price(itemCreateDto2.getPrice())
+                .item(item2)
+                .date(item2CreateDate)
+                .build();
+        ItemPriceHistory priceHistory2 = itemPriceHistoryRepository.save(itemPriceHistory2);
+
+        // 2023-09-01 12:00:00
+        LocalDateTime item3CreateDate = item2CreateDate.plusMonths(5);
+        ItemCreateDto itemCreateDto3 = ItemCreateDto.builder()
+                .name(itemName)
+                .price(3000)
+                .date(item3CreateDate)
+                .build();
+
+        Item item3 = new Item(itemCreateDto3);
+        item3 = itemRepository.save(item3);
+
+        ItemPriceHistory itemPriceHistory3 = ItemPriceHistory.builder()
+                .price(itemCreateDto3.getPrice())
+                .item(item3)
+                .date(item3CreateDate)
+                .build();
+        ItemPriceHistory priceHistory3 = itemPriceHistoryRepository.save(itemPriceHistory3);
+
+        // 2023-11-01 12:00:00
+        LocalDateTime item4CreateDate = item3CreateDate.plusMonths(2);
+        ItemCreateDto itemCreateDto4 = ItemCreateDto.builder()
+                .name(itemName)
+                .price(3000)
+                .date(item3CreateDate)
+                .build();
+
+        Item item4 = new Item(itemCreateDto4);
+        item4 = itemRepository.save(item4);
+
+        ItemPriceHistory itemPriceHistory4 = ItemPriceHistory.builder()
+                .price(itemCreateDto3.getPrice())
+                .item(item4)
+                .date(item4CreateDate)
+                .build();
+        ItemPriceHistory priceHistory4 = itemPriceHistoryRepository.save(itemPriceHistory3);
 
         // when
-        ItemDto itemDto = itemService.searchItemByTime(item1.getName(), "2023-09-06T12:00:00");
+        ItemDto itemDto = itemService.searchItemByTime(item1.getId(), "2023-09-06T12:00:00");
 
         // then
         assertThat(itemDto).isNotNull();
-        assertThat(itemDto.getPrice()).isEqualTo(item4.getPrice());
+        assertThat(itemDto.getPrice()).isEqualTo(priceHistory4.getPrice());
 
     }
     @Test
     @DisplayName("아이템 조회 성공 : 여러 개")
     void 아이템조회_성공_여러개() throws ItemNotFoundException, UnavailableDateTimeException {
         // given
-        List<Item> itemList =
-                saveAndGetItemList("왕뚜껑", 1000, 2000, 3000, 2, 3);
+        LocalDateTime createDate = LocalDateTime.of(
+                2023, 1, 1, 12, 0, 0
+        );
 
-        Item item2 = itemList.get(1);
+        String itemName = "짱구";
+
+        ItemCreateDto itemCreateDto1 = ItemCreateDto.builder()
+                .name(itemName)
+                .price(3000)
+                .date(createDate)
+                .build();
+
+        Item item1 = new Item(itemCreateDto1);
+        item1 = itemRepository.save(item1);
+
+        ItemPriceHistory itemPriceHistory1 = ItemPriceHistory.builder()
+                .price(itemCreateDto1.getPrice())
+                .item(item1)
+                .date(createDate)
+                .build();
+        ItemPriceHistory priceHistory1 = itemPriceHistoryRepository.save(itemPriceHistory1);
+
+        // 2023-04-01 12:00:00
+        LocalDateTime item2CreateDate = createDate.plusMonths(3);
+        ItemCreateDto itemCreateDto2 = ItemCreateDto.builder()
+                .name(itemName)
+                .price(3000)
+                .date(item2CreateDate)
+                .build();
+
+        ItemPriceHistory itemPriceHistory2 = ItemPriceHistory.builder()
+                .price(itemCreateDto2.getPrice())
+                .item(item1)
+                .date(item2CreateDate)
+                .build();
+        ItemPriceHistory priceHistory2 = itemPriceHistoryRepository.save(itemPriceHistory2);
+
+        // 2023-09-01 12:00:00
+        LocalDateTime item3CreateDate = item2CreateDate.plusMonths(5);
+        ItemCreateDto itemCreateDto3 = ItemCreateDto.builder()
+                .name(itemName)
+                .price(3000)
+                .date(item3CreateDate)
+                .build();
+
+        ItemPriceHistory itemPriceHistory3 = ItemPriceHistory.builder()
+                .price(itemCreateDto3.getPrice())
+                .item(item1)
+                .date(item3CreateDate)
+                .build();
+        ItemPriceHistory priceHistory3 = itemPriceHistoryRepository.save(itemPriceHistory3);
 
         // when
-        ItemDto itemDto = itemService.searchItemByTime(item2.getName(), "2023-03-06T12:00:00");
+        ItemDto itemDto = itemService.searchItemByTime(item1.getId(), "2023-03-06T12:00:00");
 
         // then
         assertThat(itemDto).isNotNull();
-        assertThat(itemDto.getName()).isEqualTo(item2.getName());
+        assertThat(itemDto.getName()).isEqualTo(item1.getName());
         // 2000
-        assertThat(itemDto.getPrice()).isEqualTo(item2.getPrice());
+        assertThat(itemDto.getPrice()).isEqualTo(priceHistory2.getPrice());
 
     }
 
@@ -312,35 +558,8 @@ class ItemServiceImplTest {
 
         // when then
         Assertions.assertThrows(ItemNotFoundException.class, () ->
-                itemService.searchItemByTime("바보", "2023-09-06T12:00:00"));
+                itemService.searchItemByTime(1L, "2023-09-06T12:00:00"));
 
-    }
-
-
-    private List<Item> saveAndGetItemList(String itemName, int priceA, int priceB, int priceC, int plusMonthsA, int plusMonthsB) {
-        LocalDateTime createDate = LocalDateTime.of(
-                2023, 1, 1, 12, 20, 0
-        );
-
-        Item item1 = new Item(itemName, priceA, createDate);
-        itemRepository.save(item1);
-
-        // 2023-09-05 13:25:00
-        LocalDateTime item2CreateDate = createDate.plusMonths(plusMonthsA);
-        Item item2 = new Item(item1.getName(), priceB, item2CreateDate);
-        itemRepository.save(item2);
-
-        // 2023-09-05 13:28:00
-        LocalDateTime item3CreateDate = item2CreateDate.plusMonths(plusMonthsB);
-        Item item3 = new Item(item1.getName(), priceC, item3CreateDate);
-        itemRepository.save(item3);
-
-        List<Item> itemList = new ArrayList<>();
-        itemList.add(item1);
-        itemList.add(item2);
-        itemList.add(item3);
-
-        return itemList;
     }
 
     private ItemCreateDto saveAndGetItemCreateDto(String name, int price, Role role) {
@@ -349,10 +568,30 @@ class ItemServiceImplTest {
                 .name(name)
                 .price(price)
                 .role(role)
+                .date(now())
                 .build();
 
-        itemRepository.save(new Item(itemCreateDto));
+        Item item = Item.builder()
+                .name(itemCreateDto.getName())
+                .date(itemCreateDto.getDate())
+                .build();
 
-        return itemCreateDto;
+        Item saveItem = itemRepository.save(item);
+
+        ItemPriceHistory itemPriceHistory = ItemPriceHistory.builder()
+                .item(saveItem)
+                .date(saveItem.getDate())
+                .price(itemCreateDto.getPrice())
+                .build();
+
+        itemPriceHistoryRepository.save(itemPriceHistory);
+
+        return ItemCreateDto.builder()
+                .id(saveItem.getId())
+                .role(itemCreateDto.getRole())
+                .name(saveItem.getName())
+                .date(saveItem.getDate())
+                .price(itemPriceHistory.getPrice())
+                .build();
     }
 }
