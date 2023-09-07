@@ -53,7 +53,7 @@ public class CouponServiceImpl implements CouponService {
         Coupon saveCoupon = couponRepository.save(coupon);
 
         Item couponItem = coupon.getItem();
-        itemId = couponItem != null ? coupon.getId() : null;
+        itemId = couponItem != null ? couponItem.getId() : null;
 
         return CouponDto.builder()
                 .couponId(saveCoupon.getId())
