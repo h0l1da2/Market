@@ -56,14 +56,15 @@ public class OrderServiceImpl implements OrderService {
 
                     ItemPriceHistory finalItemStatus = getFinalItemStatusByItem(itemNotFoundFlag, findItem);
                     if (finalItemStatus == null) return;
-                    int itemPrice = finalItemStatus.getPrice() * item.getCount();
+                    int itemPrice = finalItemStatus.getPrice() - amount;
                     int resultItemPrice = 0;
+                    int itemCount = item.getCount();
 
                     if (coupon.getItem().getId().equals(findItem.getId())) {
 
                         if (how.equals(How.FIXED)) {
                             // 고정값을 아이템 값에서 뺀 후 ...
-                            resultItemPrice = itemPrice - amount;
+                            resultItemPrice = itemPrice * itemCount;
                             price.set(price.get() + resultItemPrice);
                         }
 
