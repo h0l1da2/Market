@@ -42,10 +42,8 @@ class OrderControllerTest {
     @Test
     @DisplayName("결제가격 성공 : 아이템 한개")
     void 결제가격_성공_아이템한개() throws Exception {
-
         List<OrderItemDto> list = itemSaveAndAddList();
-
-        OrderDto orderDto = new OrderDto(list, 1000, false);
+        OrderDto orderDto = getOrderDto(list);
 
         mockMvc.perform(
                         post("/order")
@@ -60,9 +58,13 @@ class OrderControllerTest {
         saveItem("감자", 3000);
 
         List<OrderItemDto> list = new ArrayList<>();
-        OrderItemDto orderItemDto1 = new OrderItemDto("감자", 2);
 
-        list.add(orderItemDto1);
+        OrderItemDto orderItemDto = OrderItemDto.builder()
+                .name("감자")
+                .count(2)
+                .build();
+
+        list.add(orderItemDto);
         return list;
     }
 
@@ -72,7 +74,7 @@ class OrderControllerTest {
 
         List<OrderItemDto> list = getOrderItemDtos();
 
-        OrderDto orderDto = new OrderDto(list, 1000, false);
+        OrderDto orderDto = getOrderDto(list);
 
         mockMvc.perform(
                         post("/order")
@@ -91,7 +93,8 @@ class OrderControllerTest {
 
         Coupon coupon = getFixedCoupon(3000);
 
-        OrderDto orderDto = new OrderDto(list, 1000, true, coupon);
+
+        OrderDto orderDto = getOrderDtoUserCoupon(list, coupon);
 
         mockMvc.perform(
                         post("/order")
@@ -110,7 +113,7 @@ class OrderControllerTest {
 
         Coupon coupon = getFixedCoupon(1000);
 
-        OrderDto orderDto = new OrderDto(list, 1000, true, coupon);
+        OrderDto orderDto = getOrderDtoUserCoupon(list, coupon);
 
         mockMvc.perform(
                         post("/order")
@@ -129,7 +132,7 @@ class OrderControllerTest {
 
         Coupon coupon = getPercentageCoupon(20);
 
-        OrderDto orderDto = new OrderDto(list, 1000, true, coupon);
+        OrderDto orderDto = getOrderDtoUserCoupon(list, coupon);
 
         mockMvc.perform(
                         post("/order")
@@ -148,7 +151,7 @@ class OrderControllerTest {
 
         Coupon coupon = getPercentageCoupon(20);
 
-        OrderDto orderDto = new OrderDto(list, 1000, true, coupon);
+        OrderDto orderDto = getOrderDtoUserCoupon(list, coupon);
 
         mockMvc.perform(
                         post("/order")
@@ -167,7 +170,7 @@ class OrderControllerTest {
 
         Coupon coupon = getFixedCoupon(2000);
 
-        OrderDto orderDto = new OrderDto(list, 1000, true, coupon);
+        OrderDto orderDto = getOrderDtoUserCoupon(list, coupon);
 
         mockMvc.perform(
                         post("/order")
@@ -186,7 +189,7 @@ class OrderControllerTest {
 
         Coupon coupon = getFixedCoupon(3000);
 
-        OrderDto orderDto = new OrderDto(list, 1000, true, coupon);
+        OrderDto orderDto = getOrderDtoUserCoupon(list, coupon);
 
         mockMvc.perform(
                         post("/order")
@@ -205,7 +208,7 @@ class OrderControllerTest {
 
         Coupon coupon = getPercentageCoupon(20);
 
-        OrderDto orderDto = new OrderDto(list, 1000, true, coupon);
+        OrderDto orderDto = getOrderDtoUserCoupon(list, coupon);
 
         mockMvc.perform(
                         post("/order")
@@ -224,7 +227,7 @@ class OrderControllerTest {
 
         Coupon coupon = getPercentageCoupon(1000);
 
-        OrderDto orderDto = new OrderDto(list, 1000, true, coupon);
+        OrderDto orderDto = getOrderDtoUserCoupon(list, coupon);
 
         mockMvc.perform(
                         post("/order")
@@ -242,7 +245,13 @@ class OrderControllerTest {
     }
 
     private Item saveItem(String name, int price) {
-        ItemCreateDto itemCreateDto = new ItemCreateDto(name, price, Role.MARKET);
+
+        ItemCreateDto itemCreateDto = ItemCreateDto.builder()
+                .name(name)
+                .price(price)
+                .role(Role.MARKET)
+                .build();
+
         Item item = new Item(itemCreateDto);
         itemRepository.save(item);
 
@@ -255,19 +264,53 @@ class OrderControllerTest {
         return coupon;
     }
 
+    private OrderDto getOrderDto(List<OrderItemDto> list) {
+        OrderDto orderDto = OrderDto.builder()
+                .items(list)
+                .deliveryPrice(1000)
+                .useCoupon(false)
+                .build();
+        return orderDto;
+    }
+
     private List<OrderItemDto> getOrderItemDtos() {
-        saveItem("감자", 3000);
-        saveItem("고구마", 1000);
-        saveItem("사과", 2000);
+        Item item1 = saveItem("감자", 3000);
+        Item item2 = saveItem("고구마", 1000);
+        Item item3 = saveItem("사과", 2000);
 
         List<OrderItemDto> list = new ArrayList<>();
-        OrderItemDto orderItemDto1 = new OrderItemDto("감자", 2);
-        OrderItemDto orderItemDto2 = new OrderItemDto("고구마", 1);
-        OrderItemDto orderItemDto3 = new OrderItemDto("사과", 3);
+
+        OrderItemDto orderItemDto1 = OrderItemDto.builder()
+                .name(item1.getName())
+                .count(2)
+                .build();
+
+        OrderItemDto orderItemDto2 = OrderItemDto.builder()
+                .name(item2.getName())
+                .count(2)
+                .build();
+
+        OrderItemDto orderItemDto3 = OrderItemDto.builder()
+                .name(item3.getName())
+                .count(2)
+                .build();
 
         list.add(orderItemDto1);
         list.add(orderItemDto2);
         list.add(orderItemDto3);
+
         return list;
+    }
+
+    private OrderDto getOrderDtoUserCoupon(List<OrderItemDto> list, Coupon coupon) {
+
+        OrderDto orderDto = OrderDto.builder()
+                .items(list)
+                .deliveryPrice(1000)
+                .useCoupon(true)
+                .coupon(coupon)
+                .build();
+
+        return orderDto;
     }
 }

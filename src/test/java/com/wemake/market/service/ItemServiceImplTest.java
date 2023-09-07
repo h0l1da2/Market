@@ -44,8 +44,13 @@ class ItemServiceImplTest {
     @DisplayName("아이템 추가 : 성공 !")
     void createItem() throws NotAuthorityException, DuplicateItemException {
         // given
-        ItemCreateDto itemCreateDto = new ItemCreateDto("감자", 20000, Role.MARKET);
+        ItemCreateDto itemCreateDto = ItemCreateDto.builder()
+                .name("감자")
+                .price(20000)
+                .role(Role.MARKET)
+                .build();
 
+        // when
         ItemCreateDto item = itemService.createItem(itemCreateDto);
 
         // then
@@ -85,7 +90,12 @@ class ItemServiceImplTest {
         // given
         ItemCreateDto itemCreateDto = saveAndGetItemCreateDto("도넛", 30000, Role.MARKET);
 
-        ItemUpdateDto itemUpdateDto = new ItemUpdateDto(itemCreateDto.getName(), 2000, Role.MARKET, password);
+        ItemUpdateDto itemUpdateDto = ItemUpdateDto.builder()
+                .name(itemCreateDto.getName())
+                .price(2000)
+                .role(Role.MARKET)
+                .password(password)
+                .build();
 
         // when
         ItemUpdateDto updateItem = itemService.updateItem(itemUpdateDto);
@@ -107,7 +117,12 @@ class ItemServiceImplTest {
         // given
         ItemCreateDto itemCreateDto = saveAndGetItemCreateDto("어묵", 1000, Role.MARKET);
 
-        ItemUpdateDto itemUpdateDto = new ItemUpdateDto(itemCreateDto.getName(), 2000, Role.USER, password);
+        ItemUpdateDto itemUpdateDto = ItemUpdateDto.builder()
+                .name(itemCreateDto.getName())
+                .price(2000)
+                .role(Role.USER)
+                .password(password)
+                .build();
 
         // when then
         Assertions.assertThrows(NotAuthorityException.class,
@@ -119,7 +134,12 @@ class ItemServiceImplTest {
     @DisplayName("아이템 수정 실패 : 없는 아이템")
     void updateItem_실패_없는아이템() {
         // given
-        ItemUpdateDto itemUpdateDto = new ItemUpdateDto("맥도날드", 2000, Role.MARKET, password);
+        ItemUpdateDto itemUpdateDto = ItemUpdateDto.builder()
+                .name("힝")
+                .price(2000)
+                .role(Role.MARKET)
+                .password(password)
+                .build();
 
         // when then
         Assertions.assertThrows(ItemNotFoundException.class,
@@ -133,14 +153,18 @@ class ItemServiceImplTest {
         // given
         ItemCreateDto itemCreateDto = saveAndGetItemCreateDto("당근", 3000, Role.MARKET);
 
-        ItemDeleteDto itemDeleteDto = new ItemDeleteDto(itemCreateDto.getName(), itemCreateDto.getRole(), password);
+        ItemDeleteDto itemDeleteDto = ItemDeleteDto.builder()
+                .name(itemCreateDto.getName())
+                .role(itemCreateDto.getRole())
+                .password(password)
+                .build();
 
         // when
         itemService.deleteItem(itemDeleteDto);
 
-        // then
         List<Item> itemList = itemRepository.findByName(itemDeleteDto.getName());
 
+        // then
         assertThat(itemList.size()).isEqualTo(0);
     }
 
@@ -152,14 +176,16 @@ class ItemServiceImplTest {
         itemRepository.save(new Item(itemCreateDto));
         itemRepository.save(new Item(itemCreateDto));
 
-        ItemDeleteDto itemDeleteDto = new ItemDeleteDto(itemCreateDto.getName(), itemCreateDto.getRole(), password);
-
+        ItemDeleteDto itemDeleteDto = ItemDeleteDto.builder()
+                .name(itemCreateDto.getName())
+                .role(itemCreateDto.getRole())
+                .password(password)
+                .build();
         // when
         itemService.deleteItem(itemDeleteDto);
 
-        // then
         List<Item> itemList = itemRepository.findByName(itemDeleteDto.getName());
-
+        // then
         assertThat(itemList.size()).isEqualTo(0);
     }
 
@@ -167,10 +193,15 @@ class ItemServiceImplTest {
     @DisplayName("아이템 삭제 실패 : 삭제 아이템 존재 안 함")
     void deleteItem_실패_존재없음() {
         // given
-        ItemDeleteDto itemDeleteDto = new ItemDeleteDto("치약", Role.MARKET, password);
+        ItemDeleteDto itemDeleteDto = ItemDeleteDto.builder()
+                .name("치약")
+                .role(Role.MARKET)
+                .password(password)
+                .build();
 
         // when then
-        Assertions.assertThrows(ItemNotFoundException.class, () -> itemService.deleteItem(itemDeleteDto));
+        Assertions.assertThrows(ItemNotFoundException.class, () ->
+                itemService.deleteItem(itemDeleteDto));
 
     }
 
@@ -180,10 +211,15 @@ class ItemServiceImplTest {
         // given
         ItemCreateDto itemCreateDto = saveAndGetItemCreateDto("칫솔", 1000, Role.MARKET);
 
-        ItemDeleteDto itemDeleteDto = new ItemDeleteDto(itemCreateDto.getName(), Role.USER, password);
+        ItemDeleteDto itemDeleteDto = ItemDeleteDto.builder()
+                .name(itemCreateDto.getName())
+                .role(Role.USER)
+                .password(password)
+                .build();
 
         // when then
-        Assertions.assertThrows(NotAuthorityException.class, () -> itemService.deleteItem(itemDeleteDto));
+        Assertions.assertThrows(NotAuthorityException.class, () ->
+                itemService.deleteItem(itemDeleteDto));
 
     }
 
@@ -194,19 +230,11 @@ class ItemServiceImplTest {
         List<Item> itemList =
                 saveAndGetItemList("짱구", 30000, 2000, 15000, 2, 3);
 
-        LocalDateTime searchDate = of(
-                2023,
-                9,
-                6,
-                12, 52, 0);
-
         Item item1 = itemList.get(0);
         Item item3 = itemList.get(2);
 
-        ItemSearchTimeDto itemSearchTimeDto = new ItemSearchTimeDto(item1.getName(), searchDate);
-
         // when
-        ItemDto itemDto = itemService.searchItemByTime(itemSearchTimeDto);
+        ItemDto itemDto = itemService.searchItemByTime(item1.getName(), "2023-09-06T12:00:00");
 
         // then
         assertThat(itemDto).isNotNull();
@@ -225,20 +253,11 @@ class ItemServiceImplTest {
         Item item1 = itemList.get(0);
         Item item2 = itemList.get(1);
 
-        LocalDateTime searchDate = of(
-                2023,
-                3,
-                9,
-                12, 52, 0);
-
-        ItemSearchTimeDto itemSearchTimeDto = new ItemSearchTimeDto(item1.getName(), searchDate);
-
         // when
-        ItemDto itemDto = itemService.searchItemByTime(itemSearchTimeDto);
+        ItemDto itemDto = itemService.searchItemByTime(item1.getName(), "2023-04-06T12:00:00");
 
         // then
         assertThat(itemDto).isNotNull();
-
         assertThat(itemDto.getPrice()).isEqualTo(item2.getPrice());
 
     }
@@ -258,14 +277,11 @@ class ItemServiceImplTest {
         Item item1 = itemList.get(0);
         Item item4 = itemList.get(2);
 
-        ItemSearchTimeDto itemSearchTimeDto = new ItemSearchTimeDto(item1.getName(), searchDate);
-
         // when
-        ItemDto itemDto = itemService.searchItemByTime(itemSearchTimeDto);
+        ItemDto itemDto = itemService.searchItemByTime(item1.getName(), "2023-09-06T12:00:00");
 
         // then
         assertThat(itemDto).isNotNull();
-
         assertThat(itemDto.getPrice()).isEqualTo(item4.getPrice());
 
     }
@@ -276,20 +292,13 @@ class ItemServiceImplTest {
         List<Item> itemList =
                 saveAndGetItemList("왕뚜껑", 1000, 2000, 3000, 2, 3);
 
-        LocalDateTime searchDate = of(
-                2023, 3, 5, 13, 27, 0
-                );
-
         Item item2 = itemList.get(1);
 
-        ItemSearchTimeDto itemSearchTimeDto = new ItemSearchTimeDto(item2.getName(), searchDate);
-
         // when
-        ItemDto itemDto = itemService.searchItemByTime(itemSearchTimeDto);
+        ItemDto itemDto = itemService.searchItemByTime(item2.getName(), "2023-03-06T12:00:00");
 
         // then
         assertThat(itemDto).isNotNull();
-
         assertThat(itemDto.getName()).isEqualTo(item2.getName());
         // 2000
         assertThat(itemDto.getPrice()).isEqualTo(item2.getPrice());
@@ -299,18 +308,11 @@ class ItemServiceImplTest {
     @Test
     @DisplayName("아이템 조회 실패 : 없는 아이템")
     void 아이템조회_실패_없는아이템() {
-        // given
-        ItemCreateDto itemCreateDto = new ItemCreateDto("name", 1000, Role.MARKET);
-
-        LocalDateTime localDateTime = of(
-                now().getYear(),
-                now().getMonth(),
-                now().getDayOfMonth(),
-                now().getHour(), 0);
-        ItemSearchTimeDto itemSearchTimeDto = new ItemSearchTimeDto(itemCreateDto.getName(), localDateTime);
+        // no given
 
         // when then
-        Assertions.assertThrows(ItemNotFoundException.class, () -> itemService.searchItemByTime(itemSearchTimeDto));
+        Assertions.assertThrows(ItemNotFoundException.class, () ->
+                itemService.searchItemByTime("바보", "2023-09-06T12:00:00"));
 
     }
 
@@ -342,8 +344,15 @@ class ItemServiceImplTest {
     }
 
     private ItemCreateDto saveAndGetItemCreateDto(String name, int price, Role role) {
-        ItemCreateDto itemCreateDto = new ItemCreateDto(name, price, role);
+
+        ItemCreateDto itemCreateDto = ItemCreateDto.builder()
+                .name(name)
+                .price(price)
+                .role(role)
+                .build();
+
         itemRepository.save(new Item(itemCreateDto));
+
         return itemCreateDto;
     }
 }

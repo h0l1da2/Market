@@ -5,7 +5,6 @@ import com.wemake.market.domain.Item;
 import com.wemake.market.domain.Role;
 import com.wemake.market.domain.dto.ItemDeleteDto;
 import com.wemake.market.domain.dto.ItemCreateDto;
-import com.wemake.market.domain.dto.ItemSearchTimeDto;
 import com.wemake.market.domain.dto.ItemUpdateDto;
 import com.wemake.market.repository.ItemRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +20,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 
-import static java.time.LocalDateTime.now;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -49,7 +47,12 @@ class ItemControllerTest {
     @Test
     @DisplayName("아이템 추가 : 성공 !")
     void create() throws Exception {
-        ItemCreateDto itemCreateDto = new ItemCreateDto("초코송이", 1000, Role.MARKET);
+        ItemCreateDto itemCreateDto =
+                ItemCreateDto.builder()
+                        .name("초코송이")
+                        .price(3000)
+                        .role(Role.MARKET)
+                        .build();
 
         mockMvc.perform(
                         post("/item")
@@ -65,7 +68,12 @@ class ItemControllerTest {
     @Test
     @DisplayName("아이템 추가 : 실패 -> 유저 요청")
     void create_실패_유저요청() throws Exception {
-        ItemCreateDto itemCreateDto = new ItemCreateDto("name", 1000, Role.USER);
+        ItemCreateDto itemCreateDto =
+                ItemCreateDto.builder()
+                        .name("사과")
+                        .price(1000)
+                        .role(Role.USER)
+                        .build();
 
         mockMvc.perform(
                         post("/item")
@@ -95,7 +103,12 @@ class ItemControllerTest {
     void 아이템수정_성공() throws Exception {
         ItemCreateDto itemCreateDto = saveItem();
 
-        ItemUpdateDto itemUpdateDto = new ItemUpdateDto(itemCreateDto.getName(), 2000, Role.MARKET, password);
+        ItemUpdateDto itemUpdateDto = ItemUpdateDto.builder()
+                .name(itemCreateDto.getName())
+                .price(2000)
+                .role(Role.MARKET)
+                .password(password)
+                .build();
 
         mockMvc.perform(
                         put("/item")
@@ -112,8 +125,12 @@ class ItemControllerTest {
     void 아이템수정_실패_권한없음_유저요청() throws Exception {
         saveItem();
 
-        ItemUpdateDto itemUpdateDto = new ItemUpdateDto("name", 2000, Role.USER, password);
-
+        ItemUpdateDto itemUpdateDto = ItemUpdateDto.builder()
+                .name("칸쵸")
+                .price(2000)
+                .role(Role.USER)
+                .password(password)
+                .build();
         mockMvc.perform(
                         put("/item")
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -127,7 +144,12 @@ class ItemControllerTest {
     void 아이템수정_실패_권한없음_비밀번호틀림() throws Exception {
         saveItem();
 
-        ItemUpdateDto itemUpdateDto = new ItemUpdateDto("name", 2000, Role.MARKET, "패스워둥");
+        ItemUpdateDto itemUpdateDto = ItemUpdateDto.builder()
+                .name("도로롱")
+                .price(2000)
+                .role(Role.MARKET)
+                .password("메롱")
+                .build();
 
         mockMvc.perform(
                         put("/item")
@@ -142,7 +164,12 @@ class ItemControllerTest {
     void 아이템수정_실패_권한없음_둘다이상함() throws Exception {
         saveItem();
 
-        ItemUpdateDto itemUpdateDto = new ItemUpdateDto("name", 2000, Role.USER, "패스워둥");
+        ItemUpdateDto itemUpdateDto = ItemUpdateDto.builder()
+                .name("문제")
+                .price(2000)
+                .role(Role.USER)
+                .password("문제")
+                .build();
 
         mockMvc.perform(
                         put("/item")
@@ -157,7 +184,12 @@ class ItemControllerTest {
     @DisplayName("아이템 수정 실패 : 없는 아이템")
     void 아이템수정_실패_아이템없음() throws Exception {
 
-        ItemUpdateDto itemUpdateDto = new ItemUpdateDto("name", 2000, Role.MARKET, password);
+        ItemUpdateDto itemUpdateDto = ItemUpdateDto.builder()
+                .name("샴푸")
+                .price(2000)
+                .role(Role.MARKET)
+                .password(password)
+                .build();
 
         mockMvc.perform(
                         put("/item")
@@ -173,7 +205,11 @@ class ItemControllerTest {
     void 아이템삭제_성공_한개() throws Exception {
         ItemCreateDto itemCreateDto = saveItem();
 
-        ItemDeleteDto itemDeleteDto = new ItemDeleteDto(itemCreateDto.getName(), itemCreateDto.getRole(), password);
+        ItemDeleteDto itemDeleteDto = ItemDeleteDto.builder()
+                .name(itemCreateDto.getName())
+                .role(itemCreateDto.getRole())
+                .password(password)
+                .build();
 
         mockMvc.perform(
                         delete("/item")
@@ -190,7 +226,11 @@ class ItemControllerTest {
         itemRepository.save(new Item(itemCreateDto));
         itemRepository.save(new Item(itemCreateDto));
 
-        ItemDeleteDto itemDeleteDto = new ItemDeleteDto(itemCreateDto.getName(), itemCreateDto.getRole(), password);
+        ItemDeleteDto itemDeleteDto = ItemDeleteDto.builder()
+                .name(itemCreateDto.getName())
+                .role(itemCreateDto.getRole())
+                .password(password)
+                .build();
 
         mockMvc.perform(
                         delete("/item")
@@ -206,7 +246,11 @@ class ItemControllerTest {
     void 아이템삭제_실패_권한없음_유저() throws Exception {
         ItemCreateDto itemCreateDto = saveItem();
 
-        ItemDeleteDto itemDeleteDto = new ItemDeleteDto(itemCreateDto.getName(), Role.USER, password);
+        ItemDeleteDto itemDeleteDto = ItemDeleteDto.builder()
+                .name(itemCreateDto.getName())
+                .role(Role.USER)
+                .password(password)
+                .build();
 
         mockMvc.perform(
                         delete("/item")
@@ -220,7 +264,11 @@ class ItemControllerTest {
     void 아이템삭제_실패_권한없음_비밀번호() throws Exception {
         ItemCreateDto itemCreateDto = saveItem();
 
-        ItemDeleteDto itemDeleteDto = new ItemDeleteDto(itemCreateDto.getName(), Role.MARKET, "다른패스워드");
+        ItemDeleteDto itemDeleteDto = ItemDeleteDto.builder()
+                .name(itemCreateDto.getName())
+                .role(itemCreateDto.getRole())
+                .password("ㅋㅋ")
+                .build();
 
         mockMvc.perform(
                         delete("/item")
@@ -235,7 +283,11 @@ class ItemControllerTest {
     void 아이템삭제_실패_권한없음_둘다틀림() throws Exception {
         ItemCreateDto itemCreateDto = saveItem();
 
-        ItemDeleteDto itemDeleteDto = new ItemDeleteDto(itemCreateDto.getName(), Role.USER, "다른패스워드");
+        ItemDeleteDto itemDeleteDto = ItemDeleteDto.builder()
+                .name(itemCreateDto.getName())
+                .role(Role.USER)
+                .password("zz")
+                .build();
 
         mockMvc.perform(
                         delete("/item")
@@ -248,9 +300,19 @@ class ItemControllerTest {
     @Test
     @DisplayName("아이템 삭제 실패 : 없는 아이템")
     void 아이템삭제_실패_권한없음_없는아이템() throws Exception {
-        ItemCreateDto itemCreateDto = new ItemCreateDto("name", 1000, Role.MARKET);
 
-        ItemDeleteDto itemDeleteDto = new ItemDeleteDto(itemCreateDto.getName(), itemCreateDto.getRole(), password);
+        ItemCreateDto itemCreateDto =
+                ItemCreateDto.builder()
+                        .name("빼빼로")
+                        .price(3000)
+                        .role(Role.MARKET)
+                        .build();
+
+        ItemDeleteDto itemDeleteDto = ItemDeleteDto.builder()
+                .name(itemCreateDto.getName())
+                .role(itemCreateDto.getRole())
+                .password(password)
+                .build();
 
         mockMvc.perform(
                         delete("/item")
@@ -263,15 +325,16 @@ class ItemControllerTest {
     @Test
     @DisplayName("아이템 조회 성공 : 하나")
     void 아이템조회_성공_한개() throws Exception {
-        ItemCreateDto itemCreateDto = saveItem();
+        LocalDateTime createDate = LocalDateTime.of(
+                2023, 1, 1, 12, 20, 0
+        );
 
-        ItemSearchTimeDto itemSearchTimeDto = new ItemSearchTimeDto(itemCreateDto.getName(), now());
+        Item item = itemRepository.save(new Item("사과", 2000, createDate));
+
         mockMvc.perform(
-                        get("/item")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(mapper.writeValueAsString(itemSearchTimeDto))
+                        get("/item?name="+item.getName()+"&date=2023-03-05T12:00:00")
                 ).andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("name").value(itemSearchTimeDto.getName()))
+                .andExpect(jsonPath("name").value(item.getName()))
                 .andDo(print());
     }
 
@@ -282,49 +345,39 @@ class ItemControllerTest {
         itemRepository.save(new Item(itemCreateDto));
         itemRepository.save(new Item(itemCreateDto));
 
-        ItemSearchTimeDto itemSearchTimeDto = new ItemSearchTimeDto(itemCreateDto.getName(), now());
         mockMvc.perform(
-                        get("/item")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(mapper.writeValueAsString(itemSearchTimeDto))
+                        get("/item?name="+itemCreateDto.getName()+"&date=2023-03-05T12:00:00")
                 ).andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("name").value(itemSearchTimeDto.getName()))
+                .andExpect(jsonPath("name").value(itemCreateDto.getName()))
                 .andDo(print());
     }
 
     @Test
     @DisplayName("아이템 조회 성공 : 특정 시간")
     void 아이템조회_성공_특정시간() throws Exception {
-        LocalDateTime createDate = LocalDateTime.of(
-                2023, 1, 1, 11, 11, 0, 0
-        );
         ItemCreateDto itemCreateDto = saveItem();
         Item item = itemRepository.save(new Item(itemCreateDto));
         itemRepository.save(item);
 
-        LocalDateTime searchDate = now();
-
-        ItemSearchTimeDto itemSearchTimeDto = new ItemSearchTimeDto(item.getName(), searchDate);
-
         mockMvc.perform(
-                        get("/item")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(mapper.writeValueAsString(itemSearchTimeDto))
+                        get("/item?name="+item.getName()+"&date=2023-03-05T12:00:00")
                 ).andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("name").value(itemSearchTimeDto.getName()))
+                .andExpect(jsonPath("name").value(item.getName()))
                 .andDo(print());
     }
 
     @Test
     @DisplayName("아이템 조회 실패 : 없는 아이템")
     void 아이템조회_실패_없음() throws Exception {
-        ItemCreateDto itemCreateDto = new ItemCreateDto("딸기", 1000, Role.MARKET);
+        ItemCreateDto itemCreateDto =
+                ItemCreateDto.builder()
+                .name("딸기")
+                .price(1000)
+                .role(Role.MARKET)
+                .build();
 
-        ItemSearchTimeDto itemSearchTimeDto = new ItemSearchTimeDto(itemCreateDto.getName(), now());
         mockMvc.perform(
-                        get("/item")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(mapper.writeValueAsString(itemSearchTimeDto))
+                        get("/item?name="+itemCreateDto.getName()+"&date=2023-03-05T12:00:00")
                 ).andExpect(status().is4xxClientError())
                 .andDo(print());
     }
@@ -332,8 +385,15 @@ class ItemControllerTest {
 
 
     private ItemCreateDto saveItem() {
-        ItemCreateDto itemCreateDto = new ItemCreateDto("사과", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemCreateDto));
+        ItemCreateDto itemCreateDto =
+                ItemCreateDto.builder()
+                        .name("사과")
+                        .price(1000)
+                        .role(Role.MARKET)
+                        .build();
+
+        itemRepository.save(new Item("사과", 2000, LocalDateTime.of(2023,1,1,12,0,0)));
+
         return itemCreateDto;
     }
 
