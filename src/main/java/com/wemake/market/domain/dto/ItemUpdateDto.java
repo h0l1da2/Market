@@ -7,6 +7,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 
+import static java.time.LocalDateTime.now;
+
 @Data
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -23,5 +25,9 @@ public class ItemUpdateDto {
     private String password;
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime date;
+
+    public void nowItemCreated() {
+        this.date = now();
+    }
 
 }

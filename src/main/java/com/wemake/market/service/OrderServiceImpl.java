@@ -59,7 +59,7 @@ public class OrderServiceImpl implements OrderService {
                     int itemPrice = finalItemStatus.getPrice() * item.getCount();
                     int resultItemPrice = 0;
 
-                    if (coupon.getName().equals(findItem.getName())) {
+                    if (coupon.getItem().getId().equals(findItem.getId())) {
 
                         if (how.equals(How.FIXED)) {
                             // 고정값을 아이템 값에서 뺀 후 ...

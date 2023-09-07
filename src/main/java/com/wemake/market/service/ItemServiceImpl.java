@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import static java.time.LocalDateTime.now;
 import static org.springframework.data.domain.Sort.Direction.*;
 
 @Slf4j
@@ -53,9 +54,14 @@ public class ItemServiceImpl implements ItemService {
             throw new DuplicateItemException("아이템 중복");
         }
 
+        // 보안을 위해 서버에서 생성 시간을 결정하도록 했음.
+        // 직접 시간을 넣어 테스트 시에는 아래 한 줄 주석 필수!!
+//        itemCreateDto.nowItemCreated();
+
         // 아이템 넣기
         Item item = Item.builder()
                 .name(itemCreateDto.getName())
+                .date(itemCreateDto.getDate())
                 .build();
         Item saveItem = itemRepository.save(item);
 
@@ -68,6 +74,7 @@ public class ItemServiceImpl implements ItemService {
         itemPriceHistoryRepository.save(itemPriceHistory);
 
         return ItemCreateDto.builder()
+                .id(saveItem.getId())
                 .name(item.getName())
                 .price(itemCreateDto.getPrice())
                 .date(itemPriceHistory.getDate())
@@ -82,6 +89,10 @@ public class ItemServiceImpl implements ItemService {
 
         Item item = itemRepository.findById(itemUpdateDto.getId())
                 .orElseThrow(ItemNotFoundException::new);
+
+        // 보안을 위해 서버에서 생성 시간을 결정하도록 했음.
+        // 직접 시간을 넣어 테스트 시에는 아래 한 줄 주석 필수!!
+//        itemUpdateDto.nowItemCreated();
 
         ItemPriceHistory itemPriceHistory = ItemPriceHistory
                 .builder()
@@ -124,7 +135,15 @@ public class ItemServiceImpl implements ItemService {
         DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         LocalDateTime dateForItemPrice = LocalDateTime.parse(date, dateTimeFormat);
 
+        if (dateForItemPrice.isAfter(now())) {
+            throw new UnavailableDateTimeException();
+        }
+
         Item findItem = itemRepository.findById(id).orElseThrow(ItemNotFoundException::new);
+
+        if (dateForItemPrice.isBefore(findItem.getDate())) {
+            throw new UnavailableDateTimeException();
+        }
 
         // 궁금한 시간 ~ 지금까지해서 한 개 조회
         LocalDateTime offsetDateTime = LocalDateTime.of(
