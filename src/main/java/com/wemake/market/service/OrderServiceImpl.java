@@ -1,12 +1,10 @@
 package com.wemake.market.service;
 
-import com.wemake.market.domain.Coupon;
-import com.wemake.market.domain.How;
-import com.wemake.market.domain.Item;
-import com.wemake.market.domain.Where;
+import com.wemake.market.domain.*;
 import com.wemake.market.domain.dto.OrderItemDto;
 import com.wemake.market.domain.dto.OrderDto;
 import com.wemake.market.exception.ItemNotFoundException;
+import com.wemake.market.repository.ItemPriceHistoryRepository;
 import com.wemake.market.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class OrderServiceImpl implements OrderService {
 
     private final ItemRepository itemRepository;
+    private final ItemPriceHistoryRepository itemPriceHistoryRepository;
 
     @Override
     public int getOrderPrice(OrderDto orderDto) throws ItemNotFoundException {
@@ -46,21 +45,21 @@ public class OrderServiceImpl implements OrderService {
             if (wheres.equals(Where.ITEM)) {
                 orderDto.getItems().forEach(item -> {
 
-                    List<Item> itemList = itemRepository.findByName(item.getName());
+                    Item findItem = itemRepository.findById(item.getId()).orElse(null);
 
-                    if (itemList.size() == 0) {
+                    if (findItem == null) {
 
                         itemNotFoundFlag.set(true);
                         return;
 
                     }
 
-                    Item findItem = itemList.get(itemList.size() - 1);
-
-                    int itemPrice = findItem.getPrice() * item.getCount();
+                    ItemPriceHistory finalItemStatus = getFinalItemStatusByItem(itemNotFoundFlag, findItem);
+                    if (finalItemStatus == null) return;
+                    int itemPrice = finalItemStatus.getPrice() * item.getCount();
                     int resultItemPrice = 0;
 
-                    if (coupon.getName().equals(item.getName())) {
+                    if (coupon.getName().equals(findItem.getName())) {
 
                         if (how.equals(How.FIXED)) {
                             // 고정값을 아이템 값에서 뺀 후 ...
@@ -127,15 +126,17 @@ public class OrderServiceImpl implements OrderService {
 
         payDto.forEach(orderItem -> {
 
-            List<Item> itemList = itemRepository.findByName(orderItem.getName());
+            Item findItem = itemRepository.findById(orderItem.getId()).orElse(null);
 
-            if (itemList.size() == 0) {
+            if (findItem == null) {
                 itemNotFoundFlag.set(true);
                 return;
             }
 
-            Item findItem = itemList.get(itemList.size() - 1);
-            price.set(price.get() + (findItem.getPrice() * orderItem.getCount()));
+            ItemPriceHistory finalItemStatus = getFinalItemStatusByItem(itemNotFoundFlag, findItem);
+            if (finalItemStatus == null) return;
+
+            price.set(price.get() + (finalItemStatus.getPrice() * orderItem.getCount()));
 
         });
 
@@ -143,6 +144,18 @@ public class OrderServiceImpl implements OrderService {
             throw new ItemNotFoundException();
         }
 
+    }
+
+    private ItemPriceHistory getFinalItemStatusByItem(AtomicBoolean itemNotFoundFlag, Item findItem) {
+        List<ItemPriceHistory> findPriceHistories = itemPriceHistoryRepository.findByItem(findItem);
+        if (findPriceHistories.size() == 0) {
+
+            itemNotFoundFlag.set(true);
+            return null;
+
+        }
+        ItemPriceHistory finalItemStatus = findPriceHistories.get(findPriceHistories.size() - 1);
+        return finalItemStatus;
     }
 
 }
