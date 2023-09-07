@@ -19,6 +19,8 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDateTime;
+
 import static java.time.LocalDateTime.now;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -47,14 +49,15 @@ class ItemControllerTest {
     @Test
     @DisplayName("아이템 추가 : 성공 !")
     void create() throws Exception {
-        ItemCreateDto itemCreateDto = new ItemCreateDto("name", 1000, Role.MARKET);
+        ItemCreateDto itemCreateDto = new ItemCreateDto("초코송이", 1000, Role.MARKET);
 
         mockMvc.perform(
                         post("/item")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(mapper.writeValueAsString(itemCreateDto))
                 ).andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("name").value("name"))
+                .andExpect(jsonPath("name").value(itemCreateDto.getName()))
+                .andExpect(jsonPath("price").value(itemCreateDto.getPrice()))
                 .andDo(print());
 
     }
@@ -90,9 +93,9 @@ class ItemControllerTest {
     @Test
     @DisplayName("아이템 수정 : 성공 !")
     void 아이템수정_성공() throws Exception {
-        saveItem();
+        ItemCreateDto itemCreateDto = saveItem();
 
-        ItemUpdateDto itemUpdateDto = new ItemUpdateDto("name", 2000, Role.MARKET, password);
+        ItemUpdateDto itemUpdateDto = new ItemUpdateDto(itemCreateDto.getName(), 2000, Role.MARKET, password);
 
         mockMvc.perform(
                         put("/item")
@@ -289,16 +292,33 @@ class ItemControllerTest {
                 .andDo(print());
     }
 
-    private ItemCreateDto saveItem() {
-        ItemCreateDto itemCreateDto = new ItemCreateDto("name", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemCreateDto));
-        return itemCreateDto;
+    @Test
+    @DisplayName("아이템 조회 성공 : 특정 시간")
+    void 아이템조회_성공_특정시간() throws Exception {
+        LocalDateTime createDate = LocalDateTime.of(
+                2023, 1, 1, 11, 11, 0, 0
+        );
+        ItemCreateDto itemCreateDto = saveItem();
+        Item item = itemRepository.save(new Item(itemCreateDto));
+        itemRepository.save(item);
+
+        LocalDateTime searchDate = now();
+
+        ItemSearchTimeDto itemSearchTimeDto = new ItemSearchTimeDto(item.getName(), searchDate);
+
+        mockMvc.perform(
+                        get("/item")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(mapper.writeValueAsString(itemSearchTimeDto))
+                ).andExpect(status().is2xxSuccessful())
+                .andExpect(jsonPath("name").value(itemSearchTimeDto.getName()))
+                .andDo(print());
     }
 
     @Test
     @DisplayName("아이템 조회 실패 : 없는 아이템")
     void 아이템조회_실패_없음() throws Exception {
-        ItemCreateDto itemCreateDto = new ItemCreateDto("name", 1000, Role.MARKET);
+        ItemCreateDto itemCreateDto = new ItemCreateDto("딸기", 1000, Role.MARKET);
 
         ItemSearchTimeDto itemSearchTimeDto = new ItemSearchTimeDto(itemCreateDto.getName(), now());
         mockMvc.perform(
@@ -307,6 +327,14 @@ class ItemControllerTest {
                                 .content(mapper.writeValueAsString(itemSearchTimeDto))
                 ).andExpect(status().is4xxClientError())
                 .andDo(print());
+    }
+
+
+
+    private ItemCreateDto saveItem() {
+        ItemCreateDto itemCreateDto = new ItemCreateDto("사과", 1000, Role.MARKET);
+        itemRepository.save(new Item(itemCreateDto));
+        return itemCreateDto;
     }
 
 }

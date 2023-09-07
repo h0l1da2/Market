@@ -20,7 +20,6 @@ import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
@@ -44,14 +43,7 @@ class OrderControllerTest {
     @DisplayName("결제가격 성공 : 아이템 한개")
     void 결제가격_성공_아이템한개() throws Exception {
 
-        saveItem("감자", 3000);
-        saveItem("고구마", 1000);
-        saveItem("사과", 2000);
-
-        List<OrderItemDto> list = new ArrayList<>();
-        OrderItemDto orderItemDto1 = new OrderItemDto("감자", 2);
-
-        list.add(orderItemDto1);
+        List<OrderItemDto> list = itemSaveAndAddList();
 
         OrderDto orderDto = new OrderDto(list, 1000, false);
 
@@ -64,22 +56,21 @@ class OrderControllerTest {
 
     }
 
+    private List<OrderItemDto> itemSaveAndAddList() {
+        saveItem("감자", 3000);
+
+        List<OrderItemDto> list = new ArrayList<>();
+        OrderItemDto orderItemDto1 = new OrderItemDto("감자", 2);
+
+        list.add(orderItemDto1);
+        return list;
+    }
+
     @Test
     @DisplayName("결제가격 성공 : 아이템 여러개")
     void 결제가격_성공_아이템여러개() throws Exception {
 
-        saveItem("감자", 3000);
-        saveItem("고구마", 1000);
-        saveItem("사과", 2000);
-
-        List<OrderItemDto> list = new ArrayList<>();
-        OrderItemDto orderItemDto1 = new OrderItemDto("감자", 2);
-        OrderItemDto orderItemDto2 = new OrderItemDto("고구마", 1);
-        OrderItemDto orderItemDto3 = new OrderItemDto("사과", 3);
-
-        list.add(orderItemDto1);
-        list.add(orderItemDto2);
-        list.add(orderItemDto3);
+        List<OrderItemDto> list = getOrderItemDtos();
 
         OrderDto orderDto = new OrderDto(list, 1000, false);
 
@@ -96,15 +87,9 @@ class OrderControllerTest {
     @DisplayName("결제가격 성공 : 아이템한개,아이템쿠폰(고정값)")
     void 결제가격_성공_아이템한개_쿠폰_고정값() throws Exception {
 
-        saveItem("감자", 3000);
+        List<OrderItemDto> list = itemSaveAndAddList();
 
-        List<OrderItemDto> list = new ArrayList<>();
-        OrderItemDto orderItemDto1 = new OrderItemDto("감자", 2);
-
-        list.add(orderItemDto1);
-
-        Coupon coupon = new Coupon("감자", How.FIXED, Where.ITEM);
-        coupon.setAmount(2000);
+        Coupon coupon = getFixedCoupon(3000);
 
         OrderDto orderDto = new OrderDto(list, 1000, true, coupon);
 
@@ -121,21 +106,9 @@ class OrderControllerTest {
     @DisplayName("결제가격 성공 : 아이템여러개,아이템쿠폰(고정값)")
     void 결제가격_성공_아이템여러개_쿠폰_고정값() throws Exception {
 
-        saveItem("감자", 3000);
-        saveItem("고구마", 1000);
-        saveItem("사과", 2000);
+        List<OrderItemDto> list = getOrderItemDtos();
 
-        List<OrderItemDto> list = new ArrayList<>();
-        OrderItemDto orderItemDto1 = new OrderItemDto("감자", 2);
-        OrderItemDto orderItemDto2 = new OrderItemDto("고구마", 1);
-        OrderItemDto orderItemDto3 = new OrderItemDto("사과", 3);
-
-        list.add(orderItemDto1);
-        list.add(orderItemDto2);
-        list.add(orderItemDto3);
-
-        Coupon coupon = new Coupon("감자", How.FIXED, Where.ITEM);
-        coupon.setAmount(2000);
+        Coupon coupon = getFixedCoupon(1000);
 
         OrderDto orderDto = new OrderDto(list, 1000, true, coupon);
 
@@ -152,15 +125,9 @@ class OrderControllerTest {
     @DisplayName("결제가격 성공 : 아이템한개,아이템쿠폰(비율)")
     void 결제가격_성공_아이템한개_쿠폰_비율() throws Exception {
 
-        saveItem("감자", 3000);
+        List<OrderItemDto> list = itemSaveAndAddList();
 
-        List<OrderItemDto> list = new ArrayList<>();
-        OrderItemDto orderItemDto1 = new OrderItemDto("감자", 2);
-
-        list.add(orderItemDto1);
-
-        Coupon coupon = new Coupon("감자", How.PERCENTAGE, Where.ITEM);
-        coupon.setRate(10);
+        Coupon coupon = getPercentageCoupon(20);
 
         OrderDto orderDto = new OrderDto(list, 1000, true, coupon);
 
@@ -177,21 +144,9 @@ class OrderControllerTest {
     @DisplayName("결제가격 성공 : 아이템여러개,아이템쿠폰(비율)")
     void 결제가격_성공_아이템여러개_쿠폰_비율() throws Exception {
 
-        saveItem("감자", 3000);
-        saveItem("고구마", 1000);
-        saveItem("사과", 2000);
+        List<OrderItemDto> list = getOrderItemDtos();
 
-        List<OrderItemDto> list = new ArrayList<>();
-        OrderItemDto orderItemDto1 = new OrderItemDto("감자", 2);
-        OrderItemDto orderItemDto2 = new OrderItemDto("고구마", 1);
-        OrderItemDto orderItemDto3 = new OrderItemDto("사과", 3);
-
-        list.add(orderItemDto1);
-        list.add(orderItemDto2);
-        list.add(orderItemDto3);
-
-        Coupon coupon = new Coupon("감자", How.PERCENTAGE, Where.ITEM);
-        coupon.setRate(10);
+        Coupon coupon = getPercentageCoupon(20);
 
         OrderDto orderDto = new OrderDto(list, 1000, true, coupon);
 
@@ -208,15 +163,9 @@ class OrderControllerTest {
     @DisplayName("결제가격 성공 : 아이템한개,주문쿠폰(고정값)")
     void 결제가격_성공_아이템한개_주문쿠폰_고정값() throws Exception {
 
-        saveItem("감자", 3000);
+        List<OrderItemDto> list = itemSaveAndAddList();
 
-        List<OrderItemDto> list = new ArrayList<>();
-        OrderItemDto orderItemDto1 = new OrderItemDto("감자", 2);
-
-        list.add(orderItemDto1);
-
-        Coupon coupon = new Coupon(How.FIXED, Where.ORDER);
-        coupon.setAmount(1000);
+        Coupon coupon = getFixedCoupon(2000);
 
         OrderDto orderDto = new OrderDto(list, 1000, true, coupon);
 
@@ -233,21 +182,9 @@ class OrderControllerTest {
     @DisplayName("결제가격 성공 : 아이템여러개,주문쿠폰(고정값)")
     void 결제가격_성공_아이템여러개_주문쿠폰_고정값() throws Exception {
 
-        saveItem("감자", 3000);
-        saveItem("고구마", 1000);
-        saveItem("사과", 2000);
+        List<OrderItemDto> list = getOrderItemDtos();
 
-        List<OrderItemDto> list = new ArrayList<>();
-        OrderItemDto orderItemDto1 = new OrderItemDto("감자", 2);
-        OrderItemDto orderItemDto2 = new OrderItemDto("고구마", 1);
-        OrderItemDto orderItemDto3 = new OrderItemDto("사과", 3);
-
-        list.add(orderItemDto1);
-        list.add(orderItemDto2);
-        list.add(orderItemDto3);
-
-        Coupon coupon = new Coupon(How.FIXED, Where.ORDER);
-        coupon.setAmount(1000);
+        Coupon coupon = getFixedCoupon(3000);
 
         OrderDto orderDto = new OrderDto(list, 1000, true, coupon);
 
@@ -264,15 +201,9 @@ class OrderControllerTest {
     @DisplayName("결제가격 성공 : 아이템한개,주문쿠폰(비율)")
     void 결제가격_성공_아이템한개_주문쿠폰_비율() throws Exception {
 
-        saveItem("감자", 3000);
+        List<OrderItemDto> list = itemSaveAndAddList();
 
-        List<OrderItemDto> list = new ArrayList<>();
-        OrderItemDto orderItemDto1 = new OrderItemDto("감자", 2);
-
-        list.add(orderItemDto1);
-
-        Coupon coupon = new Coupon(How.PERCENTAGE, Where.ORDER);
-        coupon.setRate(10);
+        Coupon coupon = getPercentageCoupon(20);
 
         OrderDto orderDto = new OrderDto(list, 1000, true, coupon);
 
@@ -289,22 +220,9 @@ class OrderControllerTest {
     @DisplayName("결제가격 성공 : 아이템여러개,주문쿠폰(비율)")
     void 결제가격_성공_아이템여러개_주문쿠폰_비율() throws Exception {
 
-        saveItem("감자", 3000);
-        saveItem("고구마", 1000);
-        saveItem("사과", 2000);
+        List<OrderItemDto> list = getOrderItemDtos();
 
-        List<OrderItemDto> list = new ArrayList<>();
-        OrderItemDto orderItemDto1 = new OrderItemDto("감자", 2);
-        OrderItemDto orderItemDto2 = new OrderItemDto("고구마", 1);
-        OrderItemDto orderItemDto3 = new OrderItemDto("사과", 3);
-
-        list.add(orderItemDto1);
-        list.add(orderItemDto2);
-        list.add(orderItemDto3);
-
-
-        Coupon coupon = new Coupon(How.PERCENTAGE, Where.ORDER);
-        coupon.setRate(10);
+        Coupon coupon = getPercentageCoupon(1000);
 
         OrderDto orderDto = new OrderDto(list, 1000, true, coupon);
 
@@ -317,11 +235,39 @@ class OrderControllerTest {
 
     }
 
+    private static Coupon getPercentageCoupon(int rate) {
+        Coupon coupon = new Coupon(How.PERCENTAGE, Where.ORDER);
+        coupon.isPercentagePrice(rate);
+        return coupon;
+    }
+
     private Item saveItem(String name, int price) {
         ItemCreateDto itemCreateDto = new ItemCreateDto(name, price, Role.MARKET);
         Item item = new Item(itemCreateDto);
         itemRepository.save(item);
 
         return item;
+    }
+
+    private Coupon getFixedCoupon(int amount) {
+        Coupon coupon = new Coupon(How.FIXED, Where.ORDER);
+        coupon.isFixedPrice(amount);
+        return coupon;
+    }
+
+    private List<OrderItemDto> getOrderItemDtos() {
+        saveItem("감자", 3000);
+        saveItem("고구마", 1000);
+        saveItem("사과", 2000);
+
+        List<OrderItemDto> list = new ArrayList<>();
+        OrderItemDto orderItemDto1 = new OrderItemDto("감자", 2);
+        OrderItemDto orderItemDto2 = new OrderItemDto("고구마", 1);
+        OrderItemDto orderItemDto3 = new OrderItemDto("사과", 3);
+
+        list.add(orderItemDto1);
+        list.add(orderItemDto2);
+        list.add(orderItemDto3);
+        return list;
     }
 }

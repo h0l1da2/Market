@@ -55,7 +55,7 @@ class OrderServiceImplTest {
         OrderItemDto orderItemDto = new OrderItemDto("감자", 10);
         list.add(orderItemDto);
         Coupon coupon = new Coupon("감자", How.FIXED, Where.ITEM);
-        coupon.setAmount(2000);
+        coupon.isFixedPrice(2000);
         OrderDto orderDto = new OrderDto(list, 1000, true, coupon);
         int payPrice = orderService.getOrderPrice(orderDto);
 
@@ -71,7 +71,7 @@ class OrderServiceImplTest {
         OrderItemDto orderItemDto = new OrderItemDto("감자", 10);
         list.add(orderItemDto);
         Coupon coupon = new Coupon("감자", How.FIXED, Where.ITEM);
-        coupon.setAmount(200000);
+        coupon.isFixedPrice(200000);
         OrderDto orderDto = new OrderDto(list, 1000, true, coupon);
         int payPrice = orderService.getOrderPrice(orderDto);
 
@@ -87,7 +87,7 @@ class OrderServiceImplTest {
         OrderItemDto orderItemDto = new OrderItemDto("감자", 10);
         list.add(orderItemDto);
         Coupon coupon = new Coupon("감자", How.PERCENTAGE, Where.ITEM);
-        coupon.setRate(10);
+        coupon.isPercentagePrice(10);
         OrderDto orderDto = new OrderDto(list, 1000, true, coupon);
         int payPrice = orderService.getOrderPrice(orderDto);
 
@@ -103,7 +103,7 @@ class OrderServiceImplTest {
         OrderItemDto orderItemDto = new OrderItemDto("감자", 10);
         list.add(orderItemDto);
         Coupon coupon = new Coupon("감자", How.PERCENTAGE, Where.ITEM);
-        coupon.setRate(100);
+        coupon.isPercentagePrice(100);
         OrderDto orderDto = new OrderDto(list, 1000, true, coupon);
         int payPrice = orderService.getOrderPrice(orderDto);
 
@@ -125,7 +125,7 @@ class OrderServiceImplTest {
         list.add(orderItemDto2);
         list.add(orderItemDto3);
         Coupon coupon = new Coupon("고구마", How.PERCENTAGE, Where.ITEM);
-        coupon.setRate(20);
+        coupon.isPercentagePrice(20);
         OrderDto orderDto = new OrderDto(list, 3000, true, coupon);
         int payPrice = orderService.getOrderPrice(orderDto);
 
@@ -150,7 +150,7 @@ class OrderServiceImplTest {
         list.add(orderItemDto2);
         list.add(orderItemDto3);
         Coupon coupon = new Coupon(How.PERCENTAGE, Where.ORDER);
-        coupon.setRate(20);
+        coupon.isPercentagePrice(20);
         OrderDto orderDto = new OrderDto(list, 3000, true, coupon); // 3000
         int payPrice = orderService.getOrderPrice(orderDto);
 
@@ -172,7 +172,7 @@ class OrderServiceImplTest {
         list.add(orderItemDto2);
         list.add(orderItemDto3);
         Coupon coupon = new Coupon(How.PERCENTAGE, Where.ORDER);
-        coupon.setRate(100);
+        coupon.isPercentagePrice(100);
         OrderDto orderDto = new OrderDto(list, 3000, true, coupon); // 3000
         int payPrice = orderService.getOrderPrice(orderDto);
 
@@ -194,7 +194,7 @@ class OrderServiceImplTest {
         list.add(orderItemDto2);
         list.add(orderItemDto3);
         Coupon coupon = new Coupon(How.FIXED, Where.ORDER);
-        coupon.setAmount(3000);
+        coupon.isFixedPrice(3000);
         OrderDto orderDto = new OrderDto(list, 3000, true, coupon); // 3000
         int payPrice = orderService.getOrderPrice(orderDto);
 
@@ -216,7 +216,7 @@ class OrderServiceImplTest {
         list.add(orderItemDto2);
         list.add(orderItemDto3);
         Coupon coupon = new Coupon(How.FIXED, Where.ORDER);
-        coupon.setAmount(3000000);
+        coupon.isFixedPrice(3000000);
         OrderDto orderDto = new OrderDto(list, 3000, true, coupon); // 3000
         int payPrice = orderService.getOrderPrice(orderDto);
 

@@ -18,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.PropertySource;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.time.LocalDateTime.*;
@@ -43,7 +44,7 @@ class ItemServiceImplTest {
     @DisplayName("아이템 추가 : 성공 !")
     void createItem() throws NotAuthorityException, DuplicateItemException {
         // given
-        ItemCreateDto itemCreateDto = new ItemCreateDto("사과", 1000, Role.MARKET);
+        ItemCreateDto itemCreateDto = saveAndGetItemCreateDto("사과", 1000, Role.MARKET);
 
         // when
         ItemCreateDto item = itemService.createItem(itemCreateDto);
@@ -59,7 +60,7 @@ class ItemServiceImplTest {
     @DisplayName("아이템 추가 실패 : 유저 요청")
     void 아이템추가_실패_유저요청() {
         // given
-        ItemCreateDto itemCreateDto = new ItemCreateDto("감자", 1000, Role.USER);
+        ItemCreateDto itemCreateDto = saveAndGetItemCreateDto("감자", 1000, Role.USER);
 
         // when then
         Assertions.assertThrows(NotAuthorityException.class,
@@ -71,8 +72,7 @@ class ItemServiceImplTest {
     @DisplayName("아이템 추가 실패 : 중복 아이템)")
     void 아이템추가_실패_중복아이템() {
         // given
-        ItemCreateDto itemCreateDto = new ItemCreateDto("딸기", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemCreateDto));
+        ItemCreateDto itemCreateDto = saveAndGetItemCreateDto("딸기", 1000, Role.MARKET);
 
         // when then
         Assertions.assertThrows(DuplicateItemException.class,
@@ -84,8 +84,7 @@ class ItemServiceImplTest {
     @DisplayName("아이템 수정 : 성공 !")
     void updateItem() throws NotAuthorityException, ItemNotFoundException {
         // given
-        ItemCreateDto itemCreateDto = new ItemCreateDto("수박", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemCreateDto));
+        ItemCreateDto itemCreateDto = saveAndGetItemCreateDto("도넛", 30000, Role.MARKET);
 
         ItemUpdateDto itemUpdateDto = new ItemUpdateDto(itemCreateDto.getName(), 2000, Role.MARKET, password);
 
@@ -107,8 +106,7 @@ class ItemServiceImplTest {
     @DisplayName("아이템 수정 실패 : 권한 없음")
     void updateItem_실패_권한없음() {
         // given
-        ItemCreateDto itemCreateDto = new ItemCreateDto("어묵", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemCreateDto));
+        ItemCreateDto itemCreateDto = saveAndGetItemCreateDto("어묵", 1000, Role.MARKET);
 
         ItemUpdateDto itemUpdateDto = new ItemUpdateDto(itemCreateDto.getName(), 2000, Role.USER, password);
 
@@ -122,9 +120,6 @@ class ItemServiceImplTest {
     @DisplayName("아이템 수정 실패 : 없는 아이템")
     void updateItem_실패_없는아이템() {
         // given
-        ItemCreateDto itemCreateDto = new ItemCreateDto("고사리", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemCreateDto));
-
         ItemUpdateDto itemUpdateDto = new ItemUpdateDto("맥도날드", 2000, Role.MARKET, password);
 
         // when then
@@ -137,8 +132,7 @@ class ItemServiceImplTest {
     @DisplayName("아이템 삭제 성공 : 한 개")
     void deleteItem_성공_한개() throws NotAuthorityException, ItemNotFoundException {
         // given
-        ItemCreateDto itemCreateDto = new ItemCreateDto("곰돌이", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemCreateDto));
+        ItemCreateDto itemCreateDto = saveAndGetItemCreateDto("당근", 3000, Role.MARKET);
 
         ItemDeleteDto itemDeleteDto = new ItemDeleteDto(itemCreateDto.getName(), itemCreateDto.getRole(), password);
 
@@ -155,8 +149,7 @@ class ItemServiceImplTest {
     @DisplayName("아이템 삭제 성공 : 여러 개")
     void deleteItem_성공_여러개() throws NotAuthorityException, ItemNotFoundException {
         // given
-        ItemCreateDto itemCreateDto = new ItemCreateDto("포테토칩", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemCreateDto));
+        ItemCreateDto itemCreateDto = saveAndGetItemCreateDto("포테토칩", 1000, Role.MARKET);
         itemRepository.save(new Item(itemCreateDto));
         itemRepository.save(new Item(itemCreateDto));
 
@@ -186,8 +179,7 @@ class ItemServiceImplTest {
     @DisplayName("아이템 삭제 실패 : 권한 없음")
     void deleteItem_실패_권한없음() {
         // given
-        ItemCreateDto itemCreateDto = new ItemCreateDto("칫솔", 1000, Role.MARKET);
-        itemRepository.save(new Item(itemCreateDto));
+        ItemCreateDto itemCreateDto = saveAndGetItemCreateDto("칫솔", 1000, Role.MARKET);
 
         ItemDeleteDto itemDeleteDto = new ItemDeleteDto(itemCreateDto.getName(), Role.USER, password);
 
@@ -200,28 +192,17 @@ class ItemServiceImplTest {
     @DisplayName("아이템 조회 성공 : 특정 시간1")
     void 아이템조회_성공1() throws ItemNotFoundException, UnavailableDateTimeException {
         // given
-
-        LocalDateTime createDate = LocalDateTime.of(
-                2023, 9, 5, 13, 22, 0
-        );
-        Item item1 = new Item("샴푸", 1000, createDate);
-        itemRepository.save(item1);
-
-        // 2023-09-05 13:25:00
-        LocalDateTime item2CreateDate = createDate.plusMinutes(3);
-        Item item2 = new Item("샴푸", 2000, item2CreateDate);
-        itemRepository.save(item2);
-
-        // 2023-09-05 13:28:00
-        LocalDateTime item3CreateDate = item2CreateDate.plusMinutes(3);
-        Item item3 = new Item("샴푸", 3000, item3CreateDate);
-        itemRepository.save(item3);
+        List<Item> itemList =
+                saveAndGetItemList("짱구", 30000, 2000, 15000, 2, 3);
 
         LocalDateTime searchDate = of(
                 2023,
                 9,
                 6,
                 12, 52, 0);
+
+        Item item1 = itemList.get(0);
+        Item item3 = itemList.get(2);
 
         ItemSearchTimeDto itemSearchTimeDto = new ItemSearchTimeDto(item1.getName(), searchDate);
 
@@ -233,31 +214,17 @@ class ItemServiceImplTest {
         assertThat(itemDto.getPrice()).isEqualTo(item3.getPrice());
 
     }
+
     @Test
     @DisplayName("아이템 조회 성공 : 특정 시간2")
     void 아이템조회_성공2() throws ItemNotFoundException, UnavailableDateTimeException {
 
         // given
-        LocalDateTime createDate = LocalDateTime.of(
-                2023, 1, 1, 11, 11, 0
-        );
-        Item item1 = new Item("스파게티면", 1111000, createDate);
-        itemRepository.save(item1);
+        List<Item> itemList =
+                saveAndGetItemList("포카칩", 3000, 4000, 1000, 2, 3);
 
-        // 2023-03-01 11:11:00
-        LocalDateTime item2CreateDate = createDate.plusMonths(2);
-        Item item2 = new Item(item1.getName(), 30100, item2CreateDate);
-        itemRepository.save(item2);
-
-        // 2023-03-11 11:11:00
-        LocalDateTime item3CreateDate = item2CreateDate.plusDays(10);
-        Item item3 = new Item(item1.getName(), 31100, item3CreateDate);
-        itemRepository.save(item3);
-
-        // 2023-06-11 11:11:00
-        LocalDateTime item4CreateDate = item3CreateDate.plusMonths(3);
-        Item item4 = new Item(item1.getName(), 61100, item4CreateDate);
-        itemRepository.save(item4);
+        Item item1 = itemList.get(0);
+        Item item2 = itemList.get(1);
 
         LocalDateTime searchDate = of(
                 2023,
@@ -280,32 +247,17 @@ class ItemServiceImplTest {
     @DisplayName("아이템 조회 성공 : 특정 시간")
     void 아이템조회_성공() throws ItemNotFoundException, UnavailableDateTimeException {
         // given
-        LocalDateTime createDate = LocalDateTime.of(
-                2023, 1, 1, 11, 11, 0
-        );
-        Item item1 = new Item("왕뚜껑", 1111000, createDate);
-        itemRepository.save(item1);
-
-        // 2023-03-01 11:11:00
-        LocalDateTime item2CreateDate = createDate.plusMonths(2);
-        Item item2 = new Item(item1.getName(), 30100, item2CreateDate);
-        itemRepository.save(item2);
-
-        // 2023-03-11 11:11:00
-        LocalDateTime item3CreateDate = item2CreateDate.plusDays(10);
-        Item item3 = new Item(item1.getName(), 31100, item3CreateDate);
-        itemRepository.save(item3);
-
-        // 2023-06-11 11:11:00
-        LocalDateTime item4CreateDate = item3CreateDate.plusMonths(3);
-        Item item4 = new Item(item1.getName(), 61100, item4CreateDate);
-        itemRepository.save(item4);
+        List<Item> itemList =
+                saveAndGetItemList("감자튀김", 1000, 2000, 3000, 2, 3);
 
         LocalDateTime searchDate = of(
                 2023,
                 9,
                 5,
                 12, 52, 0);
+
+        Item item1 = itemList.get(0);
+        Item item4 = itemList.get(3);
 
         ItemSearchTimeDto itemSearchTimeDto = new ItemSearchTimeDto(item1.getName(), searchDate);
 
@@ -318,30 +270,18 @@ class ItemServiceImplTest {
         assertThat(itemDto.getPrice()).isEqualTo(item4.getPrice());
 
     }
-
     @Test
     @DisplayName("아이템 조회 성공 : 여러 개")
     void 아이템조회_성공_여러개() throws ItemNotFoundException, UnavailableDateTimeException {
         // given
-        LocalDateTime createDate = LocalDateTime.of(
-                2023, 9, 5, 13, 22, 0
-        );
-        Item item1 = new Item("짱구", 1000, createDate);
-        itemRepository.save(item1);
-
-        // 2023-09-05 13:25:00
-        LocalDateTime item2CreateDate = createDate.plusMinutes(3);
-        Item item2 = new Item(item1.getName(), 2000, item2CreateDate);
-        itemRepository.save(item2);
-
-        // 2023-09-05 13:28:00
-        LocalDateTime item3CreateDate = item2CreateDate.plusMinutes(3);
-        Item item3 = new Item(item1.getName(), 3000, item3CreateDate);
-        itemRepository.save(item3);
+        List<Item> itemList =
+                saveAndGetItemList("왕뚜껑", 1000, 2000, 3000, 2, 3);
 
         LocalDateTime searchDate = of(
                 2023, 9, 5, 13, 27, 0
                 );
+
+        Item item2 = itemList.get(1);
 
         ItemSearchTimeDto itemSearchTimeDto = new ItemSearchTimeDto(item2.getName(), searchDate);
 
@@ -375,4 +315,36 @@ class ItemServiceImplTest {
 
     }
 
+
+    private List<Item> saveAndGetItemList(String itemName, int priceA, int priceB, int priceC, int plusMonthsA, int plusMonthsB) {
+        LocalDateTime createDate = LocalDateTime.of(
+                2023, 1, 1, 12, 20, 0
+        );
+
+        Item item1 = new Item(itemName, priceA, createDate);
+        itemRepository.save(item1);
+
+        // 2023-09-05 13:25:00
+        LocalDateTime item2CreateDate = createDate.plusMonths(plusMonthsA);
+        Item item2 = new Item(item1.getName(), priceB, item2CreateDate);
+        itemRepository.save(item2);
+
+        // 2023-09-05 13:28:00
+        LocalDateTime item3CreateDate = item2CreateDate.plusMonths(plusMonthsB);
+        Item item3 = new Item(item1.getName(), priceC, item3CreateDate);
+        itemRepository.save(item3);
+
+        List<Item> itemList = new ArrayList<>();
+        itemList.add(item1);
+        itemList.add(item2);
+        itemList.add(item3);
+
+        return itemList;
+    }
+
+    private ItemCreateDto saveAndGetItemCreateDto(String name, int price, Role role) {
+        ItemCreateDto itemCreateDto = new ItemCreateDto(name, price, role);
+        itemRepository.save(new Item(itemCreateDto));
+        return itemCreateDto;
+    }
 }
