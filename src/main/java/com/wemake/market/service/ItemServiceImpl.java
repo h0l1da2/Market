@@ -93,6 +93,7 @@ public class ItemServiceImpl implements ItemService {
         ItemPriceHistory newItemPriceHistory = itemPriceHistoryRepository.save(itemPriceHistory);
 
         return ItemUpdateDto.builder()
+                .id(item.getId())
                 .price(newItemPriceHistory.getPrice())
                 .date(newItemPriceHistory.getDate())
                 .build();
@@ -155,14 +156,14 @@ public class ItemServiceImpl implements ItemService {
 
         ItemPriceHistory resultItemPriceHistory = resultItemList.get(resultItemList.size() - 1);
 
-        ItemDto resultItemDto = ItemDto.builder()
+
+        return ItemDto.builder()
                 .id(findItem.getId())
                 .name(findItem.getName())
                 .price(resultItemPriceHistory.getPrice())
                 .date(resultItemPriceHistory.getDate())
                 .build();
 
-        return resultItemDto;
     }
 
     private void checkMarketRole(Role role, String pwd) throws NotAuthorityException {
