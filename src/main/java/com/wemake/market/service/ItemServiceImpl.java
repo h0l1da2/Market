@@ -52,7 +52,13 @@ public class ItemServiceImpl implements ItemService {
         // 아이템 넣기
         Item item = itemRepository.save(new Item(itemCreateDto));
 
-        return new ItemCreateDto(item);
+        ItemCreateDto resultItemCreateDto = ItemCreateDto.builder()
+                .name(item.getName())
+                .price(item.getPrice())
+                .date(item.getDate())
+                .build();
+
+        return resultItemCreateDto;
 
     }
 
@@ -69,7 +75,13 @@ public class ItemServiceImpl implements ItemService {
 
         Item updateItem = itemRepository.save(new Item(itemUpdateDto));
 
-        return new ItemUpdateDto(updateItem);
+        ItemUpdateDto resultUpdateDto = ItemUpdateDto.builder()
+                .name(updateItem.getName())
+                .price(updateItem.getPrice())
+                .date(updateItem.getDate())
+                .build();
+
+        return resultUpdateDto;
     }
 
     @Transactional
@@ -140,7 +152,14 @@ public class ItemServiceImpl implements ItemService {
         }
 
         Item resultItem = resultItemList.get(resultItemList.size() - 1);
-        return new ItemDto(resultItem);
+
+        ItemDto resultItemDto = ItemDto.builder()
+                .name(resultItem.getName())
+                .price(resultItem.getPrice())
+                .date(resultItem.getDate())
+                .build();
+
+        return resultItemDto;
     }
 
     private void checkMarketRole(Role role, String pwd) throws NotAuthorityException {

@@ -1,14 +1,16 @@
 package com.wemake.market.domain.dto;
 
-import com.wemake.market.domain.Item;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Data
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ItemDto {
 
     @NotBlank
@@ -18,13 +20,4 @@ public class ItemDto {
     private int price;
     private LocalDateTime date;
 
-    protected ItemDto() {
-
-    }
-
-    public ItemDto(Item item) {
-        this.name = item.getName();
-        this.price = item.getPrice();
-        this.date = item.getDate();
-    }
 }
