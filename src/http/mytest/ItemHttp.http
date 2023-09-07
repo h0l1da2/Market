@@ -3,7 +3,7 @@ POST http://localhost:8080/item
 Content-Type: application/json
 
 {
-  "name": "아이템",
+  "name": "아이템11",
   "price": 3000,
   "role": "MARKET"
 }
@@ -22,8 +22,8 @@ PUT http://localhost:8080/item
 Content-Type: application/json
 
 {
-  "name": "아이템5",
-  "price": 3000,
+  "name": "아이템11",
+  "price": 57000,
   "role": "MARKET",
   "password": "lovemarket1004"
 }
@@ -65,8 +65,8 @@ GET http://localhost:8080/item
 Content-Type: application/json
 
 {
-  "name": "아이템",
-  "date": "2023-09-05T17:00:00"
+  "name": "아이템11",
+  "date": "2023-09-06T12:53:00"
 }
 
 ### 아이템 보기 실패 과거 시간 (시간 yyyy-MM-ddTHH:mm:ss)

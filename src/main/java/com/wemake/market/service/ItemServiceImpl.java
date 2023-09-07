@@ -19,9 +19,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import static java.time.LocalDateTime.*;
 import static org.springframework.data.domain.Sort.Direction.*;
 
 @Slf4j
@@ -88,7 +88,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto searchItemByTime(ItemSearchTimeDto itemSearchTimeDto) throws ItemNotFoundException, UnavailableDateTimeException {
+    public ItemDto searchItemByTime(Long id, String date) throws ItemNotFoundException, UnavailableDateTimeException {
 
         /**
          * 13 로 구한다면 -> 13 ~ 현재 시간까지 데이터를 구해서
@@ -96,17 +96,18 @@ public class ItemServiceImpl implements ItemService {
          * 이전 ~ 12:59 으로 구해서 마지막 데이터
          */
 
-        List<Item> findItems = itemRepository.findByName(itemSearchTimeDto.getName());
+        List<Item> findItems = itemRepository.findById(id).stream().toList();
 
         if (findItems.size() == 0) {
             throw new ItemNotFoundException();
         }
 
+        DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+        LocalDateTime dateForItemPrice = LocalDateTime.parse(date, dateTimeFormat);
+
         Item findItem = findItems.get(0);
 
-        LocalDateTime userWantPriceDate = itemSearchTimeDto.getDate();
-
-        if (userWantPriceDate.isBefore(findItem.getDate())) {
+        if (dateForItemPrice.isBefore(findItem.getDate())) {
             throw new UnavailableDateTimeException();
         }
 
@@ -119,7 +120,8 @@ public class ItemServiceImpl implements ItemService {
                 findItem.getDate().getMinute(),
                 findItem.getDate().getSecond()
         );
-        LocalDateTime limitDateTime = userWantPriceDate;
+
+        LocalDateTime limitDateTime = dateForItemPrice;
 
         PageRequest page = PageRequest.of(0, 1, Sort.by(DESC, "date"));
 

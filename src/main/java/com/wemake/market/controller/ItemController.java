@@ -23,10 +23,10 @@ public class ItemController {
     /**
      * (상품 이름 + 특정 시간)으로 주문을 검색할 수 있음.
      */
-    @GetMapping
-    public ResponseEntity<ItemDto> searchTime(@RequestBody @Valid ItemSearchTimeDto itemSearchTimeDto) throws ItemNotFoundException, UnavailableDateTimeException {
+    @GetMapping("{id}")
+    public ResponseEntity<ItemDto> searchTime(@PathVariable Long id, String date) throws ItemNotFoundException, UnavailableDateTimeException {
 
-        ItemDto itemDto = itemService.searchItemByTime(itemSearchTimeDto);
+        ItemDto itemDto = itemService.searchItemByTime(id, date);
 
         return ResponseEntity.ok(itemDto);
     }
