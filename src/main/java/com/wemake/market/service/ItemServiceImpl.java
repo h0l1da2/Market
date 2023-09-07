@@ -88,7 +88,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto searchItemByTime(Long id, String date) throws ItemNotFoundException, UnavailableDateTimeException {
+    public ItemDto searchItemByTime(String name, String date) throws ItemNotFoundException, UnavailableDateTimeException {
 
         /**
          * 13 로 구한다면 -> 13 ~ 현재 시간까지 데이터를 구해서
@@ -96,7 +96,7 @@ public class ItemServiceImpl implements ItemService {
          * 이전 ~ 12:59 으로 구해서 마지막 데이터
          */
 
-        List<Item> findItems = itemRepository.findById(id).stream().toList();
+        List<Item> findItems = itemRepository.findByName(name);
 
         if (findItems.size() == 0) {
             throw new ItemNotFoundException();
