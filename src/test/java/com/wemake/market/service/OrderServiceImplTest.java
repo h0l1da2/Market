@@ -76,7 +76,7 @@ class OrderServiceImplTest {
                 .wheres(Where.ITEM)
                 .build();
 
-        coupon.isFixedPrice(2000);
+        coupon.isFixedPrice(100);
 
         OrderDto orderDto = getOrderDtoUserCoupon(list, 1000, coupon);
 
@@ -84,12 +84,12 @@ class OrderServiceImplTest {
         int payPrice = orderService.getOrderPrice(orderDto);
 
         // then
-        assertThat(payPrice).isEqualTo(9000);
+        assertThat(payPrice).isEqualTo(10000);
     }
 
     @Test
     @DisplayName("결제 금액 계산 쿠폰 성공! : 아이템 하나,무료")
-    void 결제금액_성공_하나_쿠폰_아이템_고정값_무료() throws ItemNotFoundException {
+    void 주문_성공_하나_쿠폰_아이템_고정값_무료() throws ItemNotFoundException {
         // given
         Item item = saveItem("감자", 1000);
         OrderItemDto orderItemDto = getOrderItemDto(item, 10);
@@ -104,7 +104,7 @@ class OrderServiceImplTest {
                 .wheres(Where.ITEM)
                 .build();
 
-        coupon.isFixedPrice(200000);
+        coupon.isFixedPrice(1000);
 
         OrderDto orderDto = getOrderDtoUserCoupon(list, 1000, coupon);
 
@@ -112,7 +112,7 @@ class OrderServiceImplTest {
         int payPrice = orderService.getOrderPrice(orderDto);
 
         // then
-        assertThat(payPrice).isEqualTo(0);
+        assertThat(payPrice).isEqualTo(1000);
     }
 
     @Test
@@ -131,7 +131,7 @@ class OrderServiceImplTest {
                 .how(How.PERCENTAGE)
                 .wheres(Where.ITEM)
                 .build();
-        coupon.isPercentagePrice(10);
+        coupon.isPercentagePrice(20);
 
         OrderDto orderDto = getOrderDtoUserCoupon(list, 1000, coupon);
 
@@ -139,7 +139,7 @@ class OrderServiceImplTest {
         int payPrice = orderService.getOrderPrice(orderDto);
 
         // then
-        assertThat(payPrice).isEqualTo(10000);
+        assertThat(payPrice).isEqualTo(9000);
     }
 
     @Test
@@ -206,6 +206,44 @@ class OrderServiceImplTest {
 
         // then
         assertThat(payPrice).isEqualTo(23000);
+    }
+
+    @Test
+    @DisplayName("결제 금액 계산 쿠폰 성공! : 아이템 여러개,고정")
+    void 결제금액_성공_쿠폰_아이템_고정_여러개() throws ItemNotFoundException {
+        // given
+        // 10000
+        Item item1 = saveItem("감자", 1000);
+        OrderItemDto orderItemDto1 = getOrderItemDto(item1, 10);
+
+        // 12000
+        Item item2 = saveItem("고구마", 3000);
+        OrderItemDto orderItemDto2 = getOrderItemDto(item2, 4);
+
+        // 4000
+        Item item3 = saveItem("치즈", 2000);
+        OrderItemDto orderItemDto3 = getOrderItemDto(item3, 2);
+
+        // 총 26000
+        List<OrderItemDto> list = new ArrayList<>();
+        list.add(orderItemDto1);
+        list.add(orderItemDto2);
+        list.add(orderItemDto3);
+
+        Coupon coupon = Coupon.builder()
+                .item(item1)
+                .how(How.FIXED)
+                .wheres(Where.ITEM)
+                .amount(200)
+                .build();
+
+        OrderDto orderDto = getOrderDtoUserCoupon(list, 1000, coupon);
+
+        // when
+        int payPrice = orderService.getOrderPrice(orderDto);
+
+        // then
+        assertThat(payPrice).isEqualTo(25000);
     }
 
 
