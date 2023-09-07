@@ -3,6 +3,7 @@ package com.wemake.market.controller;
 import com.wemake.market.domain.dto.CouponDto;
 import com.wemake.market.domain.dto.CouponSaveDto;
 import com.wemake.market.exception.DuplicateCouponException;
+import com.wemake.market.exception.FormErrorException;
 import com.wemake.market.exception.ItemNotFoundException;
 import com.wemake.market.exception.NotAuthorityException;
 import com.wemake.market.service.CouponService;
@@ -21,7 +22,7 @@ public class CouponController {
     private final CouponService couponService;
 
     @PostMapping
-    public ResponseEntity<CouponDto> save(@RequestBody @Valid CouponSaveDto couponSaveDto) throws ItemNotFoundException, NotAuthorityException, DuplicateCouponException {
+    public ResponseEntity<CouponDto> save(@RequestBody @Valid CouponSaveDto couponSaveDto) throws ItemNotFoundException, NotAuthorityException, DuplicateCouponException, FormErrorException {
 
         CouponDto couponDto = couponService.saveCoupon(couponSaveDto);
 

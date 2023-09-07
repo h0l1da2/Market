@@ -1,7 +1,6 @@
 package com.wemake.market.handler;
 
 import com.wemake.market.exception.DuplicateCouponException;
-import com.wemake.market.exception.ItemNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

@@ -1,14 +1,9 @@
 package com.wemake.market.service;
 
-import com.wemake.market.domain.Coupon;
-import com.wemake.market.domain.Item;
-import com.wemake.market.domain.Role;
+import com.wemake.market.domain.*;
 import com.wemake.market.domain.dto.CouponDto;
 import com.wemake.market.domain.dto.CouponSaveDto;
-import com.wemake.market.exception.DuplicateCouponException;
-import com.wemake.market.exception.DuplicateItemException;
-import com.wemake.market.exception.ItemNotFoundException;
-import com.wemake.market.exception.NotAuthorityException;
+import com.wemake.market.exception.*;
 import com.wemake.market.repository.CouponRepository;
 import com.wemake.market.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,14 +23,25 @@ public class CouponServiceImpl implements CouponService {
     private final CouponRepository couponRepository;
     private final ItemRepository itemRepository;
     @Override
-    public CouponDto saveCoupon(CouponSaveDto couponSaveDto) throws ItemNotFoundException, NotAuthorityException, DuplicateCouponException {
+    public CouponDto saveCoupon(CouponSaveDto couponSaveDto) throws ItemNotFoundException, DuplicateCouponException, FormErrorException {
 
-        checkMarketRole(couponSaveDto.getRole(), couponSaveDto.getPassword());
+        couponSaveDtoFormCheck(couponSaveDto);
 
-        Item item = itemRepository.findById(couponSaveDto.getItemId()).orElseThrow(ItemNotFoundException::new);
+        Item item = null;
+        Where userWhere = couponSaveDto.getWheres();
+        Long itemId = couponSaveDto.getItemId();
 
-        couponRepository.findByItem(item).orElseThrow(DuplicateCouponException::new);
+        if (userWhere.equals(Where.ITEM) && itemId != null) {
 
+            item = itemRepository.findById(couponSaveDto.getItemId()).orElseThrow(ItemNotFoundException::new);
+
+            Coupon duplicateCoupon = couponRepository.findByItem(item).orElse(null);
+
+            if (duplicateCoupon != null) {
+                throw new DuplicateCouponException();
+            }
+
+        }
         Coupon coupon = Coupon.builder()
                 .item(item)
                 .how(couponSaveDto.getHow())
@@ -46,14 +52,35 @@ public class CouponServiceImpl implements CouponService {
 
         Coupon saveCoupon = couponRepository.save(coupon);
 
+        Item couponItem = coupon.getItem();
+        itemId = couponItem != null ? coupon.getId() : null;
+
         return CouponDto.builder()
                 .couponId(saveCoupon.getId())
-                .itemId(item.getId())
+                .itemId(itemId)
                 .wheres(saveCoupon.getWheres())
                 .how(saveCoupon.getHow())
                 .amount(saveCoupon.getAmount())
                 .rate(saveCoupon.getRate())
                 .build();
+    }
+
+    private void couponSaveDtoFormCheck(CouponSaveDto couponSaveDto) throws FormErrorException {
+        if (couponSaveDto.getWheres() == null | couponSaveDto.getHow() == null) {
+            throw new FormErrorException();
+        }
+        if (couponSaveDto.getHow() == How.PERCENTAGE && couponSaveDto.getRate() == 0) {
+            throw new FormErrorException();
+        }
+        if (couponSaveDto.getHow() == How.FIXED && couponSaveDto.getAmount() == 0) {
+            throw new FormErrorException();
+        }
+        if (couponSaveDto.getHow() == How.PERCENTAGE && couponSaveDto.getAmount() != 0) {
+            throw new FormErrorException();
+        }
+        if (couponSaveDto.getHow() == How.FIXED && couponSaveDto.getRate() != 0) {
+            throw new FormErrorException();
+        }
     }
 
     private void checkMarketRole(Role role, String pwd) throws NotAuthorityException {
