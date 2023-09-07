@@ -38,7 +38,8 @@ class OrderServiceImplTest {
     @DisplayName("결제 금액 계산 성공! : 아이템 하나, 쿠폰 사용 X")
     void 결제금액_성공_하나() throws ItemNotFoundException {
         // given
-        OrderItemDto orderItemDto = saveItemAndgetOrderItemDto("감자", 1000, 10);
+        Item item = saveItem("감자", 1000);
+        OrderItemDto orderItemDto = getOrderItemDto(item, 10);
 
         // 총 10000
         List<OrderItemDto> list = new ArrayList<>();
@@ -62,13 +63,19 @@ class OrderServiceImplTest {
     @DisplayName("결제 금액 계산 쿠폰 성공! : 아이템 하나,고정값")
     void 결제금액_성공_하나_쿠폰_아이템_고정값() throws ItemNotFoundException {
         // given
-        OrderItemDto orderItemDto = saveItemAndgetOrderItemDto("감자", 1000, 10);
+        Item item = saveItem("감자", 1000);
+        OrderItemDto orderItemDto = getOrderItemDto(item, 10);
 
         // 총 10000
         List<OrderItemDto> list = new ArrayList<>();
         list.add(orderItemDto);
 
-        Coupon coupon = new Coupon("감자", How.FIXED, Where.ITEM);
+        Coupon coupon = Coupon.builder()
+                .item(item)
+                .how(How.FIXED)
+                .wheres(Where.ITEM)
+                .build();
+
         coupon.isFixedPrice(2000);
 
         OrderDto orderDto = getOrderDtoUserCoupon(list, 1000, coupon);
@@ -80,29 +87,23 @@ class OrderServiceImplTest {
         assertThat(payPrice).isEqualTo(9000);
     }
 
-    private OrderItemDto saveItemAndgetOrderItemDto(String name, int price, int count) {
-
-        Item item = saveItem(name, price);
-
-        OrderItemDto orderItemDto = OrderItemDto.builder()
-                .id(item.getId())
-                .count(count)
-                .build();
-
-        return orderItemDto;
-    }
-
     @Test
     @DisplayName("결제 금액 계산 쿠폰 성공! : 아이템 하나,무료")
     void 결제금액_성공_하나_쿠폰_아이템_고정값_무료() throws ItemNotFoundException {
         // given
-        OrderItemDto orderItemDto = saveItemAndgetOrderItemDto("감자", 1000, 10);
+        Item item = saveItem("감자", 1000);
+        OrderItemDto orderItemDto = getOrderItemDto(item, 10);
 
         // 총 10000
         List<OrderItemDto> list = new ArrayList<>();
         list.add(orderItemDto);
 
-        Coupon coupon = new Coupon("감자", How.FIXED, Where.ITEM);
+        Coupon coupon = Coupon.builder()
+                .item(item)
+                .how(How.FIXED)
+                .wheres(Where.ITEM)
+                .build();
+
         coupon.isFixedPrice(200000);
 
         OrderDto orderDto = getOrderDtoUserCoupon(list, 1000, coupon);
@@ -118,13 +119,18 @@ class OrderServiceImplTest {
     @DisplayName("결제 금액 계산 쿠폰 성공! : 아이템 하나,퍼센트")
     void 결제금액_성공_쿠폰_아이템_퍼센트_하나() throws ItemNotFoundException {
         // given
-        OrderItemDto orderItemDto = saveItemAndgetOrderItemDto("감자", 1000, 10);
+        Item item = saveItem("감자", 1000);
+        OrderItemDto orderItemDto = getOrderItemDto(item, 10);
 
         // 총 10000
         List<OrderItemDto> list = new ArrayList<>();
         list.add(orderItemDto);
 
-        Coupon coupon = new Coupon("감자", How.PERCENTAGE, Where.ITEM);
+        Coupon coupon = Coupon.builder()
+                .item(item)
+                .how(How.PERCENTAGE)
+                .wheres(Where.ITEM)
+                .build();
         coupon.isPercentagePrice(10);
 
         OrderDto orderDto = getOrderDtoUserCoupon(list, 1000, coupon);
@@ -140,13 +146,18 @@ class OrderServiceImplTest {
     @DisplayName("결제 금액 계산 쿠폰 성공! : 아이템 하나,백퍼센트")
     void 결제금액_성공_쿠폰_아이템_퍼센트_하나_무료() throws ItemNotFoundException {
         // given
-        OrderItemDto orderItemDto = saveItemAndgetOrderItemDto("감자", 1000, 10);
+        Item item = saveItem("감자", 1000);
+        OrderItemDto orderItemDto = getOrderItemDto(item, 10);
 
         // 총 10000
         List<OrderItemDto> list = new ArrayList<>();
         list.add(orderItemDto);
 
-        Coupon coupon = new Coupon("감자", How.PERCENTAGE, Where.ITEM);
+        Coupon coupon = Coupon.builder()
+                .item(item)
+                .how(How.PERCENTAGE)
+                .wheres(Where.ITEM)
+                .build();
         coupon.isPercentagePrice(100);
 
         OrderDto orderDto = getOrderDtoUserCoupon(list, 1000, coupon);
@@ -163,13 +174,16 @@ class OrderServiceImplTest {
     void 결제금액_성공_쿠폰_아이템_퍼센트_여러개() throws ItemNotFoundException {
         // given
         // 10000
-        OrderItemDto orderItemDto1 = saveItemAndgetOrderItemDto("감자", 1000, 10);
+        Item item1 = saveItem("감자", 1000);
+        OrderItemDto orderItemDto1 = getOrderItemDto(item1, 10);
 
         // 12000
-        OrderItemDto orderItemDto2 = saveItemAndgetOrderItemDto("고구마", 3000, 4);
+        Item item2 = saveItem("고구마", 3000);
+        OrderItemDto orderItemDto2 = getOrderItemDto(item2, 4);
 
         // 4000
-        OrderItemDto orderItemDto3 = saveItemAndgetOrderItemDto("치즈", 2000, 2);
+        Item item3 = saveItem("치즈", 2000);
+        OrderItemDto orderItemDto3 = getOrderItemDto(item3, 2);
 
         // 총 26000
         List<OrderItemDto> list = new ArrayList<>();
@@ -177,7 +191,12 @@ class OrderServiceImplTest {
         list.add(orderItemDto2);
         list.add(orderItemDto3);
 
-        Coupon coupon = new Coupon("고구마", How.PERCENTAGE, Where.ITEM);
+        Coupon coupon = Coupon.builder()
+                .item(item1)
+                .how(How.PERCENTAGE)
+                .wheres(Where.ITEM)
+                .build();
+
         coupon.isPercentagePrice(40);
 
         OrderDto orderDto = getOrderDtoUserCoupon(list, 1000, coupon);
@@ -186,24 +205,27 @@ class OrderServiceImplTest {
         int payPrice = orderService.getOrderPrice(orderDto);
 
         // then
-        assertThat(payPrice).isEqualTo(22200);
+        assertThat(payPrice).isEqualTo(23000);
     }
+
 
     // 과연 아이템이 중복으로 들어갔다면 ???
     // 옵션이 생길 경우... -> 이름만으로 비교하면 나중에 고칠 게 많아지려나
-
     @Test
     @DisplayName("결제 금액 계산 쿠폰 성공! : 주문,퍼센트,여러개")
     void 결제금액_성공_하나_쿠폰_주문_퍼센트_여러개() throws ItemNotFoundException {
         // given
         // 10000
-        OrderItemDto orderItemDto1 = saveItemAndgetOrderItemDto("감자", 1000, 10);
+        Item item1 = saveItem("감자", 1000);
+        OrderItemDto orderItemDto1 = getOrderItemDto(item1, 10);
 
         // 12000
-        OrderItemDto orderItemDto2 = saveItemAndgetOrderItemDto("고구마", 3000, 4);
+        Item item2 = saveItem("고구마", 3000);
+        OrderItemDto orderItemDto2 = getOrderItemDto(item2, 4);
 
         // 4000
-        OrderItemDto orderItemDto3 = saveItemAndgetOrderItemDto("치즈", 2000, 2);
+        Item item3 = saveItem("치즈", 2000);
+        OrderItemDto orderItemDto3 = getOrderItemDto(item3, 2);
 
         // 총 26000
         List<OrderItemDto> list = new ArrayList<>();
@@ -211,7 +233,11 @@ class OrderServiceImplTest {
         list.add(orderItemDto2);
         list.add(orderItemDto3);
 
-        Coupon coupon = new Coupon(How.PERCENTAGE, Where.ORDER);
+        Coupon coupon = Coupon.builder()
+                .item(item1)
+                .how(How.PERCENTAGE)
+                .wheres(Where.ORDER)
+                .build();
         coupon.isPercentagePrice(20);
 
         OrderDto orderDto = getOrderDtoUserCoupon(list, 1000, coupon);
@@ -228,13 +254,16 @@ class OrderServiceImplTest {
     void 결제금액_성공_하나_쿠폰_주문_퍼센트_여러개_백퍼() throws ItemNotFoundException {
         // given
         // 10000
-        OrderItemDto orderItemDto1 = saveItemAndgetOrderItemDto("감자", 1000, 10);
+        Item item1 = saveItem("감자", 1000);
+        OrderItemDto orderItemDto1 = getOrderItemDto(item1, 10);
 
         // 12000
-        OrderItemDto orderItemDto2 = saveItemAndgetOrderItemDto("고구마", 3000, 4);
+        Item item2 = saveItem("고구마", 3000);
+        OrderItemDto orderItemDto2 = getOrderItemDto(item2, 4);
 
         // 4000
-        OrderItemDto orderItemDto3 = saveItemAndgetOrderItemDto("치즈", 2000, 2);
+        Item item3 = saveItem("치즈", 2000);
+        OrderItemDto orderItemDto3 = getOrderItemDto(item3, 3);
 
         // 총 26000
         List<OrderItemDto> list = new ArrayList<>();
@@ -242,7 +271,12 @@ class OrderServiceImplTest {
         list.add(orderItemDto2);
         list.add(orderItemDto3);
 
-        Coupon coupon = new Coupon(How.PERCENTAGE, Where.ORDER);
+        Coupon coupon = Coupon.builder()
+                .item(item1)
+                .how(How.PERCENTAGE)
+                .wheres(Where.ORDER)
+                .build();
+
         coupon.isPercentagePrice(100);
 
         OrderDto orderDto = getOrderDtoUserCoupon(list, 1000, coupon);
@@ -259,13 +293,16 @@ class OrderServiceImplTest {
     void 결제금액_성공_하나_쿠폰_주문_고정값_여러개() throws ItemNotFoundException {
         // given
         // 10000
-        OrderItemDto orderItemDto1 = saveItemAndgetOrderItemDto("감자", 1000, 10);
+        Item item1 = saveItem("감자", 1000);
+        OrderItemDto orderItemDto1 = getOrderItemDto(item1, 10);
 
         // 12000
-        OrderItemDto orderItemDto2 = saveItemAndgetOrderItemDto("고구마", 3000, 4);
+        Item item2 = saveItem("고구마", 3000);
+        OrderItemDto orderItemDto2 = getOrderItemDto(item2, 4);
 
         // 4000
-        OrderItemDto orderItemDto3 = saveItemAndgetOrderItemDto("치즈", 2000, 2);
+        Item item3 = saveItem("치즈", 2000);
+        OrderItemDto orderItemDto3 = getOrderItemDto(item3, 2);
 
         // 총 26000
         List<OrderItemDto> list = new ArrayList<>();
@@ -273,7 +310,12 @@ class OrderServiceImplTest {
         list.add(orderItemDto2);
         list.add(orderItemDto3);
 
-        Coupon coupon = new Coupon(How.FIXED, Where.ORDER);
+        Coupon coupon = Coupon.builder()
+                .item(item1)
+                .how(How.FIXED)
+                .wheres(Where.ORDER)
+                .build();
+
         coupon.isFixedPrice(3000);
 
         OrderDto orderDto = getOrderDtoUserCoupon(list, 1000, coupon);
@@ -290,13 +332,16 @@ class OrderServiceImplTest {
     void 결제금액_성공_하나_쿠폰_주문_고정값_여러개_무료() throws ItemNotFoundException {
         // given
         // 10000
-        OrderItemDto orderItemDto1 = saveItemAndgetOrderItemDto("감자", 1000, 10);
+        Item item1 = saveItem("감자", 1000);
+        OrderItemDto orderItemDto1 = getOrderItemDto(item1, 10);
 
         // 12000
-        OrderItemDto orderItemDto2 = saveItemAndgetOrderItemDto("고구마", 3000, 4);
+        Item item2 = saveItem("고구마", 3000);
+        OrderItemDto orderItemDto2 = getOrderItemDto(item2, 4);
 
         // 4000
-        OrderItemDto orderItemDto3 = saveItemAndgetOrderItemDto("치즈", 2000, 2);
+        Item item3 = saveItem("치즈", 2000);
+        OrderItemDto orderItemDto3 = getOrderItemDto(item3, 2);
 
         // 총 26000
 
@@ -305,7 +350,12 @@ class OrderServiceImplTest {
         list.add(orderItemDto2);
         list.add(orderItemDto3);
 
-        Coupon coupon = new Coupon(How.FIXED, Where.ORDER);
+        Coupon coupon = Coupon.builder()
+                .item(item1)
+                .how(How.FIXED)
+                .wheres(Where.ORDER)
+                .build();
+
         coupon.isFixedPrice(3000000);
 
         OrderDto orderDto = getOrderDtoUserCoupon(list, 1000, coupon);
@@ -359,4 +409,13 @@ class OrderServiceImplTest {
 
     }
 
+    private OrderItemDto getOrderItemDto(Item item, int count) {
+
+        OrderItemDto orderItemDto = OrderItemDto.builder()
+                .id(item.getId())
+                .count(count)
+                .build();
+
+        return orderItemDto;
+    }
 }

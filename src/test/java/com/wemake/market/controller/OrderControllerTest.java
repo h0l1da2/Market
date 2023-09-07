@@ -46,7 +46,9 @@ class OrderControllerTest {
     @Test
     @DisplayName("결제가격 성공 : 아이템 한개")
     void 결제가격_성공_아이템한개() throws Exception {
-        List<OrderItemDto> list = itemSaveAndAddList();
+        Item item = saveItem("감자", 1000);
+        List<OrderItemDto> list = orderItemAddList(item.getId());
+
         OrderDto orderDto = getOrderDto(list);
 
         mockMvc.perform(
@@ -58,13 +60,12 @@ class OrderControllerTest {
 
     }
 
-    private List<OrderItemDto> itemSaveAndAddList() {
-        Item item = saveItem("감자", 3000);
+    private List<OrderItemDto> orderItemAddList(Long itemId) {
 
         List<OrderItemDto> list = new ArrayList<>();
 
         OrderItemDto orderItemDto = OrderItemDto.builder()
-                .id(item.getId())
+                .id(itemId)
                 .count(2)
                 .build();
 
@@ -93,10 +94,10 @@ class OrderControllerTest {
     @DisplayName("결제가격 성공 : 아이템한개,아이템쿠폰(고정값)")
     void 결제가격_성공_아이템한개_쿠폰_고정값() throws Exception {
 
-        List<OrderItemDto> list = itemSaveAndAddList();
+        Item item = saveItem("감자", 1000);
+        List<OrderItemDto> list = orderItemAddList(item.getId());
 
-        Coupon coupon = getFixedCoupon(3000);
-
+        Coupon coupon = getFixedCoupon(item, 1000);
 
         OrderDto orderDto = getOrderDtoUserCoupon(list, coupon);
 
@@ -113,9 +114,10 @@ class OrderControllerTest {
     @DisplayName("결제가격 성공 : 아이템여러개,아이템쿠폰(고정값)")
     void 결제가격_성공_아이템여러개_쿠폰_고정값() throws Exception {
 
-        List<OrderItemDto> list = getOrderItemDtos();
+        Item item = saveItem("감자", 1000);
+        List<OrderItemDto> list = orderItemAddList(item.getId());
 
-        Coupon coupon = getFixedCoupon(1000);
+        Coupon coupon = getFixedCoupon(item, 1000);
 
         OrderDto orderDto = getOrderDtoUserCoupon(list, coupon);
 
@@ -132,9 +134,10 @@ class OrderControllerTest {
     @DisplayName("결제가격 성공 : 아이템한개,아이템쿠폰(비율)")
     void 결제가격_성공_아이템한개_쿠폰_비율() throws Exception {
 
-        List<OrderItemDto> list = itemSaveAndAddList();
+        Item item = saveItem("감자", 1000);
+        List<OrderItemDto> list = orderItemAddList(item.getId());
 
-        Coupon coupon = getPercentageCoupon(20);
+        Coupon coupon = getPercentageCoupon(item, 20);
 
         OrderDto orderDto = getOrderDtoUserCoupon(list, coupon);
 
@@ -151,9 +154,10 @@ class OrderControllerTest {
     @DisplayName("결제가격 성공 : 아이템여러개,아이템쿠폰(비율)")
     void 결제가격_성공_아이템여러개_쿠폰_비율() throws Exception {
 
-        List<OrderItemDto> list = getOrderItemDtos();
+        Item item = saveItem("감자", 1000);
+        List<OrderItemDto> list = orderItemAddList(item.getId());
 
-        Coupon coupon = getPercentageCoupon(20);
+        Coupon coupon = getPercentageCoupon(item, 20);
 
         OrderDto orderDto = getOrderDtoUserCoupon(list, coupon);
 
@@ -170,9 +174,10 @@ class OrderControllerTest {
     @DisplayName("결제가격 성공 : 아이템한개,주문쿠폰(고정값)")
     void 결제가격_성공_아이템한개_주문쿠폰_고정값() throws Exception {
 
-        List<OrderItemDto> list = itemSaveAndAddList();
+        Item item = saveItem("감자", 1000);
+        List<OrderItemDto> list = orderItemAddList(item.getId());
 
-        Coupon coupon = getFixedCoupon(2000);
+        Coupon coupon = getFixedCoupon(item, 2000);
 
         OrderDto orderDto = getOrderDtoUserCoupon(list, coupon);
 
@@ -189,9 +194,10 @@ class OrderControllerTest {
     @DisplayName("결제가격 성공 : 아이템여러개,주문쿠폰(고정값)")
     void 결제가격_성공_아이템여러개_주문쿠폰_고정값() throws Exception {
 
-        List<OrderItemDto> list = getOrderItemDtos();
+        Item item = saveItem("감자", 1000);
+        List<OrderItemDto> list = orderItemAddList(item.getId());
 
-        Coupon coupon = getFixedCoupon(3000);
+        Coupon coupon = getFixedCoupon(item, 3000);
 
         OrderDto orderDto = getOrderDtoUserCoupon(list, coupon);
 
@@ -208,9 +214,10 @@ class OrderControllerTest {
     @DisplayName("결제가격 성공 : 아이템한개,주문쿠폰(비율)")
     void 결제가격_성공_아이템한개_주문쿠폰_비율() throws Exception {
 
-        List<OrderItemDto> list = itemSaveAndAddList();
+        Item item = saveItem("감자", 1000);
+        List<OrderItemDto> list = orderItemAddList(item.getId());
 
-        Coupon coupon = getPercentageCoupon(20);
+        Coupon coupon = getPercentageCoupon(item, 20);
 
         OrderDto orderDto = getOrderDtoUserCoupon(list, coupon);
 
@@ -227,9 +234,10 @@ class OrderControllerTest {
     @DisplayName("결제가격 성공 : 아이템여러개,주문쿠폰(비율)")
     void 결제가격_성공_아이템여러개_주문쿠폰_비율() throws Exception {
 
-        List<OrderItemDto> list = getOrderItemDtos();
+        Item item = saveItem("감자", 1000);
+        List<OrderItemDto> list = orderItemAddList(item.getId());
 
-        Coupon coupon = getPercentageCoupon(1000);
+        Coupon coupon = getPercentageCoupon(item, 1000);
 
         OrderDto orderDto = getOrderDtoUserCoupon(list, coupon);
 
@@ -242,9 +250,15 @@ class OrderControllerTest {
 
     }
 
-    private static Coupon getPercentageCoupon(int rate) {
-        Coupon coupon = new Coupon(How.PERCENTAGE, Where.ORDER);
-        coupon.isPercentagePrice(rate);
+    private Coupon getPercentageCoupon(Item item, int rate) {
+
+        Coupon coupon = Coupon.builder()
+                .item(item)
+                .how(How.PERCENTAGE)
+                .wheres(Where.ORDER)
+                .rate(rate)
+                .build();
+
         return coupon;
     }
 
@@ -271,19 +285,13 @@ class OrderControllerTest {
         return item;
     }
 
-    private Coupon getFixedCoupon(int amount) {
-        Coupon coupon = new Coupon(How.FIXED, Where.ORDER);
-        coupon.isFixedPrice(amount);
-        return coupon;
-    }
-
     private OrderDto getOrderDto(List<OrderItemDto> list) {
-        OrderDto orderDto = OrderDto.builder()
+        return OrderDto.builder()
                 .items(list)
                 .deliveryPrice(1000)
                 .useCoupon(false)
                 .build();
-        return orderDto;
+
     }
 
     private List<OrderItemDto> getOrderItemDtos() {
@@ -317,13 +325,23 @@ class OrderControllerTest {
 
     private OrderDto getOrderDtoUserCoupon(List<OrderItemDto> list, Coupon coupon) {
 
-        OrderDto orderDto = OrderDto.builder()
+        return OrderDto.builder()
                 .items(list)
                 .deliveryPrice(1000)
                 .useCoupon(true)
                 .coupon(coupon)
                 .build();
 
-        return orderDto;
+    }
+
+    private Coupon getFixedCoupon(Item item, int amount) {
+
+        return Coupon.builder()
+                .item(item)
+                .how(How.FIXED)
+                .wheres(Where.ORDER)
+                .amount(amount)
+                .build();
+
     }
 }
