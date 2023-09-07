@@ -44,9 +44,8 @@ class ItemServiceImplTest {
     @DisplayName("아이템 추가 : 성공 !")
     void createItem() throws NotAuthorityException, DuplicateItemException {
         // given
-        ItemCreateDto itemCreateDto = saveAndGetItemCreateDto("사과", 1000, Role.MARKET);
+        ItemCreateDto itemCreateDto = new ItemCreateDto("감자", 20000, Role.MARKET);
 
-        // when
         ItemCreateDto item = itemService.createItem(itemCreateDto);
 
         // then
@@ -257,7 +256,7 @@ class ItemServiceImplTest {
                 12, 52, 0);
 
         Item item1 = itemList.get(0);
-        Item item4 = itemList.get(3);
+        Item item4 = itemList.get(2);
 
         ItemSearchTimeDto itemSearchTimeDto = new ItemSearchTimeDto(item1.getName(), searchDate);
 
@@ -278,7 +277,7 @@ class ItemServiceImplTest {
                 saveAndGetItemList("왕뚜껑", 1000, 2000, 3000, 2, 3);
 
         LocalDateTime searchDate = of(
-                2023, 9, 5, 13, 27, 0
+                2023, 3, 5, 13, 27, 0
                 );
 
         Item item2 = itemList.get(1);
