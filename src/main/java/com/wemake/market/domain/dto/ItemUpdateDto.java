@@ -12,9 +12,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ItemUpdateDto {
-    @NotBlank
-    @Size(min = 1)
-    private String name;
+    @NotNull
+    @Min(value = 1)
+    private Long id;
     @Min(value = 100)
     private int price;
     @NotNull

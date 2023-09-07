@@ -1,6 +1,7 @@
 package com.wemake.market.domain.dto;
 
 import com.wemake.market.domain.Role;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -11,8 +12,9 @@ import lombok.*;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ItemDeleteDto {
 
-    @NotBlank
-    private String name;
+    @NotNull
+    @Min(value = 1)
+    private Long id;
     @NotNull
     private Role role;
     @NotBlank

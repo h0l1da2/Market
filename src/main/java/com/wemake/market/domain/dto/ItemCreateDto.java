@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ItemCreateDto {
+    private Long id;
     @NotBlank @Size(min = 1)
     private String name;
     @Min(value = 100)

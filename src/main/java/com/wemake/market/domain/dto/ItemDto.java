@@ -1,8 +1,5 @@
 package com.wemake.market.domain.dto;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -13,10 +10,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ItemDto {
 
-    @NotBlank
-    @Size(min = 1)
+    private Long id;
     private String name;
-    @Min(value = 100)
     private int price;
     private LocalDateTime date;
 
