@@ -5,6 +5,7 @@ import com.wemake.market.domain.*;
 import com.wemake.market.domain.dto.ItemCreateDto;
 import com.wemake.market.domain.dto.OrderItemDto;
 import com.wemake.market.domain.dto.OrderDto;
+import com.wemake.market.repository.CouponRepository;
 import com.wemake.market.repository.ItemPriceHistoryRepository;
 import com.wemake.market.repository.ItemRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,9 +37,12 @@ class OrderControllerTest {
     private ItemRepository itemRepository;
     @Autowired
     private ItemPriceHistoryRepository itemPriceHistoryRepository;
+    @Autowired
+    private CouponRepository couponRepository;
 
     @BeforeEach
     void clean() {
+        couponRepository.deleteAll();
         itemPriceHistoryRepository.deleteAll();
         itemRepository.deleteAll();
     }
@@ -49,7 +53,7 @@ class OrderControllerTest {
         Item item = saveItem("감자", 1000);
         List<OrderItemDto> list = orderItemAddList(item.getId());
 
-        OrderDto orderDto = getOrderDto(list);
+        OrderDto orderDto = getOrderDtoCouponFalse(list);
 
         mockMvc.perform(
                         post("/order")
@@ -60,26 +64,13 @@ class OrderControllerTest {
 
     }
 
-    private List<OrderItemDto> orderItemAddList(Long itemId) {
-
-        List<OrderItemDto> list = new ArrayList<>();
-
-        OrderItemDto orderItemDto = OrderItemDto.builder()
-                .id(itemId)
-                .count(2)
-                .build();
-
-        list.add(orderItemDto);
-        return list;
-    }
-
     @Test
     @DisplayName("결제가격 성공 : 아이템 여러개")
     void 결제가격_성공_아이템여러개() throws Exception {
 
         List<OrderItemDto> list = getOrderItemDtos();
 
-        OrderDto orderDto = getOrderDto(list);
+        OrderDto orderDto = getOrderDtoCouponFalse(list);
 
         mockMvc.perform(
                         post("/order")
@@ -97,7 +88,7 @@ class OrderControllerTest {
         Item item = saveItem("감자", 1000);
         List<OrderItemDto> list = orderItemAddList(item.getId());
 
-        Coupon coupon = getFixedCoupon(item, 1000);
+        Coupon coupon = getFixedItemCoupon(item, 1000);
 
         OrderDto orderDto = getOrderDtoUserCoupon(list, coupon);
 
@@ -117,7 +108,7 @@ class OrderControllerTest {
         Item item = saveItem("감자", 1000);
         List<OrderItemDto> list = orderItemAddList(item.getId());
 
-        Coupon coupon = getFixedCoupon(item, 1000);
+        Coupon coupon = getFixedItemCoupon(item, 1000);
 
         OrderDto orderDto = getOrderDtoUserCoupon(list, coupon);
 
@@ -137,7 +128,7 @@ class OrderControllerTest {
         Item item = saveItem("감자", 1000);
         List<OrderItemDto> list = orderItemAddList(item.getId());
 
-        Coupon coupon = getPercentageCoupon(item, 20);
+        Coupon coupon = itemPercentageCoupon(item);
 
         OrderDto orderDto = getOrderDtoUserCoupon(list, coupon);
 
@@ -157,7 +148,7 @@ class OrderControllerTest {
         Item item = saveItem("감자", 1000);
         List<OrderItemDto> list = orderItemAddList(item.getId());
 
-        Coupon coupon = getPercentageCoupon(item, 20);
+        Coupon coupon = itemPercentageCoupon(item);
 
         OrderDto orderDto = getOrderDtoUserCoupon(list, coupon);
 
@@ -177,7 +168,7 @@ class OrderControllerTest {
         Item item = saveItem("감자", 1000);
         List<OrderItemDto> list = orderItemAddList(item.getId());
 
-        Coupon coupon = getFixedCoupon(item, 2000);
+        Coupon coupon = getFixedItemCoupon(item, 2000);
 
         OrderDto orderDto = getOrderDtoUserCoupon(list, coupon);
 
@@ -197,7 +188,7 @@ class OrderControllerTest {
         Item item = saveItem("감자", 1000);
         List<OrderItemDto> list = orderItemAddList(item.getId());
 
-        Coupon coupon = getFixedCoupon(item, 3000);
+        Coupon coupon = getFixedItemCoupon(item, 3000);
 
         OrderDto orderDto = getOrderDtoUserCoupon(list, coupon);
 
@@ -217,7 +208,7 @@ class OrderControllerTest {
         Item item = saveItem("감자", 1000);
         List<OrderItemDto> list = orderItemAddList(item.getId());
 
-        Coupon coupon = getPercentageCoupon(item, 20);
+        Coupon coupon = orderPercentageCoupon(item);
 
         OrderDto orderDto = getOrderDtoUserCoupon(list, coupon);
 
@@ -237,7 +228,7 @@ class OrderControllerTest {
         Item item = saveItem("감자", 1000);
         List<OrderItemDto> list = orderItemAddList(item.getId());
 
-        Coupon coupon = getPercentageCoupon(item, 1000);
+        Coupon coupon = orderPercentageCoupon(item);
 
         OrderDto orderDto = getOrderDtoUserCoupon(list, coupon);
 
@@ -248,18 +239,6 @@ class OrderControllerTest {
                 ).andExpect(status().is2xxSuccessful())
                 .andDo(print());
 
-    }
-
-    private Coupon getPercentageCoupon(Item item, int rate) {
-
-        Coupon coupon = Coupon.builder()
-                .item(item)
-                .how(How.PERCENTAGE)
-                .wheres(Where.ORDER)
-                .rate(rate)
-                .build();
-
-        return coupon;
     }
 
     private Item saveItem(String name, int price) {
@@ -285,13 +264,50 @@ class OrderControllerTest {
         return item;
     }
 
-    private OrderDto getOrderDto(List<OrderItemDto> list) {
+    private OrderDto getOrderDtoCouponFalse(List<OrderItemDto> list) throws Exception {
+
         return OrderDto.builder()
                 .items(list)
                 .deliveryPrice(1000)
                 .useCoupon(false)
                 .build();
 
+    }
+
+    private Coupon itemPercentageCoupon(Item item) {
+        Coupon coupon = Coupon.builder()
+                .item(item)
+                .rate(10)
+                .wheres(Where.ITEM)
+                .how(How.PERCENTAGE)
+                .build();
+
+        coupon = couponRepository.save(coupon);
+
+        return coupon;
+    }
+
+    private List<OrderItemDto> orderItemAddList(Long itemId) {
+
+        List<OrderItemDto> list = new ArrayList<>();
+
+        OrderItemDto orderItemDto = OrderItemDto.builder()
+                .id(itemId)
+                .count(2)
+                .build();
+
+        list.add(orderItemDto);
+        return list;
+    }
+    private Coupon orderPercentageCoupon(Item item) {
+        Coupon coupon = Coupon.builder()
+                .item(item)
+                .rate(10)
+                .wheres(Where.ORDER)
+                .how(How.FIXED)
+                .build();
+        coupon = couponRepository.save(coupon);
+        return coupon;
     }
 
     private List<OrderItemDto> getOrderItemDtos() {
@@ -329,19 +345,20 @@ class OrderControllerTest {
                 .items(list)
                 .deliveryPrice(1000)
                 .useCoupon(true)
-                .coupon(coupon)
+                .couponId(coupon.getId())
                 .build();
 
     }
 
-    private Coupon getFixedCoupon(Item item, int amount) {
-
-        return Coupon.builder()
+    private Coupon getFixedItemCoupon(Item item, int amount) {
+        Coupon coupon = Coupon.builder()
                 .item(item)
                 .how(How.FIXED)
                 .wheres(Where.ORDER)
                 .amount(amount)
                 .build();
+        coupon = couponRepository.save(coupon);
+        return coupon;
 
     }
 }
