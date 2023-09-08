@@ -23,8 +23,9 @@ public class CouponServiceImpl implements CouponService {
     private final CouponRepository couponRepository;
     private final ItemRepository itemRepository;
     @Override
-    public CouponDto saveCoupon(CouponSaveDto couponSaveDto) throws ItemNotFoundException, DuplicateCouponException, FormErrorException {
+    public CouponDto saveCoupon(CouponSaveDto couponSaveDto) throws ItemNotFoundException, DuplicateCouponException, FormErrorException, NotAuthorityException {
 
+        rolePasswordCheck(couponSaveDto);
         couponSaveDtoFormCheck(couponSaveDto);
 
         Item item = null;
@@ -83,10 +84,10 @@ public class CouponServiceImpl implements CouponService {
         }
     }
 
-    private void checkMarketRole(Role role, String pwd) throws NotAuthorityException {
-        if (!role.equals(Role.MARKET) ||
-                !pwd.equals(password)) {
-            throw new NotAuthorityException("권한 없음 : 비밀번호 에러");
+    private void rolePasswordCheck(CouponSaveDto couponSaveDto) throws NotAuthorityException {
+        if (!couponSaveDto.getRole().equals(Role.MARKET) ||
+                !couponSaveDto.getPassword().equals(password)) {
+            throw new NotAuthorityException("권한 없음");
         }
     }
 

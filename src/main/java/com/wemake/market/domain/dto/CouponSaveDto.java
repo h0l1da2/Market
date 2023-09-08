@@ -1,7 +1,9 @@
 package com.wemake.market.domain.dto;
 
 import com.wemake.market.domain.How;
+import com.wemake.market.domain.Role;
 import com.wemake.market.domain.Where;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
@@ -20,4 +22,8 @@ public class CouponSaveDto {
     private int rate;
     // 고정일 경우 -> 적용 금액
     private int amount;
+    @NotBlank
+    private String password;
+    @NotNull
+    private Role role;
 }
