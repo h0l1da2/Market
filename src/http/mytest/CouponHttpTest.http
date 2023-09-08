@@ -6,7 +6,9 @@ Content-Type: application/json
   "itemId": 1,
   "how": "FIXED",
   "wheres": "ITEM",
-  "amount": 1000
+  "amount": 1000,
+  "role": "MARKET",
+  "password": "lovemarket1004"
 }
 
 ### 쿠폰 추가 (아이템/비율)
@@ -14,10 +16,12 @@ POST http://localhost:8080/coupon
 Content-Type: application/json
 
 {
-  "itemId": 1,
+  "itemId": 2,
   "how": "PERCENTAGE",
   "wheres": "ITEM",
-  "rate": 10
+  "rate": 10,
+  "role": "MARKET",
+  "password": "lovemarket1004"
 }
 
 ### 쿠폰 추가 (주문/고정)
@@ -27,7 +31,9 @@ Content-Type: application/json
 {
   "how": "FIXED",
   "wheres": "ORDER",
-  "amount": 1000
+  "amount": 1000,
+  "role": "MARKET",
+  "password": "lovemarket1004"
 }
 
 ### 쿠폰 추가 (주문/비율)
@@ -37,5 +43,93 @@ Content-Type: application/json
 {
   "how": "PERCENTAGE",
   "wheres": "ORDER",
-  "rate": 10
+  "rate": 10,
+  "role": "MARKET",
+  "password": "lovemarket1004"
+}
+
+### 쿠폰 실패 (퍼센트인데 고정값)
+POST http://localhost:8080/coupon
+Content-Type: application/json
+
+{
+  "how": "PERCENTAGE",
+  "wheres": "ORDER",
+  "amount": 100,
+  "role": "MARKET",
+  "password": "lovemarket1004"
+}
+### 쿠폰 실패 (고정값인데 퍼센트)
+POST http://localhost:8080/coupon
+Content-Type: application/json
+
+{
+  "how": "FIXED",
+  "wheres": "ORDER",
+  "rate": 10,
+  "role": "MARKET",
+  "password": "lovemarket1004"
+}
+
+### 아이템 쿠폰 실패 (퍼센트인데 고정값)
+POST http://localhost:8080/coupon
+Content-Type: application/json
+
+{
+  "itemId": 3,
+  "how": "PERCENTAGE",
+  "wheres": "ORDER",
+  "amount": 100,
+  "role": "MARKET",
+  "password": "lovemarket1004"
+}
+
+### 아이템 쿠폰 실패 (고정값인데 퍼센트)
+POST http://localhost:8080/coupon
+Content-Type: application/json
+
+{
+  "itemId": 4,
+  "how": "FIXED",
+  "wheres": "ORDER",
+  "rate": 10,
+  "role": "MARKET",
+  "password": "lovemarket1004"
+}
+### 쿠폰 실패 권한 없음 (유저)
+POST http://localhost:8080/coupon
+Content-Type: application/json
+
+{
+  "itemId": 3,
+  "how": "PERCENTAGE",
+  "wheres": "ORDER",
+  "amount": 100,
+  "role": "USER",
+  "password": "lovemarket1004"
+}
+
+### 쿠폰 실패 권한 없음 (패스워드)
+POST http://localhost:8080/coupon
+Content-Type: application/json
+
+{
+  "itemId": 4,
+  "how": "FIXED",
+  "wheres": "ORDER",
+  "rate": 10,
+  "role": "MARKET",
+  "password": "pasdw"
+}
+### 쿠폰 실패 권한 없음 (둘다)
+POST http://localhost:8080/coupon
+Content-Type: application/json
+
+{
+  "itemId": 4,
+  "how": "FIXED",
+  "wheres": "ORDER",
+  "rate": 10,
+  "role": "USER",
+  "password": "pasdw"
 }
