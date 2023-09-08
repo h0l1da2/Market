@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface CouponRepository extends JpaRepository<Coupon, Long> {
     Optional<Coupon> findByItem(Item item);
-
+    void deleteAllByItem(Item item);
     @Query("select c from Coupon c JOIN FETCH c.item where c.id = :id")
     Optional<Coupon> findByIdAndFetchCouponEagerly(Long id);
 }

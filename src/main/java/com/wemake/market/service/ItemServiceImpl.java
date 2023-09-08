@@ -8,6 +8,7 @@ import com.wemake.market.exception.DuplicateItemException;
 import com.wemake.market.exception.NotAuthorityException;
 import com.wemake.market.exception.ItemNotFoundException;
 import com.wemake.market.exception.UnavailableDateTimeException;
+import com.wemake.market.repository.CouponRepository;
 import com.wemake.market.repository.ItemPriceHistoryRepository;
 import com.wemake.market.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,7 @@ public class ItemServiceImpl implements ItemService {
     private String password;
     private final ItemRepository itemRepository;
     private final ItemPriceHistoryRepository itemPriceHistoryRepository;
+    private final CouponRepository couponRepository;
 
     @Transactional
     @Override
@@ -116,7 +118,11 @@ public class ItemServiceImpl implements ItemService {
 
         checkMarketRole(itemDeleteDto.getRole(), itemDeleteDto.getPassword());
 
+
         Item item = itemRepository.findById(itemDeleteDto.getId()).orElseThrow(ItemNotFoundException::new);
+        itemPriceHistoryRepository.deleteAllByItem(item);
+        couponRepository.deleteAllByItem(item);
+
 
         itemPriceHistoryRepository.deleteAllByItem(item);
         itemRepository.deleteById(itemDeleteDto.getId());
