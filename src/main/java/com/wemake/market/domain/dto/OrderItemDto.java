@@ -11,7 +11,7 @@ import lombok.*;
 public class OrderItemDto {
 
     @NotNull
-    private Long id;
+    private Long itemId;
     @Min(value = 1)
     private int count;
 

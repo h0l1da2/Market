@@ -55,7 +55,7 @@ public class OrderServiceImpl implements OrderService {
             if (wheres.equals(Where.ITEM)) {
                 orderDto.getItems().forEach(item -> {
 
-                    Item findItem = itemRepository.findById(item.getId()).orElse(null);
+                    Item findItem = itemRepository.findById(item.getItemId()).orElse(null);
 
                     if (findItem == null) {
 
@@ -144,7 +144,7 @@ public class OrderServiceImpl implements OrderService {
 
         payDto.forEach(orderItem -> {
 
-            Item findItem = itemRepository.findById(orderItem.getId()).orElse(null);
+            Item findItem = itemRepository.findById(orderItem.getItemId()).orElse(null);
 
             if (findItem == null) {
                 itemNotFoundFlag.set(true);
