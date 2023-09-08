@@ -51,7 +51,8 @@
 ![httpTestGuide](https://github.com/h0l1da2/Market/assets/116418443/f15a1b7b-3c41-4b0f-a178-b1d05fef7514)
 - 왼쪽 초록 버튼은 `테스트 하나`, 위 초록 버튼을 누르면 `전체 테스트`가 가능합니다 ! 
 
-( mytest 내의 파일은 개인적으로 진행한 테스트 파일이니 신경 안 쓰셔도 됩니다.)
+![image](https://github.com/h0l1da2/Market/assets/116418443/456bfd45-8ce7-4f5b-90a6-96575c9fab5c)
+- FinalApiTest.http 에 테스트를 원활하게 할 수 있는 순서로 Api 를 배치해두었습니다!
+- 아이템 ``추가``부터 ~ ``조회`` ~ ``삭제``까지 한번에 볼 수 있답니다.
 
-
-재미있게 즐겨주세요 ! 😄
+그럼 재미있게 즐겨주세요 ! 😄
