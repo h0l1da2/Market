@@ -1,0 +1,315 @@
+### 순서대로 실행하시면 모두 알맞게 성공합니다.
+
+### 아이템 추가 (1)
+POST http://localhost:8080/item
+Content-Type: application/json
+
+{
+  "name": "감자",
+  "price": 5000,
+  "role": "MARKET",
+  "date": "2023-01-01T12:00:00"
+}
+
+### 아이템 추가 (2)
+POST http://localhost:8080/item
+Content-Type: application/json
+
+{
+  "name": "고구마",
+  "price": 5000,
+  "role": "MARKET",
+  "date": "2023-01-01T12:00:00"
+}
+
+### 아이템 추가 (3)
+POST http://localhost:8080/item
+Content-Type: application/json
+
+{
+  "name": "홈런볼",
+  "price": 1500,
+  "role": "MARKET",
+  "date": "2023-01-01T12:00:00"
+}
+### 아이템 추가 (4)
+POST http://localhost:8080/item
+Content-Type: application/json
+
+{
+  "name": "육개장",
+  "price": 2000,
+  "role": "MARKET",
+  "date": "2023-01-01T12:00:00"
+}
+
+### 아이템 추가 (5)
+POST http://localhost:8080/item
+Content-Type: application/json
+
+{
+  "name": "가지",
+  "price": 3000,
+  "role": "MARKET",
+  "date": "2023-01-01T12:00:00"
+}
+
+### 아이템 추가 (6)
+POST http://localhost:8080/item
+Content-Type: application/json
+
+{
+  "name": "고사리",
+  "price": 9000,
+  "role": "MARKET",
+  "date": "2023-01-01T12:00:00"
+}
+
+### 쿠폰 추가 (아이템/고정)
+POST http://localhost:8080/coupon
+Content-Type: application/json
+
+{
+  "itemId": 1,
+  "how": "FIXED",
+  "wheres": "ITEM",
+  "amount": 2000,
+  "role": "MARKET",
+  "password": "lovemarket1004"
+}
+
+### 쿠폰 추가 (아이템/비율)
+POST http://localhost:8080/coupon
+Content-Type: application/json
+
+{
+  "itemId": 2,
+  "how": "PERCENTAGE",
+  "wheres": "ITEM",
+  "rate": 10,
+  "role": "MARKET",
+  "password": "lovemarket1004"
+}
+
+### 쿠폰 추가 (주문/고정)
+POST http://localhost:8080/coupon
+Content-Type: application/json
+
+{
+  "how": "FIXED",
+  "wheres": "ORDER",
+  "amount": 5000,
+  "role": "MARKET",
+  "password": "lovemarket1004"
+}
+
+### 쿠폰 추가 (주문/비율)
+POST http://localhost:8080/coupon
+Content-Type: application/json
+
+{
+  "how": "PERCENTAGE",
+  "wheres": "ORDER",
+  "rate": 10,
+  "role": "MARKET",
+  "password": "lovemarket1004"
+}
+### 쿠폰 추가 (아이템/고정)
+POST http://localhost:8080/coupon
+Content-Type: application/json
+
+{
+  "itemId": 5,
+  "how": "FIXED",
+  "wheres": "ITEM",
+  "amount": 2000,
+  "role": "MARKET",
+  "password": "lovemarket1004"
+}
+
+### 쿠폰 추가 (아이템/비율)
+POST http://localhost:8080/coupon
+Content-Type: application/json
+
+{
+  "itemId": 6,
+  "how": "PERCENTAGE",
+  "wheres": "ITEM",
+  "rate": 10,
+  "role": "MARKET",
+  "password": "lovemarket1004"
+}
+
+### 결제 계산 성공 , 하나
+POST http://localhost:8080/order
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "id": 1,
+      "count": 3
+    }
+  ],
+  "deliveryPrice": 2000,
+  "useCoupon": false
+}
+
+### 결제 계산 성공 , 여러개
+POST http://localhost:8080/order
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "id": 2,
+      "count": 3
+    },
+    {
+      "id": 3,
+      "count": 1
+    }
+  ],
+  "deliveryPrice": 2000,
+  "useCoupon": false
+}
+
+### 결제 계산 성공 , 한 개, 아이템 쿠폰(고정)
+POST http://localhost:8080/order
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "itemId": 1,
+      "count": 3
+    }
+  ],
+  "deliveryPrice": 2000,
+  "useCoupon": true,
+  "couponId": 1
+}
+
+### 결제 계산 성공 , 한 개, 아이템 쿠폰(비율)
+POST http://localhost:8080/order
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "itemId": 2,
+      "count": 3
+    }
+  ],
+  "deliveryPrice": 2000,
+  "useCoupon": true,
+  "couponId": 2
+
+}
+
+### 결제 계산 성공 , 여러 개, 주문 쿠폰(비율)
+POST http://localhost:8080/order
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "itemId": 2,
+      "count": 3
+    },
+    {
+      "itemId": 3,
+      "count": 1
+    }
+  ],
+  "deliveryPrice": 2000,
+  "useCoupon": true,
+  "couponId": 3
+}
+
+### 결제 계산 성공 , 여러 개, 주문 쿠폰(고정)
+POST http://localhost:8080/order
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "itemId": 2,
+      "count": 3
+    },
+    {
+      "itemId": 3,
+      "count": 1
+    }
+  ],
+  "deliveryPrice": 2000,
+  "useCoupon": true,
+  "couponId": 4
+
+}
+### 결제 계산 성공 , 여러 개, 아이템 쿠폰(비율)
+POST http://localhost:8080/order
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "itemId": 5,
+      "count": 3
+    },
+    {
+      "itemId": 6,
+      "count": 1
+    }
+  ],
+  "deliveryPrice": 2000,
+  "useCoupon": true,
+  "couponId": 5
+}
+
+### 결제 계산 성공 , 여러 개, 아이템 쿠폰(고정)
+POST http://localhost:8080/order
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "itemId": 5,
+      "count": 3
+    },
+    {
+      "itemId": 6,
+      "count": 1
+    }
+  ],
+  "deliveryPrice": 2000,
+  "useCoupon": true,
+  "couponId": 6
+
+}
+### 아이템 수정 (5000원 -> 12000 원으로 가격 수정)
+PUT http://localhost:8080/item
+Content-Type: application/json
+
+{
+  "id": 1,
+  "price": 12000,
+  "role": "MARKET",
+  "password": "lovemarket1004",
+  "date": "2023-05-03T10:00:00"
+}
+### 2023-02-03 (5000원)
+GET http://localhost:8080/item?id=1&date=2023-02-03T10:12:00
+
+### 2023-07-03 (12000원)
+GET http://localhost:8080/item?id=1&date=2023-07-03T10:12:00
+
+### 아이템 삭제 성공
+DELETE http://localhost:8080/item
+Content-Type: application/json
+
+{
+  "id": 1,
+  "role": "MARKET",
+  "password": "lovemarket1004"
+}
