@@ -17,7 +17,8 @@ public class NotAuthorityException extends Exception {
         super(cause);
     }
 
-    public String getErrorMessage() {
+    @Override
+    public String getMessage() {
         return "해당 권한이 없음";
     }
 }

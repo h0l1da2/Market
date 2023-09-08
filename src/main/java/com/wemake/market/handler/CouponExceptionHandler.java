@@ -14,7 +14,7 @@ public class CouponExceptionHandler {
     @ExceptionHandler(DuplicateCouponException.class)
     public ResponseEntity<String> duplicateCouponExceptionHandler(DuplicateCouponException e) {
         return ResponseEntity.badRequest()
-                .body(e.getErrorMessage());
+                .body(e.getMessage());
     }
 
 }

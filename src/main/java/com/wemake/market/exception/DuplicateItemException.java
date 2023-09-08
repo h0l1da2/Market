@@ -17,7 +17,8 @@ public class DuplicateItemException extends Exception {
         super(cause);
     }
 
-    public String getErrorMessage() {
+    @Override
+    public String getMessage() {
         return "상품명이 중복입니다.";
     }
 }

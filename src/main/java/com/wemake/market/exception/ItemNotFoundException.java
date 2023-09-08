@@ -17,7 +17,8 @@ public class ItemNotFoundException extends Exception {
         super(cause);
     }
 
-    public String getErrorMessage() {
+    @Override
+    public String getMessage() {
         return "상품을 찾을 수 없습니다.";
     }
 }

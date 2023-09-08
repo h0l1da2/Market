@@ -16,7 +16,8 @@ public class DuplicateCouponException extends Exception {
         super(cause);
     }
 
-    public String getErrorMessage() {
+    @Override
+    public String getMessage() {
         return "해당 아이템으로는 이미 쿠폰이 발행되어 있습니다.";
     }
 }

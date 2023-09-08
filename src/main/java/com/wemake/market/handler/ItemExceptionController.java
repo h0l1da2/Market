@@ -16,21 +16,21 @@ public class ItemExceptionController {
     @ExceptionHandler(ItemNotFoundException.class)
     public ResponseEntity<String> itemNotFoundExceptionHandler(ItemNotFoundException e) {
         return ResponseEntity.badRequest()
-                .body(e.getErrorMessage());
+                .body(e.getMessage());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(DuplicateItemException.class)
     public ResponseEntity<String> duplicateItemExceptionHandler(DuplicateItemException e) {
         return ResponseEntity.badRequest()
-                .body(e.getErrorMessage());
+                .body(e.getMessage());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(UnavailableDateTimeException.class)
     public ResponseEntity<String> unavailableDateTimeExceptionHandler(UnavailableDateTimeException e) {
         return ResponseEntity.badRequest()
-                .body(e.getErrorMessage());
+                .body(e.getMessage());
     }
     
 }

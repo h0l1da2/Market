@@ -16,7 +16,8 @@ public class UnavailableDateTimeException extends Exception {
         super(cause);
     }
 
-    public String getErrorMessage() {
+    @Override
+    public String getMessage() {
         return "존재하지 않아 볼 수 없는 시간입니다. 올바른 시간을 확인하세요.";
     }
 }

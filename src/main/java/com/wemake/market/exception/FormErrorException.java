@@ -16,7 +16,8 @@ public class FormErrorException extends Exception {
         super(cause);
     }
 
-    public String getErrorMessage() {
+    @Override
+    public String getMessage() {
         return "양식을 다시 확인해주세요.";
     }
 }

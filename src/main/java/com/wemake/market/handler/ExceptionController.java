@@ -14,12 +14,12 @@ public class ExceptionController {
     @ExceptionHandler(NotAuthorityException.class)
     public ResponseEntity<String> haveNotMarketAuthExceptionHandler(NotAuthorityException e) {
         return ResponseEntity.badRequest()
-                .body(e.getErrorMessage());
+                .body(e.getMessage());
     }
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(FormErrorException.class)
     public ResponseEntity<String> formErrorExceptionHandler(FormErrorException e) {
         return ResponseEntity.badRequest()
-                .body(e.getErrorMessage());
+                .body(e.getMessage());
     }
 }
