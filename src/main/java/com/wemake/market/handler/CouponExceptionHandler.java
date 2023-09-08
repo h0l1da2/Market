@@ -1,5 +1,6 @@
 package com.wemake.market.handler;
 
+import com.wemake.market.exception.CouponErrorException;
 import com.wemake.market.exception.DuplicateCouponException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,12 @@ public class CouponExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(DuplicateCouponException.class)
     public ResponseEntity<String> duplicateCouponExceptionHandler(DuplicateCouponException e) {
+        return ResponseEntity.badRequest()
+                .body(e.getMessage());
+    }
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(CouponErrorException.class)
+    public ResponseEntity<String> couponExceptionHandler(CouponErrorException e) {
         return ResponseEntity.badRequest()
                 .body(e.getMessage());
     }

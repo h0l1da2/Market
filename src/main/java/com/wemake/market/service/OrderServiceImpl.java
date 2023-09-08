@@ -3,7 +3,9 @@ package com.wemake.market.service;
 import com.wemake.market.domain.*;
 import com.wemake.market.domain.dto.OrderItemDto;
 import com.wemake.market.domain.dto.OrderDto;
+import com.wemake.market.exception.CouponErrorException;
 import com.wemake.market.exception.ItemNotFoundException;
+import com.wemake.market.repository.CouponRepository;
 import com.wemake.market.repository.ItemPriceHistoryRepository;
 import com.wemake.market.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +23,10 @@ public class OrderServiceImpl implements OrderService {
 
     private final ItemRepository itemRepository;
     private final ItemPriceHistoryRepository itemPriceHistoryRepository;
+    private final CouponRepository couponRepository;
 
     @Override
-    public int getOrderPrice(OrderDto orderDto) throws ItemNotFoundException {
+    public int getOrderPrice(OrderDto orderDto) throws ItemNotFoundException, CouponErrorException {
 
         AtomicInteger price = new AtomicInteger();
 
@@ -32,14 +35,21 @@ public class OrderServiceImpl implements OrderService {
 
         // 쿠폰이 존재한다면 ?
         if (useCoupon) {
-            Coupon coupon = orderDto.getCoupon();
+            Long couponId = orderDto.getCouponId();
+            if (couponId == null) {
+                throw new CouponErrorException();
+            }
 
+            Coupon coupon = couponRepository.findByIdAndFetchCouponEagerly(couponId).orElseThrow(CouponErrorException::new);
+
+            Item couponItem = coupon.getItem();
             Where wheres = coupon.getWheres();
             How how = coupon.getHow();
             int rate = coupon.getRate();
             int amount = coupon.getAmount();
 
             AtomicBoolean itemNotFoundFlag = new AtomicBoolean(false);
+            AtomicBoolean haveCouponFlag = new AtomicBoolean(false);
 
             // 아이템 관련 쿠폰
             if (wheres.equals(Where.ITEM)) {
@@ -61,7 +71,7 @@ public class OrderServiceImpl implements OrderService {
                     int itemCount = item.getCount();
                     double resultItemPrice = 0;
 
-                    if (coupon.getItem().getId().equals(findItem.getId())) {
+                    if (couponItem.getId().equals(findItem.getId())) {
 
                         if (how.equals(How.FIXED)) {
                             // 고정값을 아이템 값에서 뺀 후 ...
@@ -77,6 +87,8 @@ public class OrderServiceImpl implements OrderService {
                             price.set((int) (price.get() + resultPrice));
                         }
 
+                        haveCouponFlag.set(true);
+
                     } else {
 
                         price.set(price.get() + (itemPrice * itemCount));
@@ -87,6 +99,9 @@ public class OrderServiceImpl implements OrderService {
 
                 if (itemNotFoundFlag.get() == true) {
                     throw new ItemNotFoundException();
+                }
+                if (haveCouponFlag.get() == false) {
+                    throw new CouponErrorException("쿠폰이 상품과 관련있지 않음.");
                 }
 
                 // 배달비 계산

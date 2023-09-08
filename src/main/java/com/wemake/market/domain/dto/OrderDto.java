@@ -1,6 +1,5 @@
 package com.wemake.market.domain.dto;
 
-import com.wemake.market.domain.Coupon;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -17,6 +16,6 @@ public class OrderDto {
     @Min(value = 0)
     private int deliveryPrice;
     private boolean useCoupon;
-    private Coupon coupon;
+    private Long couponId;
 
 }
