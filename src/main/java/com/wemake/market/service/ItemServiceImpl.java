@@ -139,6 +139,10 @@ public class ItemServiceImpl implements ItemService {
             throw new UnavailableDateTimeException();
         }
 
+        if (id == null) {
+            throw new ItemNotFoundException();
+        }
+
         Item findItem = itemRepository.findById(id).orElseThrow(ItemNotFoundException::new);
 
         if (dateForItemPrice.isBefore(findItem.getDate())) {

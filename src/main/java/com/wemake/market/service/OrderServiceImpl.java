@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @Service
@@ -40,13 +41,13 @@ public class OrderServiceImpl implements OrderService {
                 throw new CouponErrorException();
             }
 
-            Coupon coupon = couponRepository.findByIdAndFetchCouponEagerly(couponId).orElseThrow(CouponErrorException::new);
+            AtomicReference<Coupon> coupon = new AtomicReference<>(couponRepository.findById(couponId).orElseThrow(CouponErrorException::new));
 
-            Item couponItem = coupon.getItem();
-            Where wheres = coupon.getWheres();
-            How how = coupon.getHow();
-            int rate = coupon.getRate();
-            int amount = coupon.getAmount();
+            Item couponItem = coupon.get().getItem();
+            Where wheres = coupon.get().getWheres();
+            How how = coupon.get().getHow();
+            int rate = coupon.get().getRate();
+            int amount = coupon.get().getAmount();
 
             AtomicBoolean itemNotFoundFlag = new AtomicBoolean(false);
             AtomicBoolean haveCouponFlag = new AtomicBoolean(false);
@@ -54,7 +55,17 @@ public class OrderServiceImpl implements OrderService {
             // 아이템 관련 쿠폰
             if (wheres.equals(Where.ITEM)) {
                 orderDto.getItems().forEach(item -> {
-
+                    if (couponItem == null) {
+                        coupon.set(couponRepository.findByIdAndFetchCouponEagerly(couponId).orElse(null));
+                        if (coupon.get() == null) {
+                            itemNotFoundFlag.set(true);
+                            return;
+                        }
+                    }
+                    if (item.getItemId() == null) {
+                        itemNotFoundFlag.set(true);
+                        return;
+                    }
                     Item findItem = itemRepository.findById(item.getItemId()).orElse(null);
 
                     if (findItem == null) {
@@ -141,20 +152,19 @@ public class OrderServiceImpl implements OrderService {
     private void calcItemPrice(List<OrderItemDto> payDto, AtomicInteger price) throws ItemNotFoundException {
 
         AtomicBoolean itemNotFoundFlag = new AtomicBoolean(false);
-
         payDto.forEach(orderItem -> {
 
-            Item findItem = itemRepository.findById(orderItem.getItemId()).orElse(null);
+            if (orderItem.getItemId() != null){
+                Item findItem = itemRepository.findById(orderItem.getItemId()).orElse(null);
+                if (findItem == null) {
+                    itemNotFoundFlag.set(true);
+                    return;
+                }
+                ItemPriceHistory finalItemStatus = getFinalItemStatusByItem(itemNotFoundFlag, findItem);
+                if (finalItemStatus == null) return;
 
-            if (findItem == null) {
-                itemNotFoundFlag.set(true);
-                return;
+                price.set(price.get() + (finalItemStatus.getPrice() * orderItem.getCount()));
             }
-
-            ItemPriceHistory finalItemStatus = getFinalItemStatusByItem(itemNotFoundFlag, findItem);
-            if (finalItemStatus == null) return;
-
-            price.set(price.get() + (finalItemStatus.getPrice() * orderItem.getCount()));
 
         });
 
