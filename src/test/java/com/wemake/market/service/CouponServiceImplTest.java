@@ -14,7 +14,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.PropertySource;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.time.LocalDateTime;
 
 @SpringBootTest
+@PropertySource("classpath:application.yml")
 public class CouponServiceImplTest {
 
     @Autowired
@@ -32,6 +35,8 @@ public class CouponServiceImplTest {
     private CouponService couponService;
     @Autowired
     private CouponRepository couponRepository;
+    @Value("${market.password}")
+    private String password;
 
     @BeforeEach
     void clean() {
@@ -68,6 +73,8 @@ public class CouponServiceImplTest {
                 .how(How.FIXED)
                 .wheres(Where.ITEM)
                 .amount(1000)
+                .role(Role.MARKET)
+                .password(password)
                 .build();
 
         // when
@@ -106,6 +113,8 @@ public class CouponServiceImplTest {
                 .wheres(Where.ITEM)
                 .amount(1000)
                 .rate(10)
+                .role(Role.MARKET)
+                .password(password)
                 .build();
 
         // when then
@@ -141,6 +150,8 @@ public class CouponServiceImplTest {
                 .how(How.FIXED)
                 .wheres(Where.ITEM)
                 .amount(1000)
+                .role(Role.MARKET)
+                .password(password)
                 .build();
 
         couponService.saveCoupon(couponSaveDto);
@@ -158,12 +169,15 @@ public class CouponServiceImplTest {
                 .how(How.FIXED)
                 .wheres(Where.ITEM)
                 .amount(1000)
+                .role(Role.MARKET)
+                .password(password)
                 .build();
 
         // when then
         assertThrows(ItemNotFoundException.class, () -> couponService.saveCoupon(couponSaveDto));
 
     }
+
     @Test
     @DisplayName("쿠폰 추가 성공 : 주문 쿠폰")
     void 쿠폰_추가_성공_주문쿠폰() throws NotAuthorityException, DuplicateCouponException, FormErrorException, ItemNotFoundException {
@@ -173,6 +187,8 @@ public class CouponServiceImplTest {
                 .how(How.FIXED)
                 .wheres(Where.ORDER)
                 .amount(1000)
+                .role(Role.MARKET)
+                .password(password)
                 .build();
 
         // when
@@ -186,4 +202,57 @@ public class CouponServiceImplTest {
         assertThat(saveCoupon.getHow()).isEqualTo(couponSaveDto.getHow());
 
     }
+
+    @Test
+    @DisplayName("주문 쿠폰 추가 실패 : 비밀번호 에러")
+    void 쿠폰_추가_실패_주문쿠폰_패스워드틀림() {
+        // given
+        CouponSaveDto couponSaveDto = CouponSaveDto.builder()
+                .itemId(1L)
+                .how(How.FIXED)
+                .wheres(Where.ITEM)
+                .amount(1000)
+                .role(Role.MARKET)
+                .password("password")
+                .build();
+
+        // when then
+        assertThrows(NotAuthorityException.class, () -> couponService.saveCoupon(couponSaveDto));
+
+    }
+    @Test
+    @DisplayName("주문 쿠폰 추가 실패 : 유저 권한")
+    void 쿠폰_추가_실패_주문쿠폰_유저권한() {
+        // given
+        CouponSaveDto couponSaveDto = CouponSaveDto.builder()
+                .itemId(1L)
+                .how(How.FIXED)
+                .wheres(Where.ITEM)
+                .amount(1000)
+                .role(Role.USER)
+                .password(password)
+                .build();
+
+        // when then
+        assertThrows(NotAuthorityException.class, () -> couponService.saveCoupon(couponSaveDto));
+
+    }
+    @Test
+    @DisplayName("주문 쿠폰 추가 실패 : 권한 없음 다 틀림")
+    void 쿠폰_추가_실패_주문쿠폰_권한없음_둘다틀림() {
+        // given
+        CouponSaveDto couponSaveDto = CouponSaveDto.builder()
+                .itemId(1L)
+                .how(How.FIXED)
+                .wheres(Where.ITEM)
+                .amount(1000)
+                .role(Role.USER)
+                .password("password")
+                .build();
+
+        // when then
+        assertThrows(NotAuthorityException.class, () -> couponService.saveCoupon(couponSaveDto));
+
+    }
+
 }
