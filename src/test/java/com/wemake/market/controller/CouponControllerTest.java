@@ -7,6 +7,7 @@ import com.wemake.market.domain.Role;
 import com.wemake.market.domain.Where;
 import com.wemake.market.domain.dto.CouponSaveDto;
 import com.wemake.market.repository.CouponRepository;
+import com.wemake.market.repository.ItemPriceHistoryRepository;
 import com.wemake.market.repository.ItemRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -38,6 +39,8 @@ public class CouponControllerTest {
     private CouponRepository couponRepository;
     @Autowired
     private ItemRepository itemRepository;
+    @Autowired
+    private ItemPriceHistoryRepository itemPriceHistoryRepository;
     @Value("${market.password}")
     private String password;
 
@@ -45,6 +48,7 @@ public class CouponControllerTest {
     @BeforeEach
     void clean() {
         couponRepository.deleteAll();
+        itemPriceHistoryRepository.deleteAll();
         itemRepository.deleteAll();
     }
 

@@ -292,7 +292,7 @@ class OrderControllerTest {
         List<OrderItemDto> list = new ArrayList<>();
 
         OrderItemDto orderItemDto = OrderItemDto.builder()
-                .id(itemId)
+                .itemId(itemId)
                 .count(2)
                 .build();
 
@@ -318,17 +318,17 @@ class OrderControllerTest {
         List<OrderItemDto> list = new ArrayList<>();
 
         OrderItemDto orderItemDto1 = OrderItemDto.builder()
-                .id(item1.getId())
+                .itemId(item1.getId())
                 .count(2)
                 .build();
 
         OrderItemDto orderItemDto2 = OrderItemDto.builder()
-                .id(item2.getId())
+                .itemId(item2.getId())
                 .count(2)
                 .build();
 
         OrderItemDto orderItemDto3 = OrderItemDto.builder()
-                .id(item3.getId())
+                .itemId(item3.getId())
                 .count(2)
                 .build();
 

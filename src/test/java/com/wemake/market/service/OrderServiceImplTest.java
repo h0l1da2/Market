@@ -503,7 +503,7 @@ class OrderServiceImplTest {
     private OrderItemDto getOrderItemDto(Item item, int count) {
 
         OrderItemDto orderItemDto = OrderItemDto.builder()
-                .id(item.getId())
+                .itemId(item.getId())
                 .count(count)
                 .build();
 
