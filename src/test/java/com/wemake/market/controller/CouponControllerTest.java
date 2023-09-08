@@ -138,4 +138,42 @@ public class CouponControllerTest {
                 .andDo(print());
     }
 
+    @Test
+    @DisplayName("쿠폰 추가 실패 : 비율 / 고정값")
+    void 쿠폰추가_실패_비율_고정값() throws Exception {
+
+        CouponSaveDto couponSaveDto = CouponSaveDto.builder()
+                .how(How.PERCENTAGE)
+                .wheres(Where.ORDER)
+                .amount(1000)
+                .build();
+
+        mockMvc.perform(
+                        post("/coupon")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(mapper.writeValueAsString(couponSaveDto))
+                ).andExpect(status().is4xxClientError())
+                .andDo(print());
+
+    }
+
+    @Test
+    @DisplayName("쿠폰 추가 실패 : 고정 / 비율값")
+    void 쿠폰추가_실패_고정_비율값() throws Exception {
+
+        CouponSaveDto couponSaveDto = CouponSaveDto.builder()
+                .how(How.FIXED)
+                .wheres(Where.ORDER)
+                .rate(10)
+                .build();
+
+        mockMvc.perform(
+                        post("/coupon")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(mapper.writeValueAsString(couponSaveDto))
+                ).andExpect(status().is4xxClientError())
+                .andDo(print());
+
+    }
+
 }
